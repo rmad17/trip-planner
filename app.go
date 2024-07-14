@@ -36,6 +36,9 @@ func main() {
 	router.POST("/auth/login", controllers.Login)
 	router.GET("/user/profile", middlewares.CheckAuth, controllers.GetUserProfile)
 	router.GET("/auth/:provider/begin", controllers.GoogleOAuthBegin)
+
+	router.GET("/places/autocomplete/search", places.SearchAutocomplete)
+
 	router.LoadHTMLGlob("templates/*")
 	router.GET("/auth/google/login", controllers.GoogleOAuthLogin)
 	router.GET("/auth/:provider/callback", controllers.GoogleOAuthCallback)
