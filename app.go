@@ -38,6 +38,7 @@ func main() {
 	router.GET("/auth/:provider/begin", controllers.GoogleOAuthBegin)
 
 	router.GET("/places/autocomplete/search", places.SearchAutocomplete)
+	router.GET("/places/details", places.PlaceDetails)
 
 	router.LoadHTMLGlob("templates/*")
 	router.GET("/auth/google/login", controllers.GoogleOAuthLogin)
