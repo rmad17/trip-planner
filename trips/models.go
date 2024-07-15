@@ -1,18 +1,16 @@
-package main
+package trips
 
 import (
 	"time"
+	"triplanner/accounts"
 	"triplanner/core"
-	"triplanner/models"
 
 	"github.com/google/uuid"
 	"github.com/lib/pq"
 )
 
-type Trip struct {
-	core.Base
-	UserID      uuid.UUID
-	User        models.User
+type TripPlan struct {
+	core.BaseModel
 	place_name  string
 	place_id    string
 	start_date  *time.Time
@@ -22,4 +20,6 @@ type Trip struct {
 	notes       *string
 	hotels      pq.StringArray `gorm:"type:text[]"`
 	tags        pq.StringArray `gorm:"type:text[]"`
+	UserID      uuid.UUID
+	User        accounts.User
 }

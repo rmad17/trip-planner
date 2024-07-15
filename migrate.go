@@ -3,6 +3,7 @@ package main
 import (
 	"triplanner/accounts"
 	"triplanner/core"
+	"triplanner/trips"
 )
 
 func init() {
@@ -11,5 +12,5 @@ func init() {
 }
 
 func main() {
-	core.DB.AutoMigrate(&accounts.User{})
+	core.DB.AutoMigrate(&accounts.User{}, &trips.TripPlan{})
 }
