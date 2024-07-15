@@ -1,8 +1,8 @@
 package main
 
 import (
+	"triplanner/accounts"
 	"triplanner/core"
-	"triplanner/models"
 )
 
 func init() {
@@ -11,5 +11,5 @@ func init() {
 }
 
 func main() {
-	core.DB.AutoMigrate(&models.User{})
+	core.DB.AutoMigrate(&accounts.User{})
 }
