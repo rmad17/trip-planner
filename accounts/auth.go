@@ -1,4 +1,4 @@
-package controllers
+package accounts
 
 import (
 	"fmt"
@@ -6,7 +6,6 @@ import (
 	"os"
 	"time"
 	"triplanner/core"
-	"triplanner/models"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
@@ -17,14 +16,14 @@ import (
 
 func CreateUser(c *gin.Context) {
 
-	var authInput models.AuthInput
+	var authInput AuthInput
 
 	if err := c.ShouldBindJSON(&authInput); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	var userFound models.User
+	var userFound User
 	core.DB.Where("username=?", authInput.Username).Find(&userFound)
 
 	// if userFound.if ) {
@@ -38,7 +37,7 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	user := models.User{
+	user := User{
 		Username: authInput.Username,
 		Password: string(passwordHash),
 	}
@@ -51,14 +50,14 @@ func CreateUser(c *gin.Context) {
 
 func Login(c *gin.Context) {
 
-	var authInput models.AuthInput
+	var authInput AuthInput
 
 	if err := c.ShouldBindJSON(&authInput); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	var userFound models.User
+	var userFound User
 	core.DB.Where("username=?", authInput.Username).Find(&userFound)
 
 	// if userFound.ID == 0 {

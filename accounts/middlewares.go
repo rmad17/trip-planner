@@ -1,4 +1,4 @@
-package middlewares
+package accounts
 
 import (
 	"fmt"
@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 	"triplanner/core"
-	"triplanner/models"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
@@ -56,7 +55,7 @@ func CheckAuth(c *gin.Context) {
 		return
 	}
 
-	var user models.User
+	var user User
 	core.DB.Where("ID=?", claims["id"]).Find(&user)
 
 	// if user.ID == 0 {
