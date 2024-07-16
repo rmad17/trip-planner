@@ -11,15 +11,15 @@ import (
 
 type TripPlan struct {
 	core.BaseModel
-	place_name  string
-	place_id    string
-	start_date  *time.Time
-	end_date    *time.Time
-	min_days    *int8
-	travel_mode *string
-	notes       *string
-	hotels      pq.StringArray `gorm:"type:text[]"`
-	tags        pq.StringArray `gorm:"type:text[]"`
-	UserID      uuid.UUID
-	User        accounts.User
+	PlaceName  string
+	PlaceID    string
+	StartDate  *time.Time
+	EndDate    *time.Time
+	MinDays    *int8
+	TravelMode *string
+	Notes      *string
+	Hotels     pq.StringArray `gorm:"type:text[]"`
+	Tags       pq.StringArray `gorm:"type:text[]"`
+	UserID     uuid.UUID
+	User       accounts.User
 }
