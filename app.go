@@ -4,6 +4,7 @@ import (
 	"triplanner/accounts"
 	"triplanner/core"
 	"triplanner/places"
+	"triplanner/trips"
 
 	"github.com/gin-gonic/gin"
 )
@@ -29,6 +30,8 @@ func main() {
 	accounts.RouterGroupGoogleOAuth(v1.Group("/auth"))
 
 	places.RouterGroupPlacesAPI(v1.Group("/places"))
+
+	trips.RouterGroupCreateTrip(v1.Group("/trips"))
 
 	v1.Use(accounts.CheckAuth)
 	accounts.RouterGroupUserProfile(v1.Group("/user"))
