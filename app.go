@@ -16,7 +16,6 @@ func init() {
 }
 
 func main() {
-
 	router := gin.Default()
 	router.LoadHTMLGlob("templates/*")
 
@@ -25,6 +24,7 @@ func main() {
 			"message": "pong",
 		})
 	})
+
 	v1 := router.Group("/api/v1")
 	accounts.RouterGroupUserAuth(v1.Group("/auth"))
 	accounts.RouterGroupGoogleOAuth(v1.Group("/auth"))
