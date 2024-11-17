@@ -1,7 +1,16 @@
 package places
 
+import (
+	"context"
+	"net/http"
+	"os"
 
-func search(){}
+	"github.com/gin-gonic/gin"
+	"github.com/kr/pretty"
+	"googlemaps.github.io/maps"
+)
+
+func search(c *gin.Context) {
 	apiKey := os.Getenv("GOOGLE_API_KEY")
 	client, _ := maps.NewClient(maps.WithAPIKey(apiKey))
 	sessiontoken := maps.NewPlaceAutocompleteSessionToken()

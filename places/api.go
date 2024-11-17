@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"os"
+	"triplanner/core"
 
 	"github.com/gin-gonic/gin"
 	"github.com/kr/pretty"
@@ -11,13 +12,7 @@ import (
 )
 
 func SearchAutocomplete(c *gin.Context) {
-	// authHeader := c.GetHeader("Authorization")
-
-	// if authHeader == "" {
-	//     c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is missing"})
-	//     c.AbortWithStatus(http.StatusUnauthorized)
-	//     return
-	// }
+	api_to_be_used := os.Getenv(core.SEARCH_API_KEY)
 
 }
 
