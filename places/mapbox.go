@@ -19,20 +19,20 @@ type MapboxApi struct {
 	Method       string
 	Endpoint     string
 	QueryParam   string
-	Payload      string
 	AccessToken  string
 	SessionToken string
+	Payload      string
 }
 
 func GetAPIUrl(data MapboxApi) string {
 	if data.Method == "GET" {
-		return fmt.Sprintf("%s%s?q=%s&access_token=%s&session_token=%s", BASE_MAPBOX_API, data.Endpoint, data.QueryParam, data.AccessToken, data.SessionToken)
+		return fmt.Sprintf("%s%s?q=%s&language=en&session_token=%s&access_token=%s", BASE_MAPBOX_API, data.Endpoint, data.QueryParam, data.SessionToken, data.AccessToken)
 	}
-	return fmt.Sprintf("%s%s?access_token=%s&session_token=%s", BASE_MAPBOX_API, data.Endpoint, data.AccessToken, data.SessionToken)
+	return fmt.Sprintf("%s%s?session_token=%s&access_token=%s", BASE_MAPBOX_API, data.Endpoint, data.SessionToken, data.AccessToken)
 
 }
 
-func make_http_request(data MapboxApi) string {
+func make_http_request(data MapboxApi) []byte {
 	url := GetAPIUrl(data)
 	resp, err := http.Get(url)
 	if err != nil {
@@ -42,7 +42,7 @@ func make_http_request(data MapboxApi) string {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	return string(body)
+	return body
 }
 
 // func (c *Client) callAPI(ctx context.Context, r *request, opts ...RequestOption) (data []byte, err error) {

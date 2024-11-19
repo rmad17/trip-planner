@@ -2,18 +2,27 @@ package places
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"os"
 	"triplanner/core"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gofrs/uuid/v5"
 	"github.com/kr/pretty"
 	"googlemaps.github.io/maps"
 )
 
 func SearchAutocomplete(c *gin.Context) {
-	api_to_be_used := os.Getenv(core.SEARCH_API_KEY)
+	MapboxAPIKey := os.Getenv(core.SEARCH_API_KEY)
+	data := c.Request.URL.Query()
+	SearchText := data.Get("search_text")
+	pretty.Println("Text: ", SearchText)
 
+	SessionToken := uuid.Must(uuid.NewV4()).String()
+	response := make_http_request(MapboxApi{"GET", string(Autosuggest), SearchText, MapboxAPIKey, SessionToken, ""})
+	pretty.Println("Response: ", string(response))
+	c.JSON(http.StatusOK, gin.H{"data": json.Marshal(string(response))})
 }
 
 func PlaceDetails(c *gin.Context) {
