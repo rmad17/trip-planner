@@ -24,6 +24,44 @@ type MapboxApi struct {
 	Payload      string
 }
 
+type MapboxAPIResponse struct {
+	Suggestions []Suggestion
+}
+
+type Country struct {
+	Name              string
+	CountryCode       string
+	CountryCodeAlpha3 string
+}
+
+type Postcode struct {
+	Id   string
+	Name string
+}
+
+type Place struct {
+	Id   string
+	Name string
+}
+type Context struct {
+	Country  Country
+	Postcode Postcode
+	Place    Place
+}
+type Suggestion struct {
+	Name           string
+	MapboxId       string
+	FeatureType    string
+	Address        string
+	FullAddress    string
+	PlaceFormatted string
+	Context        Context
+	Language       string
+	Maki           string
+	PoiCategory    []string
+	PoiCategoryIds []string
+}
+
 func GetAPIUrl(data MapboxApi) string {
 	if data.Method == "GET" {
 		return fmt.Sprintf("%s%s?q=%s&language=en&session_token=%s&access_token=%s", BASE_MAPBOX_API, data.Endpoint, data.QueryParam, data.SessionToken, data.AccessToken)
@@ -38,6 +76,8 @@ func make_http_request(data MapboxApi) []byte {
 	if err != nil {
 		// handle error
 	}
+	defer resp.Body.Close()
+
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatalln(err)

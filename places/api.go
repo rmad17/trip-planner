@@ -20,9 +20,10 @@ func SearchAutocomplete(c *gin.Context) {
 	pretty.Println("Text: ", SearchText)
 
 	SessionToken := uuid.Must(uuid.NewV4()).String()
-	response := make_http_request(MapboxApi{"GET", string(Autosuggest), SearchText, MapboxAPIKey, SessionToken, ""})
-	pretty.Println("Response: ", string(response))
-	c.JSON(http.StatusOK, gin.H{"data": json.Marshal(string(response))})
+	response_data := make_http_request(MapboxApi{"GET", string(Autosuggest), SearchText, MapboxAPIKey, SessionToken, ""})
+	var res MapboxAPIResponse
+	json.Unmarshal(response_data, &res)
+	c.JSON(http.StatusOK, gin.H{"data": res})
 }
 
 func PlaceDetails(c *gin.Context) {
