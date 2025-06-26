@@ -5,12 +5,24 @@ import (
 	"triplanner/trips"
 )
 
-// GetAllModels returns all GORM models from different modules
+// GetAllModels returns all GORM models for Atlas
 func GetAllModels() []interface{} {
-	var models []interface{}
-	// Add models from each module
-	models = append(models, accounts.GetModels()...)
-	models = append(models, trips.GetModels()...)
+	return []interface{}{
+		&accounts.User{},
+		&trips.TripPlan{},
+		// Add other models as you create them
+	}
+}
 
-	return models
+// You can also create a function to get models by module
+func GetAccountsModels() []interface{} {
+	return []interface{}{
+		&accounts.User{},
+	}
+}
+
+func GetTripsModels() []interface{} {
+	return []interface{}{
+		&trips.TripPlan{},
+	}
 }

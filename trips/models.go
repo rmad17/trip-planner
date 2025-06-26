@@ -2,7 +2,6 @@ package trips
 
 import (
 	"time"
-	"triplanner/accounts"
 	"triplanner/core"
 
 	"github.com/google/uuid"
@@ -20,6 +19,5 @@ type TripPlan struct {
 	Notes      *string
 	Hotels     pq.StringArray `gorm:"type:text[]"`
 	Tags       pq.StringArray `gorm:"type:text[]"`
-	UserID     uuid.UUID
-	User       accounts.User
+	UserID     uuid.UUID      `gorm:"type:uuid;not null"`
 }
