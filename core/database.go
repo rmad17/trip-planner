@@ -1,6 +1,7 @@
 package core
 
 import (
+	"log/slog"
 	"os"
 
 	"github.com/mattn/go-colorable"
@@ -17,6 +18,11 @@ func ConnectDB() {
 	var err error
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
+	if err != nil {
+		var msg string = "Failed to connect to DB: " + err.Error()
+		slog.Error(msg)
+	}
+
 	encoderConfig := zap.NewDevelopmentEncoderConfig()
 	encoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	log := zap.New(zapcore.NewCore(
@@ -25,9 +31,5 @@ func ConnectDB() {
 		zapcore.DebugLevel,
 	))
 
-	if err != nil {
-		var msg string = "Failed to connect to DB: " + err.Error()
-		log.Error(msg)
-	}
 	log.Info("Connected to database ...")
 }
