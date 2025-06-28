@@ -2,7 +2,6 @@ package trips
 
 import (
 	"time"
-	"triplanner/accounts"
 
 	"github.com/google/uuid"
 	"github.com/lib/pq"
@@ -19,5 +18,4 @@ type CreateTripRequest struct {
 	Hotels     pq.StringArray `gorm:"type:text[]"`
 	Tags       pq.StringArray `gorm:"type:text[]"`
 	UserID     uuid.UUID
-	User       accounts.User
 }

@@ -8,3 +8,10 @@ type User struct {
 	Password string `json:"password"`
 	Email    *string
 }
+
+// Add method to get models for Atlas
+func GetModels() []interface{} {
+	return []interface{}{
+		&User{},
+	}
+}

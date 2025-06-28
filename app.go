@@ -31,9 +31,7 @@ func main() {
 
 	v1.Use(accounts.CheckAuth)
 	places.RouterGroupPlacesAPI(v1.Group("/places"))
-
 	trips.RouterGroupCreateTrip(v1.Group("/trips"))
-
 	accounts.RouterGroupUserProfile(v1.Group("/user"))
 
 	router.Run() // listen and serve on 0.0.0.0:8080

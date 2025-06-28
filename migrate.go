@@ -1,9 +1,9 @@
 package main
 
 import (
-	"triplanner/accounts"
+	"log"
 	"triplanner/core"
-	"triplanner/trips"
+	"triplanner/database"
 )
 
 func init() {
@@ -12,5 +12,10 @@ func init() {
 }
 
 func main() {
-	core.DB.AutoMigrate(&accounts.User{}, &trips.TripPlan{})
+	// Use the centralized migration function
+	err := database.AutoMigrateAll()
+	if err != nil {
+		log.Fatal("Migration failed:", err)
+	}
+	log.Println("Migration completed successfully!")
 }

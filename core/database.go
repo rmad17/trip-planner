@@ -3,8 +3,6 @@ package core
 import (
 	"log/slog"
 	"os"
-	"triplanner/accounts"
-	"triplanner/trips"
 
 	"github.com/mattn/go-colorable"
 	"go.uber.org/zap"
@@ -32,10 +30,11 @@ func ConnectDB() {
 		zapcore.AddSync(colorable.NewColorableStdout()),
 		zapcore.DebugLevel,
 	))
-	models := []interface{}{
-		&accounts.User{},
-		&trips.TripPlan{},
-	}
 
 	log.Info("Connected to database ...")
+}
+
+// Optional: Add a function to get the DB instance
+func GetDB() *gorm.DB {
+	return DB
 }

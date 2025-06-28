@@ -21,3 +21,10 @@ type TripPlan struct {
 	Tags       pq.StringArray `gorm:"type:text[]"`
 	UserID     uuid.UUID      `gorm:"type:uuid;not null"`
 }
+
+// Add method to get models for Atlas
+func GetModels() []interface{} {
+	return []interface{}{
+		&TripPlan{},
+	}
+}
