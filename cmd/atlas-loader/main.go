@@ -3,15 +3,20 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 
-	"triplanner/database"
+	"triplanner/accounts"
+	"triplanner/trips"
 
 	"ariga.io/atlas-provider-gorm/gormschema"
 )
 
 func main() {
-	// Get all models from centralized registry
-	models := database.GetAllModels()
+	// Collect all your models
+	models := []interface{}{
+		&accounts.User{},
+		&trips.TripPlan{},
+	}
 
 	// Generate schema for PostgreSQL
 	stmts, err := gormschema.New("postgres").Load(models...)
@@ -19,8 +24,6 @@ func main() {
 		log.Fatalf("failed to load gorm schema: %v", err)
 	}
 
-	// Output schema statements
-	for _, stmt := range stmts {
-		fmt.Println(stmt)
-	}
+	// Output schema statements as strings (not bytes)
+	fmt.Fprint(os.Stdout, stmts) // Use Print instead of Println to avoid extra newlines
 }
