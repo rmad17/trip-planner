@@ -8,8 +8,7 @@ import (
 )
 
 type CreateTripRequest struct {
-	PlaceName  string         `json:"place_name" binding:"required"`
-	PlaceID    string         `json:"place_id"`
+	Name       *string        `json:"place_name" binding:"required"`
 	StartDate  *time.Time     `json:"start_date"`
 	EndDate    *time.Time     `json:"end_date"`
 	MinDays    *int16         `json:"min_days"`

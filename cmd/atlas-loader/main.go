@@ -16,6 +16,8 @@ func main() {
 	models := []interface{}{
 		&accounts.User{},
 		&trips.TripPlan{},
+		&trips.TripHop{},
+		&trips.Stay{},
 	}
 
 	// Generate schema for PostgreSQL

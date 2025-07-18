@@ -27,8 +27,7 @@ func CreateTrip(c *gin.Context) {
 
 	// Create trip plan
 	tripPlan := TripPlan{
-		PlaceName:  newTrip.PlaceName,
-		PlaceID:    newTrip.PlaceID,
+		Name:       newTrip.Name,
 		StartDate:  newTrip.StartDate,
 		EndDate:    newTrip.EndDate,
 		TravelMode: newTrip.TravelMode,

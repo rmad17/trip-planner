@@ -10,6 +10,8 @@ func GetAllModels() []interface{} {
 	return []interface{}{
 		&accounts.User{},
 		&trips.TripPlan{},
+		&trips.TripHop{},
+		&trips.Stay{},
 		// Add other models as you create them
 	}
 }
@@ -24,5 +26,7 @@ func GetAccountsModels() []interface{} {
 func GetTripsModels() []interface{} {
 	return []interface{}{
 		&trips.TripPlan{},
+		&trips.TripHop{},
+		&trips.Stay{},
 	}
 }

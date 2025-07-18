@@ -10,8 +10,7 @@ import (
 
 type TripPlan struct {
 	core.BaseModel
-	PlaceName  string
-	PlaceID    string
+	Name       *string
 	StartDate  *time.Time
 	EndDate    *time.Time
 	MinDays    *int8
@@ -22,9 +21,38 @@ type TripPlan struct {
 	UserID     uuid.UUID      `gorm:"type:uuid;not null"`
 }
 
+type TripHop struct {
+	core.BaseModel
+	Name        *string
+	MapSource   *string
+	PlaceID     *string
+	StartDate   *time.Time
+	EndDate     *time.Time
+	Notes       *string
+	POIs        pq.StringArray `gorm:"type:text[]"`
+	PreviousHop uuid.UUID
+	NextHop     uuid.UUID
+	TripPlan    uuid.UUID `gorm:"type:uuid;not null"`
+}
+
+type Stay struct {
+	core.BaseModel
+	GoogleLocation *string
+	MapboxLocation *string
+	StayType       *string
+	StayNotes      *string
+	StartDate      *time.Time
+	EndDate        *time.Time
+	IsPrepaid      *bool
+	PaymentMode    *string
+	TripHop        uuid.UUID `gorm:"type:uuid;not null"`
+}
+
 // Add method to get models for Atlas
 func GetModels() []interface{} {
 	return []interface{}{
 		&TripPlan{},
+		&TripHop{},
+		&Stay{},
 	}
 }
