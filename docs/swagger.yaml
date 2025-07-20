@@ -1,0 +1,120 @@
+basePath: /api/v1
+definitions:
+  trips.CreateTripRequest:
+    properties:
+      end_date:
+        example: "2024-06-10T00:00:00Z"
+        type: string
+      hotels:
+        example:
+        - Hotel de Paris
+        - Le Bristol
+        items:
+          type: string
+        type: array
+      min_days:
+        example: 7
+        type: integer
+      notes:
+        example: Romantic getaway
+        type: string
+      place_name:
+        example: Trip to Paris
+        type: string
+      start_date:
+        example: "2024-06-01T00:00:00Z"
+        type: string
+      tags:
+        example:
+        - romantic
+        - europe
+        - culture
+        items:
+          type: string
+        type: array
+      travel_mode:
+        example: flight
+        type: string
+    required:
+    - place_name
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API for managing trip plans, hops, and stays
+  title: Trip Planner API
+  version: "1.0"
+paths:
+  /trips:
+    get:
+      description: Retrieve all trips along with associated user data
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of trips with user information
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all trips with user information
+      tags:
+      - trips
+  /trips/create:
+    post:
+      consumes:
+      - application/json
+      description: Create a new trip plan with automatic creation of default hop and
+        stay
+      parameters:
+      - description: Trip creation request
+        in: body
+        name: trip
+        required: true
+        schema:
+          $ref: '#/definitions/trips.CreateTripRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Trip created successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request - validation errors
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized - user not authenticated
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a new trip
+      tags:
+      - trips
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

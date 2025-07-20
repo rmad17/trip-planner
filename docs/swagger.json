@@ -1,0 +1,178 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "API for managing trip plans, hops, and stays",
+        "title": "Trip Planner API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/api/v1",
+    "paths": {
+        "/trips": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve all trips along with associated user data",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "trips"
+                ],
+                "summary": "Get all trips with user information",
+                "responses": {
+                    "200": {
+                        "description": "List of trips with user information",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/trips/create": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new trip plan with automatic creation of default hop and stay",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "trips"
+                ],
+                "summary": "Create a new trip",
+                "parameters": [
+                    {
+                        "description": "Trip creation request",
+                        "name": "trip",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/trips.CreateTripRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Trip created successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - validation errors",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - user not authenticated",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "trips.CreateTripRequest": {
+            "type": "object",
+            "required": [
+                "place_name"
+            ],
+            "properties": {
+                "end_date": {
+                    "type": "string",
+                    "example": "2024-06-10T00:00:00Z"
+                },
+                "hotels": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "Hotel de Paris",
+                        "Le Bristol"
+                    ]
+                },
+                "min_days": {
+                    "type": "integer",
+                    "example": 7
+                },
+                "notes": {
+                    "type": "string",
+                    "example": "Romantic getaway"
+                },
+                "place_name": {
+                    "type": "string",
+                    "example": "Trip to Paris"
+                },
+                "start_date": {
+                    "type": "string",
+                    "example": "2024-06-01T00:00:00Z"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "romantic",
+                        "europe",
+                        "culture"
+                    ]
+                },
+                "travel_mode": {
+                    "type": "string",
+                    "example": "flight"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "description": "Type \"Bearer\" followed by a space and JWT token.",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}
