@@ -1,23 +1,39 @@
+// @title Trip Planner API
+// @description API for managing trip plans, hops, and stays
+// @version 1.0
+// @host localhost:8080
+// @BasePath /api/v1
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Type "Bearer" followed by a space and JWT token.
+
 package main
 
 import (
 	"triplanner/accounts"
 	"triplanner/core"
+	_ "triplanner/docs" // This line is necessary for go-swagger to find your docs!
 	"triplanner/places"
 	"triplanner/trips"
 
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func init() {
 	core.LoadEnvs()
 	core.ConnectDB()
-
 }
 
 func main() {
 	router := gin.Default()
 	router.LoadHTMLGlob("templates/*")
+
+	// Swagger endpoint
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{

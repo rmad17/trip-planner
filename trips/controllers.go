@@ -8,6 +8,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// CreateTrip godoc
+// @Summary Create a new trip
+// @Description Create a new trip plan with automatic creation of default hop and stay
+// @Tags trips
+// @Accept json
+// @Produce json
+// @Param trip body CreateTripRequest true "Trip creation request"
+// @Success 201 {object} map[string]interface{} "Trip created successfully"
+// @Failure 400 {object} map[string]string "Bad request - validation errors"
+// @Failure 401 {object} map[string]string "Unauthorized - user not authenticated"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Security BearerAuth
+// @Router /trips/create [post]
 func CreateTrip(c *gin.Context) {
 	var newTrip CreateTripRequest
 
@@ -50,10 +63,41 @@ func CreateTrip(c *gin.Context) {
 		return
 	}
 
+	// Create default hop for the trip
+	defaultHop := TripHop{
+		Name:     newTrip.Name, // Use the same name as the trip
+		TripPlan: tripPlan.BaseModel.ID,
+	}
+
+	result = core.DB.Create(&defaultHop)
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+		return
+	}
+
+	// Create default stay for the hop
+	defaultStay := Stay{
+		TripHop: defaultHop.BaseModel.ID,
+	}
+
+	result = core.DB.Create(&defaultStay)
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+		return
+	}
+
 	c.JSON(http.StatusCreated, gin.H{"trip": tripPlan})
 }
 
-// GetTripsWithUser - Example of loading related data
+// GetTripsWithUser godoc
+// @Summary Get all trips with user information
+// @Description Retrieve all trips along with associated user data
+// @Tags trips
+// @Produce json
+// @Success 200 {object} map[string]interface{} "List of trips with user information"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Security BearerAuth
+// @Router /trips [get]
 func GetTripsWithUser(c *gin.Context) {
 	var trips []TripPlan
 	var tripsWithUsers []map[string]interface{}
