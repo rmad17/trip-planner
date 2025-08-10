@@ -98,24 +98,24 @@ func CreateTrip(c *gin.Context) {
 // @Failure 500 {object} map[string]string "Internal server error"
 // @Security BearerAuth
 // @Router /trips [get]
-func GetTripsWithUser(c *gin.Context) {
-	var trips []TripPlan
-	var tripsWithUsers []map[string]interface{}
-
-	// Get all trips
-	core.DB.Find(&trips)
-
-	// Load user data for each trip
-	for _, trip := range trips {
-		var user accounts.User
-		core.DB.First(&user, trip.UserID)
-
-		tripWithUser := map[string]interface{}{
-			"trip": trip,
-			"user": user,
-		}
-		tripsWithUsers = append(tripsWithUsers, tripWithUser)
-	}
-
-	c.JSON(http.StatusOK, gin.H{"trips": tripsWithUsers})
-}
+// func GetTripsWithUser(c *gin.Context) {
+// 	var trips []TripPlan
+// 	var tripsWithUsers []map[string]interface{}
+//
+// 	// Get all trips
+// 	core.DB.Find(&trips)
+//
+// 	// Load user data for each trip
+// 	for _, trip := range trips {
+// 		var user accounts.User
+// 		core.DB.First(&user, trip.UserID)
+//
+// 		tripWithUser := map[string]interface{}{
+// 			"trip": trip,
+// 			"user": user,
+// 		}
+// 		tripsWithUsers = append(tripsWithUsers, tripWithUser)
+// 	}
+//
+// 	c.JSON(http.StatusOK, gin.H{"trips": tripsWithUsers})
+// }
