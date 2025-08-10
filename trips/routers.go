@@ -17,12 +17,12 @@ func RouterGroupTripPlans(router *gin.RouterGroup) {
 	router.DELETE("/:id", DeleteTripPlan) // DELETE /trip-plans/:id
 
 	// Trip Hops nested under Trip Plans
-	router.GET("/:trip_plan_id/hops", GetTripHops)    // GET /trip-plans/:id/hops
-	router.POST("/:trip_plan_id/hops", CreateTripHop) // POST /trip-plans/:id/hops
+	router.GET("/:id/hops", GetTripHops)    // GET /trip-plans/:id/hops
+	router.POST("/:id/hops", CreateTripHop) // POST /trip-plans/:id/hops
 
 	// Trip Days nested under Trip Plans
-	router.GET("/:trip_plan_id/days", GetTripDays)    // GET /trip-plans/:id/days
-	router.POST("/:trip_plan_id/days", CreateTripDay) // POST /trip-plans/:id/days
+	router.GET("/:id/days", GetTripDays)    // GET /trip-plans/:id/days
+	router.POST("/:id/days", CreateTripDay) // POST /trip-plans/:id/days
 
 	// Travellers nested under Trip Plans
 	router.GET("/:id/travellers", GetTravellers)           // GET /trip-plans/:id/travellers
@@ -30,8 +30,8 @@ func RouterGroupTripPlans(router *gin.RouterGroup) {
 	router.POST("/:id/travellers/invite", InviteTraveller) // POST /trip-plans/:id/travellers/invite
 
 	// Activities nested under Trip Days
-	router.GET("/:trip_day_id/activities", GetActivities)   // GET /trip-plans/:id/days/:day_id/activities
-	router.POST("/:trip_day_id/activities", CreateActivity) // POST /trip-plans/:id/days/:day_id/activities
+	router.GET("/:id/activities", GetActivities)   // GET /trip-plans/:id/days/:day_id/activities
+	router.POST("/:id/activities", CreateActivity) // POST /trip-plans/:id/days/:day_id/activities
 }
 
 // RouterGroupTripHops sets up CRUD routes for individual trip hops

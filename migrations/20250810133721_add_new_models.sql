@@ -53,7 +53,7 @@ CREATE TABLE "expense_settlements" (
   PRIMARY KEY ("id")
 );
 -- Modify "trip_hops" table
-ALTER TABLE "trip_hops" ALTER COLUMN "previous_hop" TYPE uuid, ALTER COLUMN "next_hop" TYPE uuid, ADD COLUMN "description" text NULL, ADD COLUMN "city" text NULL, ADD COLUMN "country" text NULL, ADD COLUMN "region" text NULL, ADD COLUMN "latitude" numeric NULL, ADD COLUMN "longitude" numeric NULL, ADD COLUMN "estimated_budget" numeric NULL, ADD COLUMN "actual_spent" numeric NULL, ADD COLUMN "transportation" text NULL, ADD COLUMN "restaurants" text[] NULL, ADD COLUMN "activities" text[] NULL, ADD COLUMN "hop_order" bigint NULL, ADD CONSTRAINT "fk_trip_plans_trip_hops" FOREIGN KEY ("trip_plan") REFERENCES "trip_plans" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "trip_hops" ALTER COLUMN "previous_hop" TYPE uuid USING "previous_hop"::uuid, ALTER COLUMN "next_hop" TYPE uuid USING "next_hop"::uuid, ADD COLUMN "description" text NULL, ADD COLUMN "city" text NULL, ADD COLUMN "country" text NULL, ADD COLUMN "region" text NULL, ADD COLUMN "latitude" numeric NULL, ADD COLUMN "longitude" numeric NULL, ADD COLUMN "estimated_budget" numeric NULL, ADD COLUMN "actual_spent" numeric NULL, ADD COLUMN "transportation" text NULL, ADD COLUMN "restaurants" text[] NULL, ADD COLUMN "activities" text[] NULL, ADD COLUMN "hop_order" bigint NULL, ADD CONSTRAINT "fk_trip_plans_trip_hops" FOREIGN KEY ("trip_plan") REFERENCES "trip_plans" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
 -- Create "trip_days" table
 CREATE TABLE "trip_days" (
   "id" uuid NOT NULL DEFAULT gen_random_uuid(),
