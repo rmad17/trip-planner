@@ -5,13 +5,12 @@ import "github.com/gin-gonic/gin"
 // RouterGroupCreateTrip sets up the original trip creation routes (backward compatibility)
 func RouterGroupCreateTrip(router *gin.RouterGroup) {
 	router.POST("/create", CreateTrip)
-	router.GET("", GetTripsWithUser) // GET /trips to list all trips
+	router.GET("", GetTripPlans) // GET /trip-plans
 }
 
 // RouterGroupTripPlans sets up comprehensive CRUD routes for trip plans
 func RouterGroupTripPlans(router *gin.RouterGroup) {
 	// Trip Plans CRUD
-	router.GET("", GetTripPlans)                     // GET /trip-plans
 	router.GET("/:id", GetTripPlan)                  // GET /trip-plans/:id
 	router.GET("/:id/complete", GetTripPlanComplete) // GET /trip-plans/:id/complete
 	router.PUT("/:id", UpdateTripPlan)               // PUT /trip-plans/:id

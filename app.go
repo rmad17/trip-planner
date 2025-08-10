@@ -55,7 +55,7 @@ func main() {
 
 	// Trip Management Routes
 	trips.RouterGroupCreateTrip(v1.Group("/trips"))      // Original routes (backward compatibility)
-	trips.RouterGroupTripPlans(v1.Group("/trip-plans"))  // Comprehensive CRUD for trip plans
+	trips.RouterGroupTripPlans(v1.Group("/trip"))        // Comprehensive CRUD for trip plans
 	trips.RouterGroupTripHops(v1.Group("/trip-hops"))    // Individual trip hop operations
 	trips.RouterGroupTripDays(v1.Group("/trip-days"))    // Individual trip day operations
 	trips.RouterGroupActivities(v1.Group("/activities")) // Individual activity operations
