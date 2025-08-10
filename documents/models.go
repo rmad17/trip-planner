@@ -23,12 +23,34 @@ const (
 	CategoryOther          DocumentCategory = "other"
 )
 
+// StorageProvider represents the storage provider for documents
+type StorageProvider string
+
+const (
+	StorageProviderDigitalOcean StorageProvider = "digitalocean"
+	StorageProviderS3           StorageProvider = "s3"
+	StorageProviderGCS          StorageProvider = "gcs"
+	StorageProviderLocal        StorageProvider = "local"
+	StorageProviderCloudflare   StorageProvider = "cloudflare"
+)
+
+// StoragePath represents the storage path pattern for organizing documents
+type StoragePath string
+
+const (
+	StoragePathDocuments StoragePath = "documents"
+	StoragePathImages    StoragePath = "images"
+	StoragePathBackups   StoragePath = "backups"
+	StoragePathTmp       StoragePath = "tmp"
+	StoragePathUploads   StoragePath = "uploads"
+)
+
 // Document represents a document uploaded by users
 type Document struct {
 	core.BaseModel
 	Name            string           `json:"name" gorm:"not null" example:"Flight Ticket" description:"Display name of the document"`
 	OriginalName    string           `json:"original_name" gorm:"not null" example:"ticket_flight_123.pdf" description:"Original filename"`
-	StorageProvider string           `json:"storage_provider" gorm:"not null" example:"digitalocean" description:"Storage provider used (digitalocean, s3, etc.)"`
+	StorageProvider StorageProvider  `json:"storage_provider" gorm:"type:varchar(50);not null" example:"digitalocean" description:"Storage provider used (digitalocean, s3, etc.)"`
 	StoragePath     string           `json:"storage_path" gorm:"not null" example:"documents/2024/01/15/abc123.pdf" description:"Path/key in storage provider"`
 	FileSize        int64            `json:"file_size" example:"2048576" description:"File size in bytes"`
 	ContentType     string           `json:"content_type" example:"application/pdf" description:"MIME type of the file"`
@@ -83,6 +105,48 @@ func GetValidCategories() []DocumentCategory {
 func IsValidCategory(category string) bool {
 	for _, validCategory := range GetValidCategories() {
 		if string(validCategory) == category {
+			return true
+		}
+	}
+	return false
+}
+
+// GetValidStorageProviders returns all valid storage providers
+func GetValidStorageProviders() []StorageProvider {
+	return []StorageProvider{
+		StorageProviderDigitalOcean,
+		StorageProviderS3,
+		StorageProviderGCS,
+		StorageProviderLocal,
+		StorageProviderCloudflare,
+	}
+}
+
+// IsValidStorageProvider checks if a storage provider is valid
+func IsValidStorageProvider(provider string) bool {
+	for _, validProvider := range GetValidStorageProviders() {
+		if string(validProvider) == provider {
+			return true
+		}
+	}
+	return false
+}
+
+// GetValidStoragePaths returns all valid storage paths
+func GetValidStoragePaths() []StoragePath {
+	return []StoragePath{
+		StoragePathDocuments,
+		StoragePathImages,
+		StoragePathBackups,
+		StoragePathTmp,
+		StoragePathUploads,
+	}
+}
+
+// IsValidStoragePath checks if a storage path is valid
+func IsValidStoragePath(path string) bool {
+	for _, validPath := range GetValidStoragePaths() {
+		if string(validPath) == path {
 			return true
 		}
 	}

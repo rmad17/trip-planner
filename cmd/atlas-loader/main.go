@@ -5,20 +5,14 @@ import (
 	"log"
 	"os"
 
-	"triplanner/accounts"
-	"triplanner/trips"
+	"triplanner/database"
 
 	"ariga.io/atlas-provider-gorm/gormschema"
 )
 
 func main() {
-	// Collect all your models
-	models := []interface{}{
-		&accounts.User{},
-		&trips.TripPlan{},
-		&trips.TripHop{},
-		&trips.Stay{},
-	}
+	// Get all models from database package
+	models := database.GetAllModels()
 
 	// Generate schema for PostgreSQL
 	stmts, err := gormschema.New("postgres").Load(models...)
