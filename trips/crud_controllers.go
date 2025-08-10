@@ -92,6 +92,81 @@ func GetTripPlan(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"trip_plan": tripPlan})
 }
 
+// GetTripPlanComplete godoc
+// @Summary Get complete trip details with all related data
+// @Description Retrieve a trip plan with all hops, days, travellers, stays and activities in a single response
+// @Tags trip-plans
+// @Produce json
+// @Param id path string true "Trip Plan ID"
+// @Success 200 {object} map[string]interface{} "Complete trip plan details"
+// @Failure 404 {object} map[string]string "Trip plan not found"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Security BearerAuth
+// @Router /trip-plans/{id}/complete [get]
+func GetTripPlanComplete(c *gin.Context) {
+	id := c.Param("id")
+	currentUser, exists := c.Get("currentUser")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+		return
+	}
+	user := currentUser.(accounts.User)
+
+	// Get trip plan with basic data
+	var tripPlan TripPlan
+	result := core.DB.Where("id = ? AND user_id = ?", id, user.BaseModel.ID).First(&tripPlan)
+	if result.Error != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Trip plan not found"})
+		return
+	}
+
+	// Get trip hops with stays
+	var tripHops []TripHop
+	core.DB.Preload("Stays").Where("trip_plan = ?", id).Order("hop_order ASC").Find(&tripHops)
+
+	// Get trip days with activities
+	var tripDays []TripDay
+	core.DB.Preload("Activities").Where("trip_plan = ?", id).Order("day_number ASC").Find(&tripDays)
+
+	// Get travellers
+	var travellers []Traveller
+	core.DB.Where("trip_plan = ?", id).Find(&travellers)
+
+	// Compile complete response
+	response := gin.H{
+		"trip_plan":  tripPlan,
+		"hops":       tripHops,
+		"days":       tripDays,
+		"travellers": travellers,
+		"summary": gin.H{
+			"total_hops":       len(tripHops),
+			"total_days":       len(tripDays),
+			"total_travellers": len(travellers),
+			"total_stays":      countStays(tripHops),
+			"total_activities": countActivities(tripDays),
+		},
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+// Helper functions for counting nested items
+func countStays(hops []TripHop) int {
+	count := 0
+	for _, hop := range hops {
+		count += len(hop.Stays)
+	}
+	return count
+}
+
+func countActivities(days []TripDay) int {
+	count := 0
+	for _, day := range days {
+		count += len(day.Activities)
+	}
+	return count
+}
+
 // UpdateTripPlan godoc
 // @Summary Update a trip plan
 // @Description Update an existing trip plan

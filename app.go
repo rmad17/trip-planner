@@ -60,6 +60,7 @@ func main() {
 	trips.RouterGroupTripDays(v1.Group("/trip-days"))    // Individual trip day operations
 	trips.RouterGroupActivities(v1.Group("/activities")) // Individual activity operations
 	trips.RouterGroupTravellers(v1.Group("/travellers")) // Individual traveller operations
+	trips.RouterGroupStays(v1.Group("/stays"))           // Individual stay operations
 
 	// Expense Management Routes
 	expenses.RouterGroupExpenses(v1.Group("/trip-plans"))          // Expenses nested under trip plans

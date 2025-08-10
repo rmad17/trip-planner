@@ -17,6 +17,25 @@ func NewStorageManager() *StorageManager {
 	}
 }
 
+// NewStorageManagerWithDefaults creates a new storage manager with local storage as default
+func NewStorageManagerWithDefaults() *StorageManager {
+	sm := NewStorageManager()
+	
+	// Set up local storage as default
+	localProvider, err := NewLocalStorageProvider(LocalStorageConfig{
+		BasePath:   "./uploads",
+		BaseURL:    "/uploads",
+		CreatePath: true,
+	})
+	
+	if err == nil {
+		sm.RegisterProvider("local", localProvider)
+		sm.SetDefault("local")
+	}
+	
+	return sm
+}
+
 // RegisterProvider registers a storage provider
 func (sm *StorageManager) RegisterProvider(name string, provider StorageProvider) {
 	sm.providers[name] = provider
@@ -57,6 +76,12 @@ func (sm *StorageManager) InitializeFromConfig(configs map[string]StorageConfig)
 		var err error
 
 		switch config.Provider {
+		case "local":
+			localConfig := LocalStorageConfig{}
+			if err := mapToStruct(config.Config, &localConfig); err != nil {
+				return fmt.Errorf("invalid Local config for %s: %v", name, err)
+			}
+			provider, err = NewLocalStorageProvider(localConfig)
 		case "digitalocean":
 			doConfig := DigitalOceanConfig{}
 			if err := mapToStruct(config.Config, &doConfig); err != nil {
