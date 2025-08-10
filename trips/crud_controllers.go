@@ -453,3 +453,185 @@ func DeleteTripHop(c *gin.Context) {
 	tx.Commit()
 	c.Status(http.StatusNoContent)
 }
+
+// ACTIVITIES CRUD
+
+// GetActivities godoc
+// @Summary Get activities for a trip plan
+// @Description Retrieve all activities for a specific trip plan across all days
+// @Tags activities
+// @Produce json
+// @Param id path string true "Trip Plan ID"
+// @Success 200 {object} map[string]interface{} "List of activities"
+// @Failure 404 {object} map[string]string "Trip plan not found"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Security BearerAuth
+// @Router /trip-plans/{id}/activities [get]
+func GetActivities(c *gin.Context) {
+	tripPlanID := c.Param("id")
+	currentUser, exists := c.Get("currentUser")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+		return
+	}
+	user := currentUser.(accounts.User)
+
+	// Verify trip plan ownership
+	var tripPlan TripPlan
+	if err := core.DB.Where("id = ? AND user_id = ?", tripPlanID, user.BaseModel.ID).First(&tripPlan).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Trip plan not found"})
+		return
+	}
+
+	var activities []Activity
+	result := core.DB.Joins("JOIN trip_days ON activities.trip_day = trip_days.id").
+		Where("trip_days.trip_plan = ?", tripPlanID).
+		Order("trip_days.day_number ASC, activities.start_time ASC").
+		Find(&activities)
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"activities": activities})
+}
+
+// CreateActivity godoc
+// @Summary Create a new activity
+// @Description Add a new activity to a trip plan
+// @Tags activities
+// @Accept json
+// @Produce json
+// @Param id path string true "Trip Plan ID"
+// @Param activity body Activity true "Activity data"
+// @Success 201 {object} Activity "Created activity"
+// @Failure 400 {object} map[string]string "Bad request"
+// @Failure 404 {object} map[string]string "Trip plan not found"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Security BearerAuth
+// @Router /trip-plans/{id}/activities [post]
+func CreateActivity(c *gin.Context) {
+	tripPlanID := c.Param("id")
+	currentUser, exists := c.Get("currentUser")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+		return
+	}
+	user := currentUser.(accounts.User)
+
+	// Verify trip plan ownership
+	var tripPlan TripPlan
+	if err := core.DB.Where("id = ? AND user_id = ?", tripPlanID, user.BaseModel.ID).First(&tripPlan).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Trip plan not found"})
+		return
+	}
+
+	var activity Activity
+	if err := c.BindJSON(&activity); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Verify that the trip day belongs to the trip plan
+	var tripDay TripDay
+	if err := core.DB.Where("id = ? AND trip_plan = ?", activity.TripDay, tripPlanID).First(&tripDay).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid trip day for this trip plan"})
+		return
+	}
+
+	result := core.DB.Create(&activity)
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"activity": activity})
+}
+
+// UpdateActivity godoc
+// @Summary Update an activity
+// @Description Update an existing activity
+// @Tags activities
+// @Accept json
+// @Produce json
+// @Param id path string true "Activity ID"
+// @Param activity body Activity true "Updated activity data"
+// @Success 200 {object} Activity "Updated activity"
+// @Failure 400 {object} map[string]string "Bad request"
+// @Failure 404 {object} map[string]string "Activity not found"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Security BearerAuth
+// @Router /activities/{id} [put]
+func UpdateActivity(c *gin.Context) {
+	id := c.Param("id")
+	currentUser, exists := c.Get("currentUser")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+		return
+	}
+	user := currentUser.(accounts.User)
+
+	var activity Activity
+	// Verify ownership through trip day and trip plan
+	result := core.DB.Joins("JOIN trip_days ON activities.trip_day = trip_days.id").
+		Joins("JOIN trip_plans ON trip_days.trip_plan = trip_plans.id").
+		Where("activities.id = ? AND trip_plans.user_id = ?", id, user.BaseModel.ID).
+		First(&activity)
+	if result.Error != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Activity not found"})
+		return
+	}
+
+	var updateData Activity
+	if err := c.BindJSON(&updateData); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	result = core.DB.Model(&activity).Updates(updateData)
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"activity": activity})
+}
+
+// DeleteActivity godoc
+// @Summary Delete an activity
+// @Description Delete an activity
+// @Tags activities
+// @Param id path string true "Activity ID"
+// @Success 204 "No content"
+// @Failure 404 {object} map[string]string "Activity not found"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Security BearerAuth
+// @Router /activities/{id} [delete]
+func DeleteActivity(c *gin.Context) {
+	id := c.Param("id")
+	currentUser, exists := c.Get("currentUser")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+		return
+	}
+	user := currentUser.(accounts.User)
+
+	var activity Activity
+	// Verify ownership through trip day and trip plan
+	result := core.DB.Joins("JOIN trip_days ON activities.trip_day = trip_days.id").
+		Joins("JOIN trip_plans ON trip_days.trip_plan = trip_plans.id").
+		Where("activities.id = ? AND trip_plans.user_id = ?", id, user.BaseModel.ID).
+		First(&activity)
+	if result.Error != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Activity not found"})
+		return
+	}
+
+	result = core.DB.Delete(&activity)
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+		return
+	}
+
+	c.Status(http.StatusNoContent)
+}
