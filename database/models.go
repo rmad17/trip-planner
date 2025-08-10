@@ -3,6 +3,7 @@ package database
 import (
 	"triplanner/accounts"
 	"triplanner/core"
+	"triplanner/documents"
 	"triplanner/trips"
 )
 
@@ -21,5 +22,6 @@ func GetAllModels() []interface{} {
 	var models []interface{}
 	models = append(models, accounts.GetModels()...)
 	models = append(models, trips.GetModels()...)
+	models = append(models, documents.GetModels()...)
 	return models
 }
