@@ -5,13 +5,13 @@ import "github.com/gin-gonic/gin"
 // RouterGroupExpenses sets up comprehensive CRUD routes for expenses
 func RouterGroupExpenses(router *gin.RouterGroup) {
 	// Expenses nested under Trip Plans
-	router.GET("/:id/expenses", GetExpenses)              // GET /trip-plans/:id/expenses
-	router.POST("/:id/expenses", CreateExpense)           // POST /trip-plans/:id/expenses
-	router.GET("/:id/expense-summary", GetExpenseSummary) // GET /trip-plans/:id/expense-summary
+	router.GET("/:id/expenses", GetExpenses)              // GET /trip/:id/expenses
+	router.POST("/:id/expenses", CreateExpense)           // POST /trip/:id/expenses
+	router.GET("/:id/expense-summary", GetExpenseSummary) // GET /trip/:id/expense-summary
 
 	// Settlements nested under Trip Plans
-	router.GET("/:id/settlements", GetSettlements)    // GET /trip-plans/:id/settlements
-	router.POST("/:id/settlements", CreateSettlement) // POST /trip-plans/:id/settlements
+	router.GET("/:id/settlements", GetSettlements)    // GET /trip/:id/settlements
+	router.POST("/:id/settlements", CreateSettlement) // POST /trip/:id/settlements
 }
 
 // RouterGroupExpenseItems sets up CRUD routes for individual expenses

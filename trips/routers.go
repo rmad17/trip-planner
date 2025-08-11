@@ -40,19 +40,19 @@ func RouterGroupTripPlans(router *gin.RouterGroup) {
 
 // RouterGroupTripHops sets up CRUD routes for individual trip hops
 func RouterGroupTripHops(router *gin.RouterGroup) {
-	router.PUT("/:id", UpdateTripHop)    // PUT /trip-hops/:id
-	router.DELETE("/:id", DeleteTripHop) // DELETE /trip-hops/:id
+	router.PUT("/:id", UpdateTripHop)    // PUT /hops/:id
+	router.DELETE("/:id", DeleteTripHop) // DELETE /hops/:id
 
 	// Stays nested under Trip Hops
-	router.GET("/:id/stays", GetStays)    // GET /trip-hops/:id/stays
-	router.POST("/:id/stays", CreateStay) // POST /trip-hops/:id/stays
+	router.GET("/:id/stays", GetStays)    // GET /hops/:id/stays
+	router.POST("/:id/stays", CreateStay) // POST /hops/:id/stays
 }
 
 // RouterGroupTripDays sets up CRUD routes for individual trip days
 func RouterGroupTripDays(router *gin.RouterGroup) {
-	router.GET("/:id", GetTripDay)       // GET /trip-days/:id
-	router.PUT("/:id", UpdateTripDay)    // PUT /trip-days/:id
-	router.DELETE("/:id", DeleteTripDay) // DELETE /trip-days/:id
+	router.GET("/:id", GetTripDay)       // GET /days/:id
+	router.PUT("/:id", UpdateTripDay)    // PUT /days/:id
+	router.DELETE("/:id", DeleteTripDay) // DELETE /days/:id
 }
 
 // RouterGroupActivities sets up CRUD routes for individual activities

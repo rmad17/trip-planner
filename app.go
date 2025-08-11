@@ -56,14 +56,14 @@ func main() {
 	// Trip Management Routes
 	trips.RouterGroupCreateTrip(v1.Group("/trips"))      // Original routes (backward compatibility)
 	trips.RouterGroupTripPlans(v1.Group("/trip"))        // Comprehensive CRUD for trip plans
-	trips.RouterGroupTripHops(v1.Group("/trip-hops"))    // Individual trip hop operations
-	trips.RouterGroupTripDays(v1.Group("/trip-days"))    // Individual trip day operations
+	trips.RouterGroupTripHops(v1.Group("/hops"))         // Individual trip hop operations
+	trips.RouterGroupTripDays(v1.Group("/days"))         // Individual trip day operations
 	trips.RouterGroupActivities(v1.Group("/activities")) // Individual activity operations
 	trips.RouterGroupTravellers(v1.Group("/travellers")) // Individual traveller operations
 	trips.RouterGroupStays(v1.Group("/stays"))           // Individual stay operations
 
 	// Expense Management Routes
-	expenses.RouterGroupExpenses(v1.Group("/trip-plans"))          // Expenses nested under trip plans
+	expenses.RouterGroupExpenses(v1.Group("/trip"))               // Expenses nested under trip plans
 	expenses.RouterGroupExpenseItems(v1.Group("/expenses"))        // Individual expense operations
 	expenses.RouterGroupExpenseSplits(v1.Group("/expense-splits")) // Expense split operations
 

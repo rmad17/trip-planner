@@ -279,7 +279,7 @@ func DeleteTripPlan(c *gin.Context) {
 // @Security BearerAuth
 // @Router /trip-plans/{trip_plan_id}/hops [get]
 func GetTripHops(c *gin.Context) {
-	tripPlanID := c.Param("trip_plan_id")
+	tripPlanID := c.Param("id")
 	currentUser, exists := c.Get("currentUser")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
@@ -319,7 +319,7 @@ func GetTripHops(c *gin.Context) {
 // @Security BearerAuth
 // @Router /trip-plans/{trip_plan_id}/hops [post]
 func CreateTripHop(c *gin.Context) {
-	tripPlanID := c.Param("trip_plan_id")
+	tripPlanID := c.Param("id")
 	currentUser, exists := c.Get("currentUser")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})

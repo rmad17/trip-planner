@@ -23,7 +23,7 @@ import (
 // @Security BearerAuth
 // @Router /trip-plans/{trip_plan_id}/days [get]
 func GetTripDays(c *gin.Context) {
-	tripPlanID := c.Param("trip_plan_id")
+	tripPlanID := c.Param("id")
 	currentUser, exists := c.Get("currentUser")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
@@ -98,7 +98,7 @@ func GetTripDay(c *gin.Context) {
 // @Security BearerAuth
 // @Router /trip-plans/{trip_plan_id}/days [post]
 func CreateTripDay(c *gin.Context) {
-	tripPlanID := c.Param("trip_plan_id")
+	tripPlanID := c.Param("id")
 	currentUser, exists := c.Get("currentUser")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
