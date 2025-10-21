@@ -142,14 +142,22 @@ func MarkSplitPaid(c *gin.Context) {
 // @Description Retrieve all settlements for a specific trip plan
 // @Tags settlements
 // @Produce json
-// @Param trip_plan_id path string true "Trip Plan ID"
+// @Param id path string true "Trip Plan ID"
 // @Success 200 {object} map[string]interface{} "List of settlements"
 // @Failure 404 {object} map[string]string "Trip plan not found"
 // @Failure 500 {object} map[string]string "Internal server error"
 // @Security BearerAuth
-// @Router /trip-plans/{trip_plan_id}/settlements [get]
+// @Router /trip/{id}/settlements [get]
 func GetSettlements(c *gin.Context) {
-	tripPlanID := c.Param("trip_plan_id")
+	tripPlanIDStr := c.Param("id")
+	
+	// Validate UUID format
+	tripPlanID, err := uuid.Parse(tripPlanIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid trip plan ID format"})
+		return
+	}
+	
 	currentUser, exists := c.Get("currentUser")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
@@ -191,16 +199,24 @@ func GetSettlements(c *gin.Context) {
 // @Tags settlements
 // @Accept json
 // @Produce json
-// @Param trip_plan_id path string true "Trip Plan ID"
+// @Param id path string true "Trip Plan ID"
 // @Param settlement body ExpenseSettlementRequest true "Settlement data"
 // @Success 201 {object} ExpenseSettlement "Created settlement"
 // @Failure 400 {object} map[string]string "Bad request"
 // @Failure 404 {object} map[string]string "Trip plan not found"
 // @Failure 500 {object} map[string]string "Internal server error"
 // @Security BearerAuth
-// @Router /trip-plans/{trip_plan_id}/settlements [post]
+// @Router /trip/{id}/settlements [post]
 func CreateSettlement(c *gin.Context) {
-	tripPlanID := c.Param("trip_plan_id")
+	tripPlanIDStr := c.Param("id")
+	
+	// Validate UUID format
+	tripPlanID, err := uuid.Parse(tripPlanIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid trip plan ID format"})
+		return
+	}
+	
 	currentUser, exists := c.Get("currentUser")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
@@ -251,7 +267,7 @@ func CreateSettlement(c *gin.Context) {
 
 	// Create settlement
 	settlement := ExpenseSettlement{
-		TripPlan:      uuid.MustParse(tripPlanID),
+		TripPlan:      tripPlanID,
 		FromTraveller: settlementReq.FromTraveller,
 		ToTraveller:   settlementReq.ToTraveller,
 		Amount:        settlementReq.Amount,
@@ -278,14 +294,22 @@ func CreateSettlement(c *gin.Context) {
 // @Description Get comprehensive expense summary including totals, splits, and settlements
 // @Tags expenses
 // @Produce json
-// @Param trip_plan_id path string true "Trip Plan ID"
+// @Param id path string true "Trip Plan ID"
 // @Success 200 {object} ExpenseSummaryResponse "Expense summary"
 // @Failure 404 {object} map[string]string "Trip plan not found"
 // @Failure 500 {object} map[string]string "Internal server error"
 // @Security BearerAuth
-// @Router /trip-plans/{trip_plan_id}/expense-summary [get]
+// @Router /trip/{id}/expense-summary [get]
 func GetExpenseSummary(c *gin.Context) {
-	tripPlanID := c.Param("trip_plan_id")
+	tripPlanIDStr := c.Param("id")
+	
+	// Validate UUID format
+	tripPlanID, err := uuid.Parse(tripPlanIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid trip plan ID format"})
+		return
+	}
+	
 	currentUser, exists := c.Get("currentUser")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})

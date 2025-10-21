@@ -17,7 +17,7 @@ import (
 // @Description Retrieve all expenses for a specific trip plan with optional filtering
 // @Tags expenses
 // @Produce json
-// @Param trip_plan_id path string true "Trip Plan ID"
+// @Param id path string true "Trip Plan ID"
 // @Param category query string false "Filter by category"
 // @Param traveller query string false "Filter by traveller who paid"
 // @Param limit query int false "Number of records to return (default: 50)"
@@ -26,9 +26,17 @@ import (
 // @Failure 404 {object} map[string]string "Trip plan not found"
 // @Failure 500 {object} map[string]string "Internal server error"
 // @Security BearerAuth
-// @Router /trip-plans/{trip_plan_id}/expenses [get]
+// @Router /trip/{id}/expenses [get]
 func GetExpenses(c *gin.Context) {
-	tripPlanID := c.Param("trip_plan_id")
+	tripPlanIDStr := c.Param("id")
+	
+	// Validate UUID format
+	tripPlanID, err := uuid.Parse(tripPlanIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid trip plan ID format"})
+		return
+	}
+	
 	currentUser, exists := c.Get("currentUser")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
@@ -135,16 +143,24 @@ func GetExpense(c *gin.Context) {
 // @Tags expenses
 // @Accept json
 // @Produce json
-// @Param trip_plan_id path string true "Trip Plan ID"
+// @Param id path string true "Trip Plan ID"
 // @Param expense body ExpenseCreateRequest true "Expense data"
 // @Success 201 {object} Expense "Created expense"
 // @Failure 400 {object} map[string]string "Bad request"
 // @Failure 404 {object} map[string]string "Trip plan not found"
 // @Failure 500 {object} map[string]string "Internal server error"
 // @Security BearerAuth
-// @Router /trip-plans/{trip_plan_id}/expenses [post]
+// @Router /trip/{id}/expenses [post]
 func CreateExpense(c *gin.Context) {
-	tripPlanID := c.Param("trip_plan_id")
+	tripPlanIDStr := c.Param("id")
+	
+	// Validate UUID format
+	tripPlanID, err := uuid.Parse(tripPlanIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid trip plan ID format"})
+		return
+	}
+	
 	currentUser, exists := c.Get("currentUser")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})

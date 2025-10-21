@@ -95,9 +95,9 @@ All endpoints require JWT Bearer token authentication except for auth endpoints.
 ### Expenses
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/trip-plans/{trip_plan_id}/expenses` | Get expenses for a trip |
+| GET | `/trip/{id}/expenses` | Get expenses for a trip |
 | GET | `/expenses/{id}` | Get specific expense |
-| POST | `/trip-plans/{trip_plan_id}/expenses` | Create new expense |
+| POST | `/trip/{id}/expenses` | Create new expense |
 | PUT | `/expenses/{id}` | Update expense |
 | DELETE | `/expenses/{id}` | Delete expense |
 
@@ -116,13 +116,36 @@ All endpoints require JWT Bearer token authentication except for auth endpoints.
 ### Expense Settlements
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/trip-plans/{trip_plan_id}/settlements` | Get settlements for a trip |
-| POST | `/trip-plans/{trip_plan_id}/settlements` | Create new settlement |
+| GET | `/trip/{id}/settlements` | Get settlements for a trip |
+| POST | `/trip/{id}/settlements` | Create new settlement |
 
 ### Expense Summary
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/trip-plans/{trip_plan_id}/expense-summary` | Get comprehensive expense summary |
+| GET | `/trip/{id}/expense-summary` | Get comprehensive expense summary |
+
+---
+
+## 📄 Document Management Endpoints
+
+### Documents
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/trip/{id}/documents` | Get documents for a trip |
+| POST | `/trip/{id}/documents` | Upload new document |
+| GET | `/documents/{id}` | Get specific document |
+| PUT | `/documents/{id}` | Update document |
+| DELETE | `/documents/{id}` | Delete document |
+| GET | `/documents/{id}/download` | Download document file |
+
+**Query Parameters for GET documents:**
+- `category` (string): Filter by document category
+- `entity_type` (string): Filter by entity type
+- `limit` (int): Number of records (default: 50)
+- `offset` (int): Records to skip (default: 0)
+
+**Document Categories:**
+- `tickets`, `invoices`, `identity_proofs`, `medical`, `hotel_bookings`, `insurance`, `visas`, `receipts`, `itineraries`, `other`
 
 ---
 
@@ -223,7 +246,7 @@ POST /api/v1/trip-plans/{trip_plan_id}/travellers
 
 ### Create Expense
 ```json
-POST /api/v1/trip-plans/{trip_plan_id}/expenses
+POST /api/v1/trip/{id}/expenses
 {
   "title": "Hotel Booking",
   "description": "3 nights at Hotel de Paris",
@@ -239,9 +262,25 @@ POST /api/v1/trip-plans/{trip_plan_id}/expenses
 }
 ```
 
+### Upload Document
+```bash
+POST /api/v1/trip/{id}/documents
+Content-Type: multipart/form-data
+
+Form fields:
+- file: (binary file)
+- name: "Flight Ticket"
+- category: "tickets"
+- description: "Return flight ticket from NYC to Paris"
+- notes: "Keep this handy at airport"
+- tags: "flight,business-class"
+- expires_at: "2024-12-31T23:59:59Z"
+- is_public: false
+```
+
 ### Expense Summary Response
 ```json
-GET /api/v1/trip-plans/{trip_plan_id}/expense-summary
+GET /api/v1/trip/{id}/expense-summary
 {
   "summary": {
     "trip_plan": "trip_plan_id",
@@ -310,6 +349,8 @@ GET /api/v1/trip-plans/{trip_plan_id}/expense-summary
 6. **Expense** - Trip expenses with splitting
 7. **ExpenseSplit** - Individual expense shares
 8. **ExpenseSettlement** - Payments between travellers
+9. **Document** - File uploads with metadata
+10. **DocumentShare** - Document sharing permissions
 
 ### Supported Enums
 - **Currency**: USD, EUR, GBP, INR, CAD, AUD, JPY, OTHER
@@ -318,6 +359,8 @@ GET /api/v1/trip-plans/{trip_plan_id}/expense-summary
 - **ExpenseCategory**: accommodation, transportation, food, activities, shopping_gifts, insurance, visas_fees, medical, communication, miscellaneous, other
 - **SplitMethod**: equal, exact, percentage, shares, paid_by
 - **PaymentMethod**: cash, card, digital_pay, bank_transfer, cheque, other
+- **DocumentCategory**: tickets, invoices, identity_proofs, medical, hotel_bookings, insurance, visas, receipts, itineraries, other
+- **StorageProvider**: digitalocean, s3, gcs, local, cloudflare
 
 ---
 
@@ -328,8 +371,9 @@ GET /api/v1/trip-plans/{trip_plan_id}/expense-summary
 3. **Add Destinations**: POST to `/trip-plans/{id}/hops`
 4. **Plan Daily Activities**: POST to `/trip-plans/{id}/days` and `/trip-days/{id}/activities`
 5. **Invite Travellers**: POST to `/trip-plans/{id}/travellers`
-6. **Track Expenses**: POST to `/trip-plans/{id}/expenses`
-7. **Manage via Admin**: Access `http://localhost:8080/admin`
+6. **Track Expenses**: POST to `/trip/{id}/expenses`
+7. **Upload Documents**: POST to `/trip/{id}/documents`
+8. **Manage via Admin**: Access `http://localhost:8080/admin`
 
 ## 🔄 Legacy Compatibility
 
