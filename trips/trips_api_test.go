@@ -18,7 +18,7 @@ import (
 func setupTestDB() {
 	// Set test environment
 	os.Setenv("APP_ENV", "test")
-	
+
 	// For now, skip actual database connection in tests
 	// This would require a real test database to be set up
 	// TODO: Set up proper test database or use in-memory database for tests
@@ -51,17 +51,17 @@ func int16Ptr(i int16) *int16 {
 func setupTestRouter() *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
-	
+
 	// Add middleware to set test user
 	router.Use(func(c *gin.Context) {
 		user := createTestUser()
 		c.Set("currentUser", user)
 		c.Next()
 	})
-	
+
 	v1 := router.Group("/api/v1")
 	RouterGroupCreateTrip(v1.Group("/trips"))
-	
+
 	return router
 }
 
@@ -144,7 +144,7 @@ func TestCreateTrip_MinimalData(t *testing.T) {
 	// var hopCount, stayCount int64
 	// core.DB.Model(&TripHop{}).Count(&hopCount)
 	// core.DB.Model(&Stay{}).Count(&stayCount)
-	
+
 	// if hopCount != 1 || stayCount != 1 {
 	// 	t.Error("Expected default hop and stay to be created even with minimal trip data")
 	// }
@@ -233,7 +233,7 @@ func TestCreateTrip_InvalidJSON(t *testing.T) {
 	router := setupTestRouter()
 
 	invalidJSON := `{"name": "Test Trip", "start_date": "invalid-date"}`
-	
+
 	req, _ := http.NewRequest("POST", "/api/v1/trips/create", bytes.NewBufferString(invalidJSON))
 	req.Header.Set("Content-Type", "application/json")
 
@@ -257,7 +257,7 @@ func TestCreateTrip_MalformedJSON(t *testing.T) {
 	router := setupTestRouter()
 
 	malformedJSON := `{"name": "Test Trip", "start_date":}`
-	
+
 	req, _ := http.NewRequest("POST", "/api/v1/trips/create", bytes.NewBufferString(malformedJSON))
 	req.Header.Set("Content-Type", "application/json")
 
@@ -286,7 +286,7 @@ func TestCreateTrip_EmptyBody(t *testing.T) {
 
 func TestCreateTrip_NoAuthUser(t *testing.T) {
 	setupTestDB()
-	
+
 	// Create router without auth middleware
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
@@ -339,7 +339,7 @@ func TestCreateTrip_LargeMinDays(t *testing.T) {
 	// TODO: Verify the conversion from int16 to int8 works when database is properly set up
 	// var trip TripPlan
 	// core.DB.First(&trip)
-	
+
 	// if trip.MinDays == nil {
 	// 	t.Error("Expected MinDays to be set")
 	// } else if *trip.MinDays != 127 { // int8 max value after truncation
