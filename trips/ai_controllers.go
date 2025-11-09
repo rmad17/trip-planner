@@ -245,7 +245,7 @@ func CreateTripFromAIGeneration(c *gin.Context) {
 
 		day := TripDay{
 			BaseModel:       core.BaseModel{ID: dayID},
-			Date:            dayDate,
+			Date:            core.Date{Time: dayDate},
 			DayNumber:       generatedDay.DayNumber,
 			Title:           &dayTitle,
 			DayType:         dayType,
