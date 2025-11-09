@@ -519,9 +519,16 @@ func CreateActivity(c *gin.Context) {
 	}
 	user := currentUser.(accounts.User)
 
+	// Parse trip plan ID to UUID
+	tripPlanUUID, err := uuid.Parse(tripPlanID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid trip plan ID"})
+		return
+	}
+
 	// Verify trip plan ownership
 	var tripPlan TripPlan
-	if err := core.DB.Where("id = ? AND user_id = ?", tripPlanID, user.BaseModel.ID).First(&tripPlan).Error; err != nil {
+	if err := core.DB.Where("id = ? AND user_id = ?", tripPlanUUID, user.BaseModel.ID).First(&tripPlan).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Trip plan not found"})
 		return
 	}
@@ -534,7 +541,7 @@ func CreateActivity(c *gin.Context) {
 
 	// Verify that the trip day belongs to the trip plan
 	var tripDay TripDay
-	if err := core.DB.Where("id = ? AND trip_plan = ?", activity.TripDay, tripPlanID).First(&tripDay).Error; err != nil {
+	if err := core.DB.Where("id = ? AND trip_plan = ?", activity.TripDay, tripPlanUUID).First(&tripDay).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid trip day for this trip plan"})
 		return
 	}
