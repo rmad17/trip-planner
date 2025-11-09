@@ -1,5 +1,15 @@
 # Date Field Migration Guide
 
+## IMPORTANT: Only TripDay.Date Needs Fixing
+
+**⚠️ CRITICAL:** Only the `TripDay.Date` field has changed to `core.Date`.
+
+**DO NOT change these fields** (they remain `*time.Time`):
+- ❌ `TripPlan.StartDate` and `TripPlan.EndDate`
+- ❌ `TripHop.StartDate` and `TripHop.EndDate`
+- ❌ `Stay.StartDate` and `Stay.EndDate`
+- ✅ **ONLY:** `TripDay.Date` needs wrapping in `core.Date{}`
+
 ## Problem
 
 The `TripDay.Date` field has been changed from `time.Time` to `core.Date` to support multiple date formats (both date-only and RFC3339).
@@ -122,12 +132,12 @@ tripDay.Date = core.Date{Time: parsedDate}  // CORRECT
 
 ## For ai_controllers.go Specifically
 
-Based on the error at line 248, you likely have code like:
+### ✅ Line 248 (TripDay.Date) - NEEDS FIXING
 
 **Current (line 248):**
 ```go
 tripDay := TripDay{
-    Date: dayDate,  // ← ERROR HERE
+    Date: dayDate,  // ← ERROR HERE - Must wrap in core.Date
     // ... other fields
 }
 ```
@@ -140,14 +150,31 @@ tripDay := TripDay{
 }
 ```
 
-## Quick Fix Script
+### ❌ Lines 126-127, 174-175 (TripHop dates) - DO NOT CHANGE
 
-If you have multiple files to fix, you can use this search pattern:
+These are `TripHop.StartDate` and `TripHop.EndDate` which remain `*time.Time`:
+
+```go
+// These are CORRECT as-is (no changes needed):
+tripHop := TripHop{
+    StartDate: startDate,  // ✅ CORRECT - TripHop uses *time.Time
+    EndDate:   endDate,    // ✅ CORRECT - TripHop uses *time.Time
+}
+```
+
+## Finding TripDay.Date Assignments
+
+To find TripDay.Date assignments that need fixing:
 
 ```bash
-# Find all potential issues (this is a heuristic, review each match)
-grep -rn "Date:\s*\(time\.\|.*Date\)" trips/ --include="*.go" | grep -v "core.Date"
+# Search specifically for TripDay struct creations
+grep -rn "TripDay{" trips/ --include="*.go" -A 10 | grep "Date:"
+
+# Or search for any Date field in trip_days files
+grep -rn "Date:" trips/*day* --include="*.go"
 ```
+
+**Remember:** Only fix if it's `TripDay.Date` - ignore `TripPlan.StartDate`, `TripHop.StartDate`, etc.
 
 ## Important Notes
 
