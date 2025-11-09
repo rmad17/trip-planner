@@ -1,8 +1,8 @@
 package core
 
 import (
-	"log"
 	"github.com/joho/godotenv"
+	"log"
 )
 
 func LoadEnvs() {

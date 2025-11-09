@@ -230,4 +230,3 @@ func DeleteTripDay(c *gin.Context) {
 	tx.Commit()
 	c.Status(http.StatusNoContent)
 }
-

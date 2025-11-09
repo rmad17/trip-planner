@@ -78,7 +78,7 @@ func GetDailyItinerary(c *gin.Context) {
 
 	// Organize the response
 	itinerary := make([]map[string]interface{}, 0)
-	
+
 	if len(tripDays) > 0 {
 		// Process trip days as usual
 		for _, day := range tripDays {
@@ -97,17 +97,17 @@ func GetDailyItinerary(c *gin.Context) {
 
 			dayItinerary := map[string]interface{}{
 				"day_number":       day.DayNumber,
-				"date":            day.Date.Format("2006-01-02"),
-				"title":           day.Title,
-				"day_type":        day.DayType,
-				"notes":           day.Notes,
-				"start_location":  day.StartLocation,
-				"end_location":    day.EndLocation,
+				"date":             day.Date.Time.Format("2006-01-02"),
+				"title":            day.Title,
+				"day_type":         day.DayType,
+				"notes":            day.Notes,
+				"start_location":   day.StartLocation,
+				"end_location":     day.EndLocation,
 				"estimated_budget": day.EstimatedBudget,
-				"actual_budget":   day.ActualBudget,
-				"weather":         day.Weather,
-				"activities":      activities,
-				"activity_count":  len(activities),
+				"actual_budget":    day.ActualBudget,
+				"weather":          day.Weather,
+				"activities":       activities,
+				"activity_count":   len(activities),
 			}
 
 			// If no activities exist for this day, include hop information for context
@@ -122,17 +122,17 @@ func GetDailyItinerary(c *gin.Context) {
 						}
 					}
 				}
-				
+
 				if associatedHop != nil {
 					dayItinerary["hop_info"] = map[string]interface{}{
-						"hop_id":           associatedHop.BaseModel.ID,
-						"hop_name":         associatedHop.Name,
-						"hop_description":  associatedHop.Description,
-						"city":             associatedHop.City,
-						"country":          associatedHop.Country,
-						"region":           associatedHop.Region,
-						"pois":             associatedHop.POIs,
-						"restaurants":      associatedHop.Restaurants,
+						"hop_id":             associatedHop.BaseModel.ID,
+						"hop_name":           associatedHop.Name,
+						"hop_description":    associatedHop.Description,
+						"city":               associatedHop.City,
+						"country":            associatedHop.Country,
+						"region":             associatedHop.Region,
+						"pois":               associatedHop.POIs,
+						"restaurants":        associatedHop.Restaurants,
 						"planned_activities": associatedHop.Activities,
 					}
 				}
@@ -159,7 +159,7 @@ func GetDailyItinerary(c *gin.Context) {
 		for i, hop := range tripHops {
 			var hopStartDate string
 			var hopEndDate string
-			
+
 			if hop.StartDate != nil {
 				hopStartDate = hop.StartDate.Format("2006-01-02")
 			}
@@ -168,30 +168,30 @@ func GetDailyItinerary(c *gin.Context) {
 			}
 
 			hopItinerary := map[string]interface{}{
-				"day_number":       i + 1, // Sequential numbering based on hop order
-				"date":            hopStartDate,
-				"end_date":        hopEndDate,
-				"title":           hop.Name,
-				"day_type":        "explore", // Default type when generating from hops
-				"notes":           hop.Notes,
-				"start_location":  hop.City,
-				"end_location":    hop.City,
-				"estimated_budget": hop.EstimatedBudget,
-				"actual_budget":   hop.ActualSpent,
-				"weather":         nil,
-				"activities":      []interface{}{}, // Empty activities array
-				"activity_count":  0,
-				"hop_id":          hop.BaseModel.ID,
-				"hop_name":        hop.Name,
-				"hop_description": hop.Description,
-				"city":            hop.City,
-				"country":         hop.Country,
-				"region":          hop.Region,
-				"pois":            hop.POIs,
-				"restaurants":     hop.Restaurants,
-				"planned_activities": hop.Activities,
+				"day_number":                    i + 1, // Sequential numbering based on hop order
+				"date":                          hopStartDate,
+				"end_date":                      hopEndDate,
+				"title":                         hop.Name,
+				"day_type":                      "explore", // Default type when generating from hops
+				"notes":                         hop.Notes,
+				"start_location":                hop.City,
+				"end_location":                  hop.City,
+				"estimated_budget":              hop.EstimatedBudget,
+				"actual_budget":                 hop.ActualSpent,
+				"weather":                       nil,
+				"activities":                    []interface{}{}, // Empty activities array
+				"activity_count":                0,
+				"hop_id":                        hop.BaseModel.ID,
+				"hop_name":                      hop.Name,
+				"hop_description":               hop.Description,
+				"city":                          hop.City,
+				"country":                       hop.Country,
+				"region":                        hop.Region,
+				"pois":                          hop.POIs,
+				"restaurants":                   hop.Restaurants,
+				"planned_activities":            hop.Activities,
 				"total_estimated_activity_cost": 0.0,
-				"total_actual_activity_cost":   0.0,
+				"total_actual_activity_cost":    0.0,
 			}
 
 			itinerary = append(itinerary, hopItinerary)
@@ -207,11 +207,11 @@ func GetDailyItinerary(c *gin.Context) {
 
 	// Add date range and data source information
 	if len(tripDays) > 0 {
-		summary["start_date"] = tripDays[0].Date.Format("2006-01-02")
-		summary["end_date"] = tripDays[len(tripDays)-1].Date.Format("2006-01-02")
+		summary["start_date"] = tripDays[0].Date.Time.Format("2006-01-02")
+		summary["end_date"] = tripDays[len(tripDays)-1].Date.Time.Format("2006-01-02")
 		summary["data_source"] = "trip_days"
 		summary["has_detailed_days"] = true
-		
+
 		// Count days with no activities
 		daysWithoutActivities := 0
 		for _, day := range tripDays {
@@ -234,7 +234,7 @@ func GetDailyItinerary(c *gin.Context) {
 		summary["data_source"] = "none"
 		summary["has_detailed_days"] = false
 	}
-	
+
 	// Always include hop information in summary
 	summary["total_hops"] = len(tripHops)
 
@@ -261,7 +261,7 @@ func GetDailyItinerary(c *gin.Context) {
 func GetDayItinerary(c *gin.Context) {
 	tripID := c.Param("id")
 	dayNumberParam := c.Param("day_number")
-	
+
 	currentUser, exists := c.Get("currentUser")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
@@ -319,22 +319,22 @@ func GetDayItinerary(c *gin.Context) {
 
 	response := gin.H{
 		"day_number":       tripDay.DayNumber,
-		"date":            tripDay.Date.Format("2006-01-02"),
-		"title":           tripDay.Title,
-		"day_type":        tripDay.DayType,
-		"notes":           tripDay.Notes,
-		"start_location":  tripDay.StartLocation,
-		"end_location":    tripDay.EndLocation,
+		"date":             tripDay.Date.Time.Format("2006-01-02"),
+		"title":            tripDay.Title,
+		"day_type":         tripDay.DayType,
+		"notes":            tripDay.Notes,
+		"start_location":   tripDay.StartLocation,
+		"end_location":     tripDay.EndLocation,
 		"estimated_budget": tripDay.EstimatedBudget,
-		"actual_budget":   tripDay.ActualBudget,
-		"weather":         tripDay.Weather,
-		"activities":      activities,
+		"actual_budget":    tripDay.ActualBudget,
+		"weather":          tripDay.Weather,
+		"activities":       activities,
 		"summary": gin.H{
-			"activity_count":              len(activities),
+			"activity_count":                len(activities),
 			"total_estimated_activity_cost": totalEstimated,
-			"total_actual_activity_cost":   totalActual,
-			"trip_id":                     tripID,
-			"trip_name":                   tripPlan.Name,
+			"total_actual_activity_cost":    totalActual,
+			"trip_id":                       tripID,
+			"trip_name":                     tripPlan.Name,
 		},
 	}
 

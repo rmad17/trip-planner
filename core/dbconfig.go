@@ -48,7 +48,7 @@ func GetDatabaseConfig() DatabaseConfig {
 // ConnectDB connects to the database using the appropriate configuration
 func ConnectDB() {
 	config := GetDatabaseConfig()
-	
+
 	var err error
 	DB, err = gorm.Open(postgres.Open(config.DSN), &gorm.Config{})
 
@@ -77,10 +77,10 @@ func ConnectTestDB() {
 	// Temporarily set environment to test
 	originalEnv := os.Getenv("APP_ENV")
 	os.Setenv("APP_ENV", "test")
-	
+
 	// Connect to test database
 	ConnectDB()
-	
+
 	// Restore original environment
 	if originalEnv == "" {
 		os.Unsetenv("APP_ENV")

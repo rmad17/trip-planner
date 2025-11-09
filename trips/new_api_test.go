@@ -13,19 +13,19 @@ import (
 func setupExtendedTestRouter() *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
-	
+
 	// Add middleware to set test user
 	router.Use(func(c *gin.Context) {
 		user := createTestUser()
 		c.Set("currentUser", user)
 		c.Next()
 	})
-	
+
 	v1 := router.Group("/api/v1")
 	RouterGroupTripPlans(v1.Group("/trip-plans"))
 	RouterGroupTripHops(v1.Group("/trip-hops"))
 	RouterGroupStays(v1.Group("/stays"))
-	
+
 	return router
 }
 
@@ -79,7 +79,7 @@ func TestGetDayItinerary_InvalidDayNumber(t *testing.T) {
 
 	tripID := uuid.New().String()
 	invalidDayNumber := "invalid"
-	
+
 	req, _ := http.NewRequest("GET", "/api/v1/trip-plans/"+tripID+"/itinerary/day/"+invalidDayNumber, nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -107,7 +107,7 @@ func TestStaysAPI_Unauthorized(t *testing.T) {
 	RouterGroupStays(v1.Group("/stays"))
 
 	tripHopID := uuid.New().String()
-	
+
 	req, _ := http.NewRequest("GET", "/api/v1/trip-hops/"+tripHopID+"/stays", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -132,7 +132,7 @@ func TestItineraryAPI_Unauthorized(t *testing.T) {
 	RouterGroupTripPlans(v1.Group("/trip-plans"))
 
 	tripID := uuid.New().String()
-	
+
 	req, _ := http.NewRequest("GET", "/api/v1/trip-plans/"+tripID+"/itinerary", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
