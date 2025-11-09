@@ -29,26 +29,26 @@ func SearchAutocomplete(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "MAPBOX_TOKEN environment variable is not set"})
 		return
 	}
-	
+
 	data := c.Request.URL.Query()
-	SearchText := data.Get("text")
-	
+	SearchText := data.Get("query")
+
 	if SearchText == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "text parameter is required"})
 		return
 	}
-	
+
 	pretty.Println("SearchText: ", SearchText)
 	pretty.Println("MapboxAPIKey set: ", MapboxAPIKey != "")
-	
+
 	SessionToken := uuid.Must(uuid.NewV4()).String()
 	response_data := make_http_request(MapboxApi{"GET", string(Autosuggest), SearchText, MapboxAPIKey, SessionToken, ""})
-	
+
 	if response_data == nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch data from Mapbox API"})
 		return
 	}
-	
+
 	var res MapboxAPIResponse
 	err := json.Unmarshal(response_data, &res)
 	if err != nil {
@@ -56,7 +56,7 @@ func SearchAutocomplete(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse API response"})
 		return
 	}
-	
+
 	pretty.Println("Response: ", res)
 	c.JSON(http.StatusOK, gin.H{"data": res})
 }
@@ -81,34 +81,34 @@ func PlaceRetrieve(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "MAPBOX_TOKEN environment variable is not set"})
 		return
 	}
-	
+
 	// Get the ID from URL path
 	placeID := c.Param("id")
 	if placeID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "place ID parameter is required"})
 		return
 	}
-	
+
 	// Get optional query parameters
 	data := c.Request.URL.Query()
 	language := data.Get("language")
 	if language == "" {
 		language = "en"
 	}
-	
+
 	pretty.Println("PlaceID: ", placeID)
 	pretty.Println("Language: ", language)
-	
+
 	SessionToken := uuid.Must(uuid.NewV4()).String()
-	
+
 	// Build the request - for retrieve endpoint, the ID goes in the URL path
 	response_data := make_http_request(MapboxApi{"GET", string(Retrieve), placeID, MapboxAPIKey, SessionToken, ""})
-	
+
 	if response_data == nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch data from Mapbox API"})
 		return
 	}
-	
+
 	var res RetrieveAPIResponse
 	err := json.Unmarshal(response_data, &res)
 	if err != nil {
@@ -116,7 +116,7 @@ func PlaceRetrieve(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse API response"})
 		return
 	}
-	
+
 	pretty.Println("Response: ", res)
 	c.JSON(http.StatusOK, gin.H{"data": res})
 }
