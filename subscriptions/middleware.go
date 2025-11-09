@@ -6,7 +6,6 @@ import (
 	"triplanner/featureflags"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 // Middleware provides subscription-based access control
