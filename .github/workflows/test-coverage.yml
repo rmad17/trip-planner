@@ -170,10 +170,10 @@ jobs:
           go mod verify
 
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v4
+        uses: golangci/golangci-lint-action@v6
         with:
-          version: latest
-          args: --timeout=5m --out-format=colored-line-number
+          version: v2
+          args: --timeout=5m
 
   build:
     name: Build Application
