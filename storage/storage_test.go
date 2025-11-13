@@ -131,7 +131,10 @@ func TestStorageManager_SetDefault(t *testing.T) {
 		err := sm.SetDefault("test")
 
 		assert.NoError(t, err)
-		assert.Equal(t, "test", sm.default)
+		// Verify by getting the default provider
+		defaultProvider, err := sm.GetDefaultProvider()
+		assert.NoError(t, err)
+		assert.Equal(t, "mock", defaultProvider.GetProvider())
 	})
 
 	t.Run("Set non-existent provider as default", func(t *testing.T) {

@@ -1,6 +1,8 @@
 package tables
 
 import (
+	"html/template"
+
 	"github.com/GoAdminGroup/go-admin/context"
 	"github.com/GoAdminGroup/go-admin/modules/db"
 	"github.com/GoAdminGroup/go-admin/plugins/admin/modules/table"
@@ -29,7 +31,7 @@ func GetContent(ctx *context.Context) (types.Panel, error) {
 	`
 
 	return types.Panel{
-		Content: types.HTML(col1),
+		Content: template.HTML(col1),
 		Title:   "Trip Planner Dashboard",
 		Description: "Administrative dashboard for the trip planning system",
 	}, nil
