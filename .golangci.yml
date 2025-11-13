@@ -1,0 +1,84 @@
+run:
+  timeout: 5m
+  tests: true
+  allow-parallel-runners: true
+
+linters:
+  enable:
+    - errcheck      # Check for unchecked errors
+    - gosimple      # Simplify code
+    - govet         # Reports suspicious constructs
+    - ineffassign   # Detect ineffectual assignments
+    - staticcheck   # Advanced static analysis
+    - unused        # Check for unused code
+    - gofmt         # Check if code is formatted
+    - goimports     # Check if imports are formatted
+    - misspell      # Check for misspelled words
+    - revive        # Fast, configurable, extensible linter
+    - typecheck     # Type check Go code
+
+linters-settings:
+  errcheck:
+    check-type-assertions: false
+    check-blank: false
+
+  govet:
+    check-shadowing: false
+    enable-all: false
+
+  gofmt:
+    simplify: true
+
+  revive:
+    confidence: 0.8
+    rules:
+      - name: blank-imports
+      - name: context-as-argument
+      - name: dot-imports
+      - name: error-return
+      - name: error-strings
+      - name: error-naming
+      - name: exported
+      - name: if-return
+      - name: increment-decrement
+      - name: var-naming
+      - name: package-comments
+      - name: range
+      - name: receiver-naming
+      - name: indent-error-flow
+      - name: superfluous-else
+      - name: modifies-parameter
+      - name: unreachable-code
+
+issues:
+  exclude-use-default: false
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+  exclude-rules:
+    # Exclude some linters from running on tests files
+    - path: _test\.go
+      linters:
+        - errcheck
+        - revive
+
+    # Exclude known false positives
+    - text: "Error return value of .((os\\.)?std(out|err)\\..*|.*Close|.*Flush|os\\.Remove(All)?|.*printf?|os\\.(Un)?Setenv). is not checked"
+      linters:
+        - errcheck
+
+    # Exclude shadow checking on err variable
+    - text: "shadow: declaration of \"err\""
+      linters:
+        - govet
+
+    # Exclude some revive rules for generated code
+    - path: docs/
+      linters:
+        - revive
+        - gofmt
+        - goimports
+
+    # Allow underscore in generated swagger code
+    - path: docs/swagger.go
+      text: "don't use underscores in Go names"
