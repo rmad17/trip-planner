@@ -21,14 +21,14 @@ func SimpleSetupGoAdmin(r *gin.Engine) {
 	adminConfig := config.Config{
 		Databases: config.DatabaseList{
 			"default": {
-				Host:       "localhost",
-				Port:       "5432",
-				User:       "postgres",
-				Pwd:        "postgres",
-				Name:       "trip",
-				MaxIdleCon: 50,
-				MaxOpenCon: 150,
-				Driver:     "postgres",
+				Host:         "localhost",
+				Port:         "5432",
+				User:         "postgres",
+				Pwd:          "postgres",
+				Name:         "trip",
+				MaxIdleConns: 50,
+				MaxOpenConns: 150,
+				Driver:       "postgres",
 			},
 		},
 		UrlPrefix: "admin",

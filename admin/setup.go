@@ -23,14 +23,14 @@ func SetupGoAdmin(r *gin.Engine) {
 	adminConfig := config.Config{
 		Databases: config.DatabaseList{
 			"default": {
-				Host:       os.Getenv("DB_HOST"),
-				Port:       os.Getenv("DB_PORT"),
-				User:       os.Getenv("DB_USER"),
-				Pwd:        os.Getenv("DB_PASSWORD"),
-				Name:       os.Getenv("DB_NAME"),
-				MaxIdleCon: 50,
-				MaxOpenCon: 150,
-				Driver:     "postgres",
+				Host:         os.Getenv("DB_HOST"),
+				Port:         os.Getenv("DB_PORT"),
+				User:         os.Getenv("DB_USER"),
+				Pwd:          os.Getenv("DB_PASSWORD"),
+				Name:         os.Getenv("DB_NAME"),
+				MaxIdleConns: 50,
+				MaxOpenConns: 150,
+				Driver:       "postgres",
 			},
 		},
 		UrlPrefix: "admin",
