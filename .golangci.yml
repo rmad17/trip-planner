@@ -14,9 +14,6 @@ linters:
     - unused        # Check for unused code
     - misspell      # Check for misspelled words
     - revive        # Fast, configurable, extensible linter
-
-formatters:
-  enable:
     - gofmt         # Check if code is formatted
     - goimports     # Check if imports are formatted
 
@@ -75,7 +72,6 @@ issues:
     - path: docs/
       linters:
         - revive
-      formatters:
         - gofmt
         - goimports
 
