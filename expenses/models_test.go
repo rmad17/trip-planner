@@ -3,7 +3,6 @@ package expenses
 import (
 	"testing"
 	"time"
-	"triplanner/core"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -583,7 +582,6 @@ func TestCalculateNetSettlements(t *testing.T) {
 	tripID := uuid.New()
 	user1 := uuid.New()
 	user2 := uuid.New()
-	user3 := uuid.New()
 
 	tests := []struct {
 		name      string
