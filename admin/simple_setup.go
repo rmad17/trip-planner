@@ -4,6 +4,8 @@ import (
 	"os"
 
 	"github.com/GoAdminGroup/go-admin/engine"
+	"github.com/GoAdminGroup/go-admin/modules/config"
+	"github.com/GoAdminGroup/go-admin/modules/language"
 	"github.com/GoAdminGroup/go-admin/template"
 	"github.com/GoAdminGroup/go-admin/template/chartjs"
 	"github.com/GoAdminGroup/themes/adminlte"
@@ -16,8 +18,8 @@ import (
 func SimpleSetupGoAdmin(r *gin.Engine) {
 	eng := engine.Default()
 
-	adminConfig := engine.Config{
-		Databases: engine.DatabaseList{
+	adminConfig := config.Config{
+		Databases: config.DatabaseList{
 			"default": {
 				Host:       "localhost",
 				Port:       "5432",
@@ -30,11 +32,11 @@ func SimpleSetupGoAdmin(r *gin.Engine) {
 			},
 		},
 		UrlPrefix: "admin",
-		Store: engine.Store{
+		Store: config.Store{
 			Path:   "./uploads",
 			Prefix: "uploads",
 		},
-		Language:    engine.EN,
+		Language:    language.EN,
 		IndexUrl:    "/",
 		LoginUrl:    "/login",
 		Debug:       os.Getenv("APP_ENV") == "development",
