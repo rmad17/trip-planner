@@ -44,10 +44,6 @@ jobs:
           go mod download
           go mod verify
 
-      - name: Install test dependencies
-        run: |
-          go install github.com/stretchr/testify@latest
-
       - name: Set up test environment
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/triplanner_test?sslmode=disable
