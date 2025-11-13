@@ -42,6 +42,7 @@ jobs:
       - name: Install dependencies
         run: |
           go mod download
+          go mod tidy
           go mod verify
 
       - name: Set up test environment
@@ -165,6 +166,7 @@ jobs:
       - name: Install dependencies
         run: |
           go mod download
+          go mod tidy
           go mod verify
 
       - name: Run golangci-lint
