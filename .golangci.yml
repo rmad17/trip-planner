@@ -1,3 +1,5 @@
+version: "2"
+
 run:
   timeout: 5m
   tests: true
@@ -6,16 +8,17 @@ run:
 linters:
   enable:
     - errcheck      # Check for unchecked errors
-    - gosimple      # Simplify code
     - govet         # Reports suspicious constructs
     - ineffassign   # Detect ineffectual assignments
-    - staticcheck   # Advanced static analysis
+    - staticcheck   # Advanced static analysis (includes gosimple)
     - unused        # Check for unused code
-    - gofmt         # Check if code is formatted
-    - goimports     # Check if imports are formatted
     - misspell      # Check for misspelled words
     - revive        # Fast, configurable, extensible linter
-    - typecheck     # Type check Go code
+
+formatters:
+  enable:
+    - gofmt         # Check if code is formatted
+    - goimports     # Check if imports are formatted
 
 linters-settings:
   errcheck:
@@ -23,11 +26,7 @@ linters-settings:
     check-blank: false
 
   govet:
-    check-shadowing: false
     enable-all: false
-
-  gofmt:
-    simplify: true
 
   revive:
     confidence: 0.8
@@ -51,7 +50,7 @@ linters-settings:
       - name: unreachable-code
 
 issues:
-  exclude-use-default: false
+  exclude-use-default: true
   max-issues-per-linter: 0
   max-same-issues: 0
 
@@ -76,6 +75,7 @@ issues:
     - path: docs/
       linters:
         - revive
+      formatters:
         - gofmt
         - goimports
 
