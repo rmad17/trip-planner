@@ -1,5 +1,10 @@
 # Travel Management App - Backend API
 
+[![Test and Coverage](https://github.com/rmad17/trip-planner/actions/workflows/test-coverage.yml/badge.svg)](https://github.com/rmad17/trip-planner/actions/workflows/test-coverage.yml)
+[![codecov](https://codecov.io/gh/rmad17/trip-planner/branch/main/graph/badge.svg)](https://codecov.io/gh/rmad17/trip-planner)
+[![Go Report Card](https://goreportcard.com/badge/github.com/rmad17/trip-planner)](https://goreportcard.com/report/github.com/rmad17/trip-planner)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A robust backend API for a travel management application built with Go, Gin, GORM, PostgreSQL, and Atlas migrations.
 
 ## 🚀 Features
@@ -179,6 +184,59 @@ atlas migrate validate --env local
 # Inspect current schema
 atlas schema inspect --env local
 ```
+
+## 🧪 Testing
+
+This project has comprehensive unit and integration test coverage across all modules.
+
+### Running Tests
+
+```bash
+# Run all tests
+go test ./...
+
+# Run tests with verbose output
+go test -v ./...
+
+# Run tests with coverage
+go test -cover ./...
+
+# Generate detailed coverage report
+go test -coverprofile=coverage.out ./...
+go tool cover -html=coverage.out -o coverage.html
+
+# Run tests with race detection
+go test -race ./...
+```
+
+### Test Coverage by Module
+
+The project includes comprehensive tests for:
+- **accounts/** - User authentication, JWT middleware, models
+- **expenses/** - Expense models, split calculations, settlements
+- **documents/** - Document management, storage providers
+- **places/** - Mapbox API integration, place data structures
+- **storage/** - Storage provider interface, multi-provider management
+- **trips/** - Trip planning, activities, itineraries
+- **core/** - Base models, date types, helper functions
+- **subscriptions/** - Subscription tiers, limits, usage tracking
+- **featureflags/** - Feature flag evaluation and management
+
+### Coverage Reports
+
+Coverage reports are automatically generated on every pull request and can be viewed:
+- In the [GitHub Actions](https://github.com/rmad17/trip-planner/actions) tab
+- On [Codecov](https://codecov.io/gh/rmad17/trip-planner)
+- As PR comments with detailed coverage breakdown
+
+### Continuous Integration
+
+Every pull request to `main` triggers automated tests:
+- ✅ Unit tests across all modules
+- ✅ Integration tests with PostgreSQL
+- ✅ Code coverage analysis
+- ✅ Race condition detection
+- ✅ Code linting with golangci-lint
 
 ## 📚 API Documentation
 
