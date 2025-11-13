@@ -9,19 +9,42 @@ import (
 	"testing"
 	"time"
 	"triplanner/accounts"
+	"triplanner/core"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/lib/pq"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
-func setupTestDB() {
+func setupTestDB(t *testing.T) {
 	// Set test environment
 	os.Setenv("APP_ENV", "test")
 
-	// For now, skip actual database connection in tests
-	// This would require a real test database to be set up
-	// TODO: Set up proper test database or use in-memory database for tests
+	// Set up in-memory SQLite database for testing
+	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+	if err != nil {
+		t.Fatalf("Failed to connect to test database: %v", err)
+	}
+
+	// Auto migrate all necessary models
+	err = db.AutoMigrate(
+		&accounts.User{},
+		&accounts.UserPreferences{},
+		&TripPlan{},
+		&TripHop{},
+		&Stay{},
+		&TripDay{},
+		&Activity{},
+		&Traveller{},
+	)
+	if err != nil {
+		t.Fatalf("Failed to migrate test database: %v", err)
+	}
+
+	// Set the global DB to our test database
+	core.DB = db
 }
 
 func createTestUser() accounts.User {
@@ -68,7 +91,7 @@ func setupTestRouter() *gin.Engine {
 // Positive Test Cases
 
 func TestCreateTrip_Success(t *testing.T) {
-	setupTestDB()
+	setupTestDB(t)
 	router := setupTestRouter()
 
 	tripRequest := CreateTripRequest{
@@ -122,7 +145,7 @@ func TestCreateTrip_Success(t *testing.T) {
 }
 
 func TestCreateTrip_MinimalData(t *testing.T) {
-	setupTestDB()
+	setupTestDB(t)
 	router := setupTestRouter()
 
 	tripRequest := CreateTripRequest{
@@ -151,7 +174,7 @@ func TestCreateTrip_MinimalData(t *testing.T) {
 }
 
 func TestCreateTrip_WithAllFields(t *testing.T) {
-	setupTestDB()
+	setupTestDB(t)
 	router := setupTestRouter()
 
 	tripRequest := CreateTripRequest{
@@ -191,7 +214,7 @@ func TestCreateTrip_WithAllFields(t *testing.T) {
 // Negative Test Cases
 
 func TestCreateTrip_MissingName(t *testing.T) {
-	setupTestDB()
+	setupTestDB(t)
 	router := setupTestRouter()
 
 	tripRequest := CreateTripRequest{
@@ -229,7 +252,7 @@ func TestCreateTrip_MissingName(t *testing.T) {
 }
 
 func TestCreateTrip_InvalidJSON(t *testing.T) {
-	setupTestDB()
+	setupTestDB(t)
 	router := setupTestRouter()
 
 	invalidJSON := `{"name": "Test Trip", "start_date": "invalid-date"}`
@@ -253,7 +276,7 @@ func TestCreateTrip_InvalidJSON(t *testing.T) {
 }
 
 func TestCreateTrip_MalformedJSON(t *testing.T) {
-	setupTestDB()
+	setupTestDB(t)
 	router := setupTestRouter()
 
 	malformedJSON := `{"name": "Test Trip", "start_date":}`
@@ -270,7 +293,7 @@ func TestCreateTrip_MalformedJSON(t *testing.T) {
 }
 
 func TestCreateTrip_EmptyBody(t *testing.T) {
-	setupTestDB()
+	setupTestDB(t)
 	router := setupTestRouter()
 
 	req, _ := http.NewRequest("POST", "/api/v1/trips/create", bytes.NewBuffer([]byte{}))
@@ -285,7 +308,7 @@ func TestCreateTrip_EmptyBody(t *testing.T) {
 }
 
 func TestCreateTrip_NoAuthUser(t *testing.T) {
-	setupTestDB()
+	setupTestDB(t)
 
 	// Create router without auth middleware
 	gin.SetMode(gin.TestMode)
@@ -317,7 +340,7 @@ func TestCreateTrip_NoAuthUser(t *testing.T) {
 }
 
 func TestCreateTrip_LargeMinDays(t *testing.T) {
-	setupTestDB()
+	setupTestDB(t)
 	router := setupTestRouter()
 
 	tripRequest := CreateTripRequest{
