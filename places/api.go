@@ -57,7 +57,7 @@ func SearchAutocomplete(c *gin.Context) {
 		return
 	}
 
-	pretty.Println("Response: ", res)
+	_, _ = pretty.Println("Response: ", res)
 	c.JSON(http.StatusOK, gin.H{"data": res})
 }
 
@@ -96,8 +96,8 @@ func PlaceRetrieve(c *gin.Context) {
 		language = "en"
 	}
 
-	pretty.Println("PlaceID: ", placeID)
-	pretty.Println("Language: ", language)
+	_, _ = pretty.Println("PlaceID: ", placeID)
+	_, _ = pretty.Println("Language: ", language)
 
 	SessionToken := uuid.Must(uuid.NewV4()).String()
 

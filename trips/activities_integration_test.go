@@ -207,7 +207,9 @@ func TestCreateActivity_WithValidUUIDConversion(t *testing.T) {
 	}
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
 
 	if response["trip_plan_uuid"] != tripPlanID.String() {
 		t.Error("Trip plan UUID not correctly converted")
