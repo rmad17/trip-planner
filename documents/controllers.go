@@ -29,13 +29,13 @@ type DocumentUploadRequest struct {
 
 // DocumentUpdateRequest represents the request structure for updating a document
 type DocumentUpdateRequest struct {
-	Name        *string          `json:"name" example:"Flight Ticket Updated" description:"Display name of the document"`
+	Name        *string           `json:"name" example:"Flight Ticket Updated" description:"Display name of the document"`
 	Category    *DocumentCategory `json:"category" example:"tickets" description:"Document category"`
-	Description *string          `json:"description" example:"Updated description" description:"Optional description"`
-	Notes       *string          `json:"notes" example:"Updated notes" description:"Optional user notes"`
-	Tags        []string         `json:"tags" example:"flight,business-class" description:"Optional tags for organization"`
-	ExpiresAt   *time.Time       `json:"expires_at" example:"2024-12-31T23:59:59Z" description:"Optional expiration date"`
-	IsPublic    *bool            `json:"is_public" example:"false" description:"Whether the document is publicly accessible"`
+	Description *string           `json:"description" example:"Updated description" description:"Optional description"`
+	Notes       *string           `json:"notes" example:"Updated notes" description:"Optional user notes"`
+	Tags        []string          `json:"tags" example:"flight,business-class" description:"Optional tags for organization"`
+	ExpiresAt   *time.Time        `json:"expires_at" example:"2024-12-31T23:59:59Z" description:"Optional expiration date"`
+	IsPublic    *bool             `json:"is_public" example:"false" description:"Whether the document is publicly accessible"`
 }
 
 // GetDocuments godoc
@@ -55,14 +55,14 @@ type DocumentUpdateRequest struct {
 // @Router /trip/{id}/documents [get]
 func GetDocuments(c *gin.Context) {
 	tripPlanIDStr := c.Param("id")
-	
+
 	// Validate UUID format
 	tripPlanID, err := uuid.Parse(tripPlanIDStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid trip plan ID format"})
 		return
 	}
-	
+
 	currentUser, exists := c.Get("currentUser")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
@@ -149,14 +149,14 @@ func GetDocuments(c *gin.Context) {
 // @Router /trip/{id}/documents [post]
 func UploadDocument(c *gin.Context) {
 	tripPlanIDStr := c.Param("id")
-	
+
 	// Validate UUID format
 	tripPlanID, err := uuid.Parse(tripPlanIDStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid trip plan ID format"})
 		return
 	}
-	
+
 	currentUser, exists := c.Get("currentUser")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})

@@ -180,7 +180,7 @@ func TestCreateActivity_WithValidUUIDConversion(t *testing.T) {
 		// In real code: WHERE id = ? AND trip_plan = ?, activity.TripDay, tripPlanUUID
 
 		c.JSON(http.StatusCreated, gin.H{
-			"activity": activity,
+			"activity":       activity,
 			"trip_plan_uuid": tripPlanUUID.String(),
 			"trip_plan_type": "uuid.UUID",
 		})

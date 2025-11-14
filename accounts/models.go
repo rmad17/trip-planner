@@ -2,7 +2,7 @@ package accounts
 
 import (
 	"triplanner/core"
-	
+
 	"github.com/google/uuid"
 )
 

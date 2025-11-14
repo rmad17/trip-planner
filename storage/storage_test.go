@@ -11,12 +11,12 @@ import (
 
 // MockStorageProvider is a mock implementation of StorageProvider for testing
 type MockStorageProvider struct {
-	uploadFunc      func(key string, file io.Reader, contentType string) (*UploadResult, error)
-	downloadFunc    func(key string) (io.ReadCloser, error)
-	deleteFunc      func(key string) error
-	getURLFunc      func(key string, expiry time.Duration) (string, error)
+	uploadFunc       func(key string, file io.Reader, contentType string) (*UploadResult, error)
+	downloadFunc     func(key string) (io.ReadCloser, error)
+	deleteFunc       func(key string) error
+	getURLFunc       func(key string, expiry time.Duration) (string, error)
 	getPublicURLFunc func(key string) string
-	provider        string
+	provider         string
 }
 
 func (m *MockStorageProvider) Upload(key string, file io.Reader, contentType string) (*UploadResult, error) {

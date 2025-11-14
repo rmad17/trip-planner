@@ -20,21 +20,21 @@ func NewStorageManager() *StorageManager {
 // NewStorageManagerWithDefaults creates a new storage manager with local storage as default
 func NewStorageManagerWithDefaults() *StorageManager {
 	sm := NewStorageManager()
-	
+
 	// Set up local storage as default
 	localProvider, err := NewLocalStorageProvider(LocalStorageConfig{
 		BasePath:   "./uploads",
 		BaseURL:    "/uploads",
 		CreatePath: true,
 	})
-	
+
 	if err == nil {
 		sm.RegisterProvider("local", localProvider)
 		if err := sm.SetDefault("local"); err != nil {
 			return nil
 		}
 	}
-	
+
 	return sm
 }
 

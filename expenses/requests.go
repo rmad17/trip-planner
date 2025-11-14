@@ -23,15 +23,15 @@ type ExpenseCreateRequest struct {
 	Notes         *string         `json:"notes"`
 	Tags          []string        `json:"tags"`
 	IsRecurring   bool            `json:"is_recurring"`
-	
+
 	// Entity Relationships - expense can be linked to trip, hop, day, or activity
 	TripHop  *uuid.UUID `json:"trip_hop"`
 	TripDay  *uuid.UUID `json:"trip_day"`
 	Activity *uuid.UUID `json:"activity"`
-	
+
 	// Who paid
 	PaidBy uuid.UUID `json:"paid_by" binding:"required"`
-	
+
 	// Splits (optional - if not provided, will auto-split based on split_method)
 	Splits []ExpenseSplitRequest `json:"splits"`
 }
@@ -67,12 +67,12 @@ type ExpenseSplitRequest struct {
 
 // ExpenseSplitUpdateRequest represents updating an expense split
 type ExpenseSplitUpdateRequest struct {
-	Amount     *float64 `json:"amount" binding:"omitempty,gt=0"`
-	Percentage *float64 `json:"percentage" binding:"omitempty,gte=0,lte=100"`
-	Shares     *int     `json:"shares" binding:"omitempty,gt=0"`
-	IsPaid     *bool    `json:"is_paid"`
+	Amount     *float64   `json:"amount" binding:"omitempty,gt=0"`
+	Percentage *float64   `json:"percentage" binding:"omitempty,gte=0,lte=100"`
+	Shares     *int       `json:"shares" binding:"omitempty,gt=0"`
+	IsPaid     *bool      `json:"is_paid"`
 	PaidAt     *time.Time `json:"paid_at"`
-	Notes      *string  `json:"notes"`
+	Notes      *string    `json:"notes"`
 }
 
 // ExpenseSettlementRequest represents creating a settlement
@@ -87,13 +87,13 @@ type ExpenseSettlementRequest struct {
 
 // ExpenseSummaryResponse represents expense summary for a trip
 type ExpenseSummaryResponse struct {
-	TripPlan       uuid.UUID            `json:"trip_plan"`
-	TotalExpenses  float64              `json:"total_expenses"`
-	Currency       string               `json:"currency"`
-	ExpenseCount   int64                `json:"expense_count"`
-	CategoryTotals map[string]float64   `json:"category_totals"`
-	TravellerTotals map[string]TravellerExpenseSummary `json:"traveller_totals"`
-	PendingSettlements []SettlementSummary `json:"pending_settlements"`
+	TripPlan           uuid.UUID                          `json:"trip_plan"`
+	TotalExpenses      float64                            `json:"total_expenses"`
+	Currency           string                             `json:"currency"`
+	ExpenseCount       int64                              `json:"expense_count"`
+	CategoryTotals     map[string]float64                 `json:"category_totals"`
+	TravellerTotals    map[string]TravellerExpenseSummary `json:"traveller_totals"`
+	PendingSettlements []SettlementSummary                `json:"pending_settlements"`
 }
 
 // TravellerExpenseSummary represents expense summary for a traveller

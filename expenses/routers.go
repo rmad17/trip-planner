@@ -26,4 +26,3 @@ func RouterGroupExpenseSplits(router *gin.RouterGroup) {
 	router.PUT("/:id", UpdateExpenseSplit)       // PUT /expense-splits/:id
 	router.POST("/:id/mark-paid", MarkSplitPaid) // POST /expense-splits/:id/mark-paid
 }
-

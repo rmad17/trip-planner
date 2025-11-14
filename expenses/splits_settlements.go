@@ -40,7 +40,7 @@ func UpdateExpenseSplit(c *gin.Context) {
 	result := core.DB.Joins("JOIN expenses ON expense_splits.expense = expenses.id").
 		Joins("JOIN trip_plans ON expenses.trip_plan = trip_plans.id").
 		Joins("JOIN travellers ON expense_splits.traveller = travellers.id").
-		Where("expense_splits.id = ? AND (trip_plans.user_id = ? OR travellers.user_id = ?)", 
+		Where("expense_splits.id = ? AND (trip_plans.user_id = ? OR travellers.user_id = ?)",
 			id, user.BaseModel.ID, user.BaseModel.ID).
 		First(&expenseSplit)
 
@@ -150,14 +150,14 @@ func MarkSplitPaid(c *gin.Context) {
 // @Router /trip/{id}/settlements [get]
 func GetSettlements(c *gin.Context) {
 	tripPlanIDStr := c.Param("id")
-	
+
 	// Validate UUID format
 	tripPlanID, err := uuid.Parse(tripPlanIDStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid trip plan ID format"})
 		return
 	}
-	
+
 	currentUser, exists := c.Get("currentUser")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
@@ -209,14 +209,14 @@ func GetSettlements(c *gin.Context) {
 // @Router /trip/{id}/settlements [post]
 func CreateSettlement(c *gin.Context) {
 	tripPlanIDStr := c.Param("id")
-	
+
 	// Validate UUID format
 	tripPlanID, err := uuid.Parse(tripPlanIDStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid trip plan ID format"})
 		return
 	}
-	
+
 	currentUser, exists := c.Get("currentUser")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
@@ -250,9 +250,9 @@ func CreateSettlement(c *gin.Context) {
 
 	// Validate that both travellers exist and are part of this trip
 	var fromExists, toExists bool
-	core.DB.Table("travellers").Where("id = ? AND trip_plan = ? AND is_active = ?", 
+	core.DB.Table("travellers").Where("id = ? AND trip_plan = ? AND is_active = ?",
 		settlementReq.FromTraveller, tripPlanID, true).Select("id").Scan(&fromExists)
-	core.DB.Table("travellers").Where("id = ? AND trip_plan = ? AND is_active = ?", 
+	core.DB.Table("travellers").Where("id = ? AND trip_plan = ? AND is_active = ?",
 		settlementReq.ToTraveller, tripPlanID, true).Select("id").Scan(&toExists)
 
 	if !fromExists || !toExists {
@@ -302,14 +302,14 @@ func CreateSettlement(c *gin.Context) {
 // @Router /trip/{id}/expense-summary [get]
 func GetExpenseSummary(c *gin.Context) {
 	tripPlanIDStr := c.Param("id")
-	
+
 	// Validate UUID format
 	tripPlanID, err := uuid.Parse(tripPlanIDStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid trip plan ID format"})
 		return
 	}
-	
+
 	currentUser, exists := c.Get("currentUser")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
@@ -319,7 +319,10 @@ func GetExpenseSummary(c *gin.Context) {
 
 	// Verify access
 	var hasAccess bool
-	var tripPlan struct{ ID uuid.UUID; Currency string }
+	var tripPlan struct {
+		ID       uuid.UUID
+		Currency string
+	}
 	result := core.DB.Table("trip_plans").Select("id, currency").Where("id = ? AND user_id = ?", tripPlanID, user.BaseModel.ID).First(&tripPlan)
 	if result.Error == nil {
 		hasAccess = true
@@ -368,7 +371,7 @@ func GetExpenseSummary(c *gin.Context) {
 		TotalPaid     float64
 		TotalOwed     float64
 	}
-	
+
 	core.DB.Raw(`
 		SELECT 
 			t.id as traveller_id,
