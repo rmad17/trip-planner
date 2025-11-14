@@ -89,7 +89,9 @@ func TestGetDayItinerary_InvalidDayNumber(t *testing.T) {
 	}
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
 
 	if response["error"] != "Invalid day number" {
 		t.Errorf("Expected 'Invalid day number' error, got %v", response["error"])
@@ -117,7 +119,9 @@ func TestStaysAPI_Unauthorized(t *testing.T) {
 	}
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
 
 	if response["error"] != "User not found" {
 		t.Errorf("Expected 'User not found' error, got %v", response["error"])

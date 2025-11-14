@@ -130,7 +130,9 @@ func TestCreateTrip_Success(t *testing.T) {
 	}
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
 
 	trip, exists := response["trip"]
 	if !exists {
@@ -215,7 +217,9 @@ func TestCreateTrip_WithAllFields(t *testing.T) {
 	}
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
 
 	tripData := response["trip"].(map[string]interface{})
 	if tripData["travel_mode"] != "car" {
@@ -250,7 +254,9 @@ func TestCreateTrip_MissingName(t *testing.T) {
 	}
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
 
 	if _, exists := response["error"]; !exists {
 		t.Error("Expected 'error' field in response for missing required field")
@@ -285,7 +291,9 @@ func TestCreateTrip_InvalidJSON(t *testing.T) {
 	}
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
 
 	if _, exists := response["error"]; !exists {
 		t.Error("Expected 'error' field in response for invalid JSON")
@@ -352,7 +360,9 @@ func TestCreateTrip_NoAuthUser(t *testing.T) {
 	}
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
 
 	if response["error"] != "User not found" {
 		t.Errorf("Expected 'User not found' error, got %v", response["error"])

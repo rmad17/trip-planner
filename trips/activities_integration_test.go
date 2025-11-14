@@ -356,7 +356,9 @@ func TestCreateActivity_CompleteFlow_MockDB(t *testing.T) {
 	}
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
 
 	activityData, ok := response["activity"].(map[string]interface{})
 	if !ok {
@@ -450,7 +452,9 @@ func TestCreateActivity_WrongTripDay_MockDB(t *testing.T) {
 	}
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
 
 	if response["error"] != "Invalid trip day for this trip plan" {
 		t.Errorf("Expected specific error message, got %v", response["error"])
