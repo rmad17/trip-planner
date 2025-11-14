@@ -248,7 +248,7 @@ func CreateExpense(c *gin.Context) {
 	if len(expenseReq.Splits) > 0 {
 		for _, splitReq := range expenseReq.Splits {
 			split := ExpenseSplit{
-				Expense:    expense.BaseModel.ID,
+				Expense:    expense.ID,
 				Traveller:  splitReq.Traveller,
 				Amount:     splitReq.Amount,
 				Percentage: splitReq.Percentage,
@@ -273,7 +273,7 @@ func CreateExpense(c *gin.Context) {
 			amountPerPerson := expense.Amount / float64(len(travellers))
 			for _, traveller := range travellers {
 				split := ExpenseSplit{
-					Expense:   expense.BaseModel.ID,
+					Expense:   expense.ID,
 					Traveller: traveller.ID,
 					Amount:    amountPerPerson,
 					IsPaid:    traveller.ID == expense.PaidBy, // Mark as paid if they paid
@@ -290,7 +290,7 @@ func CreateExpense(c *gin.Context) {
 	tx.Commit()
 
 	// Reload expense with splits
-	core.DB.Preload("ExpenseSplits").First(&expense, expense.BaseModel.ID)
+	core.DB.Preload("ExpenseSplits").First(&expense, expense.ID)
 
 	c.JSON(http.StatusCreated, gin.H{"expense": expense})
 }
@@ -362,7 +362,7 @@ func UpdateExpense(c *gin.Context) {
 	}
 
 	// Reload with splits
-	core.DB.Preload("ExpenseSplits").First(&expense, expense.BaseModel.ID)
+	core.DB.Preload("ExpenseSplits").First(&expense, expense.ID)
 
 	c.JSON(http.StatusOK, gin.H{"expense": expense})
 }

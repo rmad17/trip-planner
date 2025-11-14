@@ -20,7 +20,9 @@ import (
 
 func setupTestDB(t *testing.T) {
 	// Set test environment
-	os.Setenv("APP_ENV", "test")
+	if err := os.Setenv("APP_ENV", "test"); err != nil {
+		t.Fatalf("Failed to set APP_ENV: %v", err)
+	}
 
 	// Set up in-memory SQLite database for testing
 	// Use Config to disable foreign key constraints which helps with migrations
@@ -62,7 +64,7 @@ func createTestUser() accounts.User {
 		Username: "testuser",
 		Password: "testpassword",
 	}
-	user.BaseModel.ID = uuid.New()
+	user.ID = uuid.New()
 	// TODO: Create user in test database when database is properly set up
 	// core.DB.Create(&user)
 	return user

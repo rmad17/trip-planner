@@ -376,8 +376,10 @@ func TestCheckAuth_ContextPropagation(t *testing.T) {
 	// Setup
 	db := setupMiddlewareTestDB(t)
 	core.DB = db
-	os.Setenv("SECRET", "test-secret-key")
-	defer os.Unsetenv("SECRET")
+	if err := os.Setenv("SECRET", "test-secret-key"); err != nil {
+		t.Fatalf("Failed to set SECRET: %v", err)
+	}
+	defer func() { _ = os.Unsetenv("SECRET") }()
 
 	// Create test user
 	testUser := User{

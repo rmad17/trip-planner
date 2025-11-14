@@ -47,7 +47,7 @@ func CreateTrip(c *gin.Context) {
 		Notes:      newTrip.Notes,
 		Hotels:     newTrip.Hotels,
 		Tags:       newTrip.Tags,
-		UserID:     user.BaseModel.ID,
+		UserID:     user.ID,
 	}
 
 	// Handle MinDays conversion if provided
@@ -66,7 +66,7 @@ func CreateTrip(c *gin.Context) {
 	// Create default hop for the trip
 	defaultHop := TripHop{
 		Name:     newTrip.Name, // Use the same name as the trip
-		TripPlan: tripPlan.BaseModel.ID,
+		TripPlan: tripPlan.ID,
 	}
 
 	result = core.DB.Create(&defaultHop)
@@ -77,7 +77,7 @@ func CreateTrip(c *gin.Context) {
 
 	// Create default stay for the hop
 	defaultStay := Stay{
-		TripHop: defaultHop.BaseModel.ID,
+		TripHop: defaultHop.ID,
 	}
 
 	result = core.DB.Create(&defaultStay)

@@ -177,10 +177,10 @@ func TestNotificationType_Constants(t *testing.T) {
 
 	// Verify all types are unique
 	seen := make(map[NotificationType]bool)
-	for _, t := range types {
-		assert.False(t, seen[t], "Duplicate type: %s", t)
-		seen[t] = true
-		assert.NotEmpty(t, string(t), "Type should not be empty")
+	for _, typ := range types {
+		assert.False(t, seen[typ], "Duplicate type: %s", typ)
+		seen[typ] = true
+		assert.NotEmpty(t, string(typ), "Type should not be empty")
 	}
 }
 

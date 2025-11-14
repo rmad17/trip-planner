@@ -33,7 +33,7 @@ func (m *Middleware) RequireSubscriptionTier(minTier SubscriptionTier) gin.Handl
 		}
 		user := currentUser.(accounts.User)
 
-		subscription, err := m.subscriptionService.GetUserSubscription(user.BaseModel.ID)
+		subscription, err := m.subscriptionService.GetUserSubscription(user.ID)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get subscription"})
 			c.Abort()
@@ -68,10 +68,10 @@ func (m *Middleware) CheckLimit(limitType string, getValue func(*gin.Context) in
 		user := currentUser.(accounts.User)
 
 		currentValue := getValue(c)
-		err := m.subscriptionService.CheckLimit(user.BaseModel.ID, limitType, currentValue)
+		err := m.subscriptionService.CheckLimit(user.ID, limitType, currentValue)
 		if err != nil {
 			if err == ErrLimitExceeded {
-				subscription, _ := m.subscriptionService.GetUserSubscription(user.BaseModel.ID)
+				subscription, _ := m.subscriptionService.GetUserSubscription(user.ID)
 				c.JSON(http.StatusForbidden, gin.H{
 					"error":        "Subscription limit exceeded",
 					"limit_type":   limitType,
@@ -105,7 +105,7 @@ func (m *Middleware) RequireFeature(featureKey string) gin.HandlerFunc {
 		endpoint := c.Request.URL.Path
 		method := c.Request.Method
 		ctx := featureflags.EvaluationContext{
-			UserID:      &user.BaseModel.ID,
+			UserID:      &user.ID,
 			APIEndpoint: &endpoint,
 			HTTPMethod:  &method,
 		}
@@ -137,7 +137,7 @@ func (m *Middleware) InjectSubscriptionContext() gin.HandlerFunc {
 		currentUser, exists := c.Get("currentUser")
 		if exists {
 			user := currentUser.(accounts.User)
-			subscription, err := m.subscriptionService.GetUserSubscription(user.BaseModel.ID)
+			subscription, err := m.subscriptionService.GetUserSubscription(user.ID)
 			if err == nil {
 				c.Set("subscription", subscription)
 			}
@@ -178,7 +178,7 @@ func IsFeatureEnabled(c *gin.Context, featureFlagService *featureflags.Service, 
 	endpoint := c.Request.URL.Path
 	method := c.Request.Method
 	ctx := featureflags.EvaluationContext{
-		UserID:      &user.BaseModel.ID,
+		UserID:      &user.ID,
 		APIEndpoint: &endpoint,
 		HTTPMethod:  &method,
 	}
@@ -202,7 +202,7 @@ func GetFeatureValue(c *gin.Context, featureFlagService *featureflags.Service, f
 	endpoint := c.Request.URL.Path
 	method := c.Request.Method
 	ctx := featureflags.EvaluationContext{
-		UserID:      &user.BaseModel.ID,
+		UserID:      &user.ID,
 		APIEndpoint: &endpoint,
 		HTTPMethod:  &method,
 	}

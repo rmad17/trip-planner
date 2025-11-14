@@ -193,12 +193,12 @@ func (wp *WebhookProvider) buildPayload(notification *notifications.Notification
 	}
 
 	// Add metadata
-	if notification.Metadata != nil && len(notification.Metadata) > 0 {
+	if len(notification.Metadata) > 0 {
 		payload["metadata"] = notification.Metadata
 	}
 
 	// Add channel data
-	if notification.ChannelData != nil && len(notification.ChannelData) > 0 {
+	if len(notification.ChannelData) > 0 {
 		payload["channel_data"] = notification.ChannelData
 	}
 
@@ -271,7 +271,7 @@ func (wp *WebhookProvider) sendWebhook(ctx context.Context, url string, payload 
 
 		// Read response body
 		body, _ := io.ReadAll(resp.Body)
-		resp.Body.Close()
+		_ = resp.Body.Close()
 
 		// Check status code
 		if resp.StatusCode >= 200 && resp.StatusCode < 300 {

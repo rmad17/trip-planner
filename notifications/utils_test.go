@@ -1,6 +1,7 @@
 package notifications
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -103,8 +104,7 @@ func TestGetModels_Uniqueness(t *testing.T) {
 	// Verify all models are unique types
 	types := make(map[string]bool)
 	for _, model := range models {
-		typeName := assert.ObjectsAreEqualValues(model, model) // Get type
-		typeStr := assert.ObjectsAreEqual(model, model)        // Convert to string
+		typeStr := fmt.Sprintf("%T", model)
 		assert.False(t, types[typeStr], "Duplicate model type found")
 		types[typeStr] = true
 	}

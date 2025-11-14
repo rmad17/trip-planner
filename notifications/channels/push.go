@@ -261,7 +261,7 @@ func (pp *PushProvider) sendWebPush(ctx context.Context, notification *notificat
 		return notification.ID.String(), nil
 	*/
 
-	return "", errors.New("Web Push implementation requires webpush library (github.com/SherClockHolmes/webpush-go)")
+	return "", errors.New("web push implementation requires webpush library (github.com/SherClockHolmes/webpush-go)")
 }
 
 func (pp *PushProvider) sendMultiPlatform(ctx context.Context, notification *notifications.Notification) (string, error) {

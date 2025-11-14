@@ -89,7 +89,7 @@ func (s *Service) Send(ctx context.Context, req *SendRequest) (*Notification, er
 	}
 
 	// Log creation
-	s.auditService.Log(ctx, &NotificationAudit{
+	_ = s.auditService.Log(ctx, &NotificationAudit{
 		NotificationID: notification.ID,
 		Status:         StatusPending,
 		Event:          "created",
@@ -239,7 +239,7 @@ func (s *Service) Schedule(ctx context.Context, req *SendRequest, scheduledAt ti
 	}
 
 	// Log creation
-	s.auditService.Log(ctx, &NotificationAudit{
+	_ = s.auditService.Log(ctx, &NotificationAudit{
 		NotificationID: notification.ID,
 		Status:         StatusQueued,
 		Event:          "scheduled",
@@ -273,7 +273,7 @@ func (s *Service) Cancel(ctx context.Context, notificationID uuid.UUID) error {
 	}
 
 	// Log cancellation
-	s.auditService.Log(ctx, &NotificationAudit{
+	_ = s.auditService.Log(ctx, &NotificationAudit{
 		NotificationID: notification.ID,
 		Status:         StatusCancelled,
 		Event:          "cancelled",
@@ -306,7 +306,7 @@ func (s *Service) Retry(ctx context.Context, notificationID uuid.UUID) error {
 	}
 
 	// Log retry
-	s.auditService.Log(ctx, &NotificationAudit{
+	_ = s.auditService.Log(ctx, &NotificationAudit{
 		NotificationID: notification.ID,
 		Status:         StatusRetrying,
 		Event:          "retry_initiated",
@@ -441,7 +441,7 @@ func (s *Service) processNotification(ctx context.Context, notification *Notific
 	s.db.WithContext(ctx).Model(notification).Update("status", StatusSending)
 
 	// Log sending attempt
-	s.auditService.Log(ctx, &NotificationAudit{
+	_ = s.auditService.Log(ctx, &NotificationAudit{
 		NotificationID: notification.ID,
 		Status:         StatusSending,
 		Event:          "sending",
@@ -503,7 +503,7 @@ func (s *Service) processNotification(ctx context.Context, notification *Notific
 		}
 	}
 
-	s.auditService.Log(ctx, auditEntry)
+	_ = s.auditService.Log(ctx, auditEntry)
 }
 
 func (s *Service) handleSendError(ctx context.Context, notification *Notification, err error) {
@@ -530,7 +530,7 @@ func (s *Service) handleSendError(ctx context.Context, notification *Notificatio
 	s.db.WithContext(ctx).Save(notification)
 
 	// Log error
-	s.auditService.Log(ctx, &NotificationAudit{
+	_ = s.auditService.Log(ctx, &NotificationAudit{
 		NotificationID: notification.ID,
 		Status:         notification.Status,
 		Event:          "send_failed",

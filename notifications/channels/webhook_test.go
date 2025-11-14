@@ -159,7 +159,7 @@ func TestWebhookProvider_Send(t *testing.T) {
 		assert.Equal(t, "TripPlanner-Notification-Service/1.0", r.Header.Get("User-Agent"))
 
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"success": true}`))
+		_, _ = w.Write([]byte(`{"success": true}`))
 	}))
 	defer server.Close()
 

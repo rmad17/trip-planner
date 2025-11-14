@@ -68,7 +68,7 @@ func TestDate_UnmarshalJSON_DateOnly(t *testing.T) {
 			}
 
 			if !tt.wantErr && tt.expected != "" {
-				got := d.Time.Format("2006-01-02")
+				got := d.Format("2006-01-02")
 				if got != tt.expected {
 					t.Errorf("UnmarshalJSON() got = %v, want %v", got, tt.expected)
 				}
@@ -159,7 +159,7 @@ func TestDate_Scan(t *testing.T) {
 			}
 
 			if !tt.wantErr && tt.expected != "" {
-				got := d.Time.Format("2006-01-02")
+				got := d.Format("2006-01-02")
 				if got != tt.expected {
 					t.Errorf("Scan() got = %v, want %v", got, tt.expected)
 				}
@@ -226,8 +226,8 @@ func TestDate_RoundTrip(t *testing.T) {
 		}
 
 		// Compare dates (ignoring time component)
-		originalDate := original.Time.Format("2006-01-02")
-		restoredDate := restored.Time.Format("2006-01-02")
+		originalDate := original.Format("2006-01-02")
+		restoredDate := restored.Format("2006-01-02")
 
 		if originalDate != restoredDate {
 			t.Errorf("Round-trip failed: got %v, want %v", restoredDate, originalDate)
@@ -251,7 +251,7 @@ func TestDate_RoundTrip(t *testing.T) {
 			t.Fatalf("Scan() failed: %v", err)
 		}
 
-		if !original.Time.Equal(restored.Time) {
+		if !original.Equal(restored.Time) {
 			t.Errorf("Round-trip failed: got %v, want %v", restored.Time, original.Time)
 		}
 	})

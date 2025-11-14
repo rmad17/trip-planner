@@ -97,7 +97,7 @@ func GetDailyItinerary(c *gin.Context) {
 
 			dayItinerary := map[string]interface{}{
 				"day_number":       day.DayNumber,
-				"date":             day.Date.Time.Format("2006-01-02"),
+				"date":             day.Date.Format("2006-01-02"),
 				"title":            day.Title,
 				"day_type":         day.DayType,
 				"notes":            day.Notes,
@@ -116,7 +116,7 @@ func GetDailyItinerary(c *gin.Context) {
 				var associatedHop *TripHop
 				if day.FromTripHop != nil {
 					for _, hop := range tripHops {
-						if hop.BaseModel.ID == *day.FromTripHop {
+						if hop.ID == *day.FromTripHop {
 							associatedHop = &hop
 							break
 						}
@@ -125,7 +125,7 @@ func GetDailyItinerary(c *gin.Context) {
 
 				if associatedHop != nil {
 					dayItinerary["hop_info"] = map[string]interface{}{
-						"hop_id":             associatedHop.BaseModel.ID,
+						"hop_id":             associatedHop.ID,
 						"hop_name":           associatedHop.Name,
 						"hop_description":    associatedHop.Description,
 						"city":               associatedHop.City,
@@ -181,7 +181,7 @@ func GetDailyItinerary(c *gin.Context) {
 				"weather":                       nil,
 				"activities":                    []interface{}{}, // Empty activities array
 				"activity_count":                0,
-				"hop_id":                        hop.BaseModel.ID,
+				"hop_id":                        hop.ID,
 				"hop_name":                      hop.Name,
 				"hop_description":               hop.Description,
 				"city":                          hop.City,
@@ -207,8 +207,8 @@ func GetDailyItinerary(c *gin.Context) {
 
 	// Add date range and data source information
 	if len(tripDays) > 0 {
-		summary["start_date"] = tripDays[0].Date.Time.Format("2006-01-02")
-		summary["end_date"] = tripDays[len(tripDays)-1].Date.Time.Format("2006-01-02")
+		summary["start_date"] = tripDays[0].Date.Format("2006-01-02")
+		summary["end_date"] = tripDays[len(tripDays)-1].Date.Format("2006-01-02")
 		summary["data_source"] = "trip_days"
 		summary["has_detailed_days"] = true
 
@@ -319,7 +319,7 @@ func GetDayItinerary(c *gin.Context) {
 
 	response := gin.H{
 		"day_number":       tripDay.DayNumber,
-		"date":             tripDay.Date.Time.Format("2006-01-02"),
+		"date":             tripDay.Date.Format("2006-01-02"),
 		"title":            tripDay.Title,
 		"day_type":         tripDay.DayType,
 		"notes":            tripDay.Notes,

@@ -131,13 +131,13 @@ func PlaceDetails(c *gin.Context) {
 	request := &maps.PlaceDetailsRequest{
 		PlaceID: data.Get("place_id"),
 	}
-	pretty.Println("Request: ", request)
+	_, _ = pretty.Println("Request: ", request)
 	resp, err := client.PlaceDetails(context.Background(), request)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		pretty.Println("Error: ", err.Error())
+		_, _ = pretty.Println("Error: ", err.Error())
 	} else {
 		c.JSON(http.StatusOK, gin.H{"predictions": resp})
-		pretty.Println("Response: ", resp)
+		_, _ = pretty.Println("Response: ", resp)
 	}
 }

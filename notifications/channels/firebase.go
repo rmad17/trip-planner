@@ -107,11 +107,11 @@ func (fp *FirebaseProvider) GetProviderName() string {
 func (fp *FirebaseProvider) HealthCheck(ctx context.Context) error {
 	// Check if credentials are configured
 	if fp.config.ProjectID == "" {
-		return errors.New("Firebase project ID not configured")
+		return errors.New("firebase project ID not configured")
 	}
 
 	if len(fp.config.ServiceAccountJSON) == 0 && fp.config.Credentials == "" {
-		return errors.New("Firebase credentials not configured")
+		return errors.New("firebase credentials not configured")
 	}
 
 	// In production, perform an actual test request to FCM
@@ -196,7 +196,7 @@ func (fp *FirebaseProvider) sendViaFCM(ctx context.Context, notification *notifi
 		return response, nil
 	*/
 
-	return "", errors.New("Firebase implementation requires Firebase SDK (firebase.google.com/go/v4)")
+	return "", errors.New("firebase implementation requires Firebase SDK (firebase.google.com/go/v4)")
 }
 
 // FirebaseMessage represents a structured FCM message

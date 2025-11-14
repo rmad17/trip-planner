@@ -29,7 +29,7 @@ func TestTripDay_DateParsing_DateOnly(t *testing.T) {
 	}
 
 	expectedDate := "2025-11-28"
-	actualDate := tripDay.Date.Time.Format("2006-01-02")
+	actualDate := tripDay.Date.Format("2006-01-02")
 
 	if actualDate != expectedDate {
 		t.Errorf("Date parsing failed: got %s, want %s", actualDate, expectedDate)
@@ -59,7 +59,7 @@ func TestTripDay_DateParsing_RFC3339(t *testing.T) {
 	}
 
 	expectedDate := "2025-11-28"
-	actualDate := tripDay.Date.Time.Format("2006-01-02")
+	actualDate := tripDay.Date.Format("2006-01-02")
 
 	if actualDate != expectedDate {
 		t.Errorf("Date parsing failed: got %s, want %s", actualDate, expectedDate)
@@ -81,7 +81,7 @@ func TestTripDay_DateParsing_WithTimezone(t *testing.T) {
 	}
 
 	expectedDate := "2025-11-28"
-	actualDate := tripDay.Date.Time.Format("2006-01-02")
+	actualDate := tripDay.Date.Format("2006-01-02")
 
 	if actualDate != expectedDate {
 		t.Errorf("Date parsing failed: got %s, want %s", actualDate, expectedDate)
@@ -117,7 +117,7 @@ func TestTripDay_DateParsing_NullDate(t *testing.T) {
 		t.Fatalf("Failed to unmarshal null date: %v", err)
 	}
 
-	if !tripDay.Date.Time.IsZero() {
+	if !tripDay.Date.IsZero() {
 		t.Error("Null date should result in zero time")
 	}
 }
@@ -206,7 +206,7 @@ func TestCreateTripDay_API_DateOnly(t *testing.T) {
 
 		// Verify date was parsed correctly
 		expectedDate := "2025-11-28"
-		actualDate := tripDay.Date.Time.Format("2006-01-02")
+		actualDate := tripDay.Date.Format("2006-01-02")
 
 		if actualDate != expectedDate {
 			c.JSON(http.StatusBadRequest, gin.H{
@@ -348,7 +348,7 @@ func TestTripDay_MultipleFormats(t *testing.T) {
 			}
 
 			expectedDate := "2025-11-28"
-			actualDate := tripDay.Date.Time.Format("2006-01-02")
+			actualDate := tripDay.Date.Format("2006-01-02")
 
 			if actualDate != expectedDate {
 				t.Errorf("Date parsing failed for format %s: got %s, want %s", format, actualDate, expectedDate)

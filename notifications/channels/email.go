@@ -228,13 +228,13 @@ func (ep *EmailProvider) sendViaSMTP(ctx context.Context, notification *notifica
 		if err != nil {
 			return "", fmt.Errorf("failed to connect to SMTP server: %w", err)
 		}
-		defer conn.Close()
+		defer func() { _ = conn.Close() }()
 
 		client, err := smtp.NewClient(conn, ep.config.SMTPHost)
 		if err != nil {
 			return "", fmt.Errorf("failed to create SMTP client: %w", err)
 		}
-		defer client.Close()
+		defer func() { _ = client.Close() }()
 
 		if err = client.Auth(auth); err != nil {
 			return "", fmt.Errorf("SMTP authentication failed: %w", err)
@@ -263,7 +263,7 @@ func (ep *EmailProvider) sendViaSMTP(ctx context.Context, notification *notifica
 			return "", fmt.Errorf("failed to close data writer: %w", err)
 		}
 
-		client.Quit()
+		_ = client.Quit()
 	} else {
 		// Use plain SMTP
 		err = smtp.SendMail(addr, auth, ep.config.FromEmail, []string{to}, []byte(emailBody))
@@ -298,7 +298,7 @@ func (ep *EmailProvider) sendViaMailgun(ctx context.Context, notification *notif
 	// In production, use Mailgun SDK: github.com/mailgun/mailgun-go/v4
 
 	// Placeholder implementation
-	return "", errors.New("Mailgun implementation requires Mailgun SDK (github.com/mailgun/mailgun-go/v4)")
+	return "", errors.New("mailgun implementation requires Mailgun SDK (github.com/mailgun/mailgun-go/v4)")
 }
 
 // Health check implementations
@@ -315,13 +315,13 @@ func (ep *EmailProvider) healthCheckSMTP(ctx context.Context) error {
 		if err != nil {
 			return fmt.Errorf("SMTP health check failed: %w", err)
 		}
-		defer conn.Close()
+		defer func() { _ = conn.Close() }()
 
 		client, err := smtp.NewClient(conn, ep.config.SMTPHost)
 		if err != nil {
 			return fmt.Errorf("SMTP health check failed: %w", err)
 		}
-		defer client.Close()
+		defer func() { _ = client.Close() }()
 
 		return nil
 	}
@@ -331,7 +331,7 @@ func (ep *EmailProvider) healthCheckSMTP(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("SMTP health check failed: %w", err)
 	}
-	defer client.Close()
+	defer func() { _ = client.Close() }()
 
 	return nil
 }

@@ -332,7 +332,7 @@ func TestCreateActivity_CompleteFlow_MockDB(t *testing.T) {
 		}
 
 		// Step 5: Create activity (mock - just return success)
-		activity.BaseModel.ID = uuid.New()
+		activity.ID = uuid.New()
 		c.JSON(http.StatusCreated, gin.H{"activity": activity})
 	})
 

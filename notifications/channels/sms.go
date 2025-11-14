@@ -210,7 +210,7 @@ func (sp *SMSProvider) sendViaTwilio(ctx context.Context, notification *notifica
 		return *resp.Sid, nil
 	*/
 
-	return "", errors.New("Twilio implementation requires Twilio SDK (github.com/twilio/twilio-go)")
+	return "", errors.New("twilio implementation requires Twilio SDK (github.com/twilio/twilio-go)")
 }
 
 func (sp *SMSProvider) sendViaSNS(ctx context.Context, notification *notifications.Notification) (string, error) {
@@ -254,14 +254,14 @@ func (sp *SMSProvider) sendViaVonage(ctx context.Context, notification *notifica
 	// Vonage (Nexmo) implementation
 	// In production, use Vonage SDK: github.com/vonage/vonage-go-sdk
 
-	return "", errors.New("Vonage implementation requires Vonage SDK (github.com/vonage/vonage-go-sdk)")
+	return "", errors.New("vonage implementation requires Vonage SDK (github.com/vonage/vonage-go-sdk)")
 }
 
 func (sp *SMSProvider) sendViaPlivo(ctx context.Context, notification *notifications.Notification) (string, error) {
 	// Plivo implementation
 	// In production, use Plivo SDK: github.com/plivo/plivo-go
 
-	return "", errors.New("Plivo implementation requires Plivo SDK (github.com/plivo/plivo-go)")
+	return "", errors.New("plivo implementation requires Plivo SDK (github.com/plivo/plivo-go)")
 }
 
 // Health check implementations
@@ -269,7 +269,7 @@ func (sp *SMSProvider) sendViaPlivo(ctx context.Context, notification *notificat
 func (sp *SMSProvider) healthCheckTwilio(ctx context.Context) error {
 	// Twilio health check
 	if sp.config.TwilioAccountSID == "" || sp.config.TwilioAuthToken == "" {
-		return errors.New("Twilio credentials not configured")
+		return errors.New("twilio credentials not configured")
 	}
 	return nil
 }
@@ -285,7 +285,7 @@ func (sp *SMSProvider) healthCheckSNS(ctx context.Context) error {
 func (sp *SMSProvider) healthCheckVonage(ctx context.Context) error {
 	// Vonage health check
 	if sp.config.VonageAPIKey == "" || sp.config.VonageAPISecret == "" {
-		return errors.New("Vonage credentials not configured")
+		return errors.New("vonage credentials not configured")
 	}
 	return nil
 }
@@ -293,7 +293,7 @@ func (sp *SMSProvider) healthCheckVonage(ctx context.Context) error {
 func (sp *SMSProvider) healthCheckPlivo(ctx context.Context) error {
 	// Plivo health check
 	if sp.config.PlivoAuthID == "" || sp.config.PlivoAuthToken == "" {
-		return errors.New("Plivo credentials not configured")
+		return errors.New("plivo credentials not configured")
 	}
 	return nil
 }
