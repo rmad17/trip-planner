@@ -38,8 +38,8 @@ func SearchAutocomplete(c *gin.Context) {
 		return
 	}
 
-	pretty.Println("SearchText: ", SearchText)
-	pretty.Println("MapboxAPIKey set: ", MapboxAPIKey != "")
+	_ = pretty.Println("SearchText: ", SearchText)
+	_ = pretty.Println("MapboxAPIKey set: ", MapboxAPIKey != "")
 
 	SessionToken := uuid.Must(uuid.NewV4()).String()
 	response_data := make_http_request(MapboxApi{"GET", string(Autosuggest), SearchText, MapboxAPIKey, SessionToken, ""})
@@ -52,7 +52,7 @@ func SearchAutocomplete(c *gin.Context) {
 	var res MapboxAPIResponse
 	err := json.Unmarshal(response_data, &res)
 	if err != nil {
-		pretty.Println("JSON unmarshal error:", err)
+		_ = pretty.Println("JSON unmarshal error:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse API response"})
 		return
 	}

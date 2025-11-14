@@ -174,7 +174,10 @@ func TestStorageManager_GetProvider(t *testing.T) {
 		mockProvider := &MockStorageProvider{provider: "mock"}
 
 		sm.RegisterProvider("test", mockProvider)
-		sm.SetDefault("test")
+		err := sm.SetDefault("test")
+		if err != nil {
+			t.Fatalf("Failed to set default provider: %v", err)
+		}
 
 		provider, err := sm.GetProvider("")
 		assert.NoError(t, err)
@@ -189,7 +192,10 @@ func TestStorageManager_GetDefaultProvider(t *testing.T) {
 		mockProvider := &MockStorageProvider{provider: "mock"}
 
 		sm.RegisterProvider("test", mockProvider)
-		sm.SetDefault("test")
+		err := sm.SetDefault("test")
+		if err != nil {
+			t.Fatalf("Failed to set default provider: %v", err)
+		}
 
 		provider, err := sm.GetDefaultProvider()
 		assert.NoError(t, err)
@@ -307,7 +313,7 @@ func TestMockStorageProvider_Download(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.NotNil(t, reader)
-		defer reader.Close()
+		defer func() { _ = reader.Close() }()
 
 		data, err := io.ReadAll(reader)
 		assert.NoError(t, err)

@@ -30,7 +30,9 @@ func NewStorageManagerWithDefaults() *StorageManager {
 	
 	if err == nil {
 		sm.RegisterProvider("local", localProvider)
-		sm.SetDefault("local")
+		if err := sm.SetDefault("local"); err != nil {
+			return nil
+		}
 	}
 	
 	return sm

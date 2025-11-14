@@ -156,7 +156,7 @@ func make_http_request(data MapboxApi) []byte {
 		log.Printf("HTTP request failed: %v", err)
 		return nil
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	log.Printf("HTTP response status: %d", resp.StatusCode)
 

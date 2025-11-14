@@ -21,5 +21,7 @@ func main() {
 	}
 
 	// Output schema statements as strings (not bytes)
-	fmt.Fprint(os.Stdout, stmts) // Use Print instead of Println to avoid extra newlines
+	if _, err := fmt.Fprint(os.Stdout, stmts); err != nil {
+		log.Fatalf("failed to write schema: %v", err)
+	}
 }

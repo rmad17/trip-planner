@@ -91,7 +91,9 @@ func TestCreateActivity_Integration_InvalidTripDay_NotExists(t *testing.T) {
 	}
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
 
 	if response["error"] != "Invalid trip day for this trip plan" {
 		t.Errorf("Expected specific error message, got %v", response["error"])

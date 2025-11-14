@@ -264,7 +264,7 @@ func TestHelperFunctions(t *testing.T) {
 		if ptr == nil {
 			t.Error("StringPtr returned nil")
 		}
-		if *ptr != str {
+		if ptr != nil && *ptr != str {
 			t.Errorf("StringPtr got = %v, want %v", *ptr, str)
 		}
 	})
@@ -275,7 +275,7 @@ func TestHelperFunctions(t *testing.T) {
 		if ptr == nil {
 			t.Error("IntPtr returned nil")
 		}
-		if *ptr != val {
+		if ptr != nil && *ptr != val {
 			t.Errorf("IntPtr got = %v, want %v", *ptr, val)
 		}
 	})
@@ -286,7 +286,7 @@ func TestHelperFunctions(t *testing.T) {
 		if ptr == nil {
 			t.Error("Float64Ptr returned nil")
 		}
-		if *ptr != val {
+		if ptr != nil && *ptr != val {
 			t.Errorf("Float64Ptr got = %v, want %v", *ptr, val)
 		}
 	})

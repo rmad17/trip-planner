@@ -190,7 +190,7 @@ func (cs *ClaudeService) GenerateTrip(req TripGenerationRequest) (*TripGeneratio
 	if err != nil {
 		return nil, fmt.Errorf("failed to call Claude API: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -198,7 +198,7 @@ func (cs *ClaudeService) GenerateTrip(req TripGenerationRequest) (*TripGeneratio
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("Claude API error (status %d): %s", resp.StatusCode, string(body))
+		return nil, fmt.Errorf("claude API error (status %d): %s", resp.StatusCode, string(body))
 	}
 
 	var claudeResp ClaudeResponse
@@ -431,7 +431,7 @@ Return ONLY a JSON array of city suggestions (no markdown, no explanations):
 	if err != nil {
 		return nil, fmt.Errorf("failed to call Claude API: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -439,7 +439,7 @@ Return ONLY a JSON array of city suggestions (no markdown, no explanations):
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("Claude API error (status %d): %s", resp.StatusCode, string(body))
+		return nil, fmt.Errorf("claude API error (status %d): %s", resp.StatusCode, string(body))
 	}
 
 	var claudeResp ClaudeResponse

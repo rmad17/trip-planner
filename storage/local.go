@@ -63,12 +63,12 @@ func (l *LocalStorageProvider) Upload(key string, file io.Reader, contentType st
 	if err != nil {
 		return nil, fmt.Errorf("failed to create file: %v", err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	
 	// Copy data
 	size, err := io.Copy(f, file)
 	if err != nil {
-		os.Remove(fullPath) // Clean up on error
+		_ = os.Remove(fullPath) // Clean up on error
 		return nil, fmt.Errorf("failed to write file: %v", err)
 	}
 	
@@ -107,7 +107,7 @@ func (l *LocalStorageProvider) Delete(key string) error {
 	
 	// Try to remove empty directories
 	dir := filepath.Dir(fullPath)
-	os.Remove(dir) // Ignore error - directory might not be empty
+	_ = os.Remove(dir) // Ignore error - directory might not be empty
 	
 	return nil
 }

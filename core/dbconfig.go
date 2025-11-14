@@ -76,16 +76,20 @@ func ConnectDB() {
 func ConnectTestDB() {
 	// Temporarily set environment to test
 	originalEnv := os.Getenv("APP_ENV")
-	os.Setenv("APP_ENV", "test")
+	if err := os.Setenv("APP_ENV", "test"); err != nil {
+		slog.Error("Failed to set APP_ENV to test", "error", err)
+	}
 
 	// Connect to test database
 	ConnectDB()
 
 	// Restore original environment
 	if originalEnv == "" {
-		os.Unsetenv("APP_ENV")
+		_ = os.Unsetenv("APP_ENV")
 	} else {
-		os.Setenv("APP_ENV", originalEnv)
+		if err := os.Setenv("APP_ENV", originalEnv); err != nil {
+			slog.Error("Failed to restore APP_ENV", "error", err)
+		}
 	}
 }
 

@@ -125,7 +125,7 @@ func CreateTraveller(c *gin.Context) {
 	traveller.JoinedAt = time.Now()
 
 	// Set default values
-	if traveller.IsActive == false && c.PostForm("is_active") == "" {
+	if !traveller.IsActive && c.PostForm("is_active") == "" {
 		traveller.IsActive = true
 	}
 

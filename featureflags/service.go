@@ -100,9 +100,10 @@ func (s *Service) Evaluate(key string, ctx EvaluationContext) (*EvaluationResult
 	// Return default value
 	isEnabled := flag.IsEnabled
 	if flag.DefaultValue != nil {
-		if *flag.DefaultValue == "true" || *flag.DefaultValue == "1" {
+		switch *flag.DefaultValue {
+		case "true", "1":
 			isEnabled = true
-		} else if *flag.DefaultValue == "false" || *flag.DefaultValue == "0" {
+		case "false", "0":
 			isEnabled = false
 		}
 	}

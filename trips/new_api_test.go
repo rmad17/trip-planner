@@ -142,12 +142,6 @@ func TestItineraryAPI_Unauthorized(t *testing.T) {
 	}
 }
 
-// Helper functions
-
-func boolPtr(b bool) *bool {
-	return &b
-}
-
 // Test data validation for stays
 
 func TestCreateStay_InvalidJSON(t *testing.T) {

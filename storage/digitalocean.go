@@ -4,10 +4,15 @@ import (
 	"io"
 	"time"
 
+	//nolint:staticcheck
 	"github.com/aws/aws-sdk-go/aws"
+	//nolint:staticcheck
 	"github.com/aws/aws-sdk-go/aws/credentials"
+	//nolint:staticcheck
 	"github.com/aws/aws-sdk-go/aws/session"
+	//nolint:staticcheck
 	"github.com/aws/aws-sdk-go/service/s3"
+	//nolint:staticcheck
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
