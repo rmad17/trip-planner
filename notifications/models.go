@@ -112,11 +112,11 @@ type Notification struct {
 
 	// Template information
 	TemplateID   *uuid.UUID `gorm:"type:uuid;index" json:"template_id,omitempty"`
-	TemplateData JSONB      `gorm:"type:jsonb" json:"template_data,omitempty"`
+	TemplateData JSONB      `gorm:"serializer:json" json:"template_data,omitempty"`
 
 	// Channel-specific data
 	ChannelProvider string `gorm:"type:varchar(100)" json:"channel_provider,omitempty"` // e.g., "sendgrid", "twilio", "firebase"
-	ChannelData     JSONB  `gorm:"type:jsonb" json:"channel_data,omitempty"`
+	ChannelData     JSONB  `gorm:"serializer:json" json:"channel_data,omitempty"`
 
 	// Delivery information
 	RecipientEmail    string `gorm:"type:varchar(255);index" json:"recipient_email,omitempty"`
@@ -138,14 +138,14 @@ type Notification struct {
 	LastError     string `gorm:"type:text" json:"last_error,omitempty"`
 
 	// Metadata
-	Metadata        JSONB  `gorm:"type:jsonb" json:"metadata,omitempty"`
+	Metadata        JSONB  `gorm:"serializer:json" json:"metadata,omitempty"`
 	EntityType      string `gorm:"type:varchar(100);index" json:"entity_type,omitempty"` // e.g., "trip", "expense"
 	EntityID        *uuid.UUID `gorm:"type:uuid;index" json:"entity_id,omitempty"`
-	Tags            []string `gorm:"type:text[];index:,type:gin" json:"tags,omitempty"`
+	Tags            []string `gorm:"serializer:json" json:"tags,omitempty"`
 
 	// External tracking
 	ExternalID       string `gorm:"type:varchar(255);index" json:"external_id,omitempty"` // Provider's message ID
-	ExternalResponse JSONB  `gorm:"type:jsonb" json:"external_response,omitempty"`
+	ExternalResponse JSONB  `gorm:"serializer:json" json:"external_response,omitempty"`
 
 	// Expiry and archival
 	ExpiresAt  *time.Time `gorm:"index" json:"expires_at,omitempty"`
@@ -172,10 +172,10 @@ type NotificationTemplate struct {
 
 	// Default values
 	DefaultPriority NotificationPriority `gorm:"type:varchar(20);default:'normal'" json:"default_priority"`
-	DefaultMetadata JSONB                `gorm:"type:jsonb" json:"default_metadata,omitempty"`
+	DefaultMetadata JSONB                `gorm:"serializer:json" json:"default_metadata,omitempty"`
 
 	// Template variables documentation
-	Variables JSONB `gorm:"type:jsonb" json:"variables,omitempty"` // Schema/docs for template variables
+	Variables JSONB `gorm:"serializer:json" json:"variables,omitempty"` // Schema/docs for template variables
 
 	// Template settings
 	IsActive    bool   `gorm:"default:true;index" json:"is_active"`
@@ -200,14 +200,14 @@ type NotificationAudit struct {
 	// Event details
 	Event       string    `gorm:"type:varchar(100);not null" json:"event"` // e.g., "created", "sent", "delivered", "failed"
 	Message     string    `gorm:"type:text" json:"message,omitempty"`
-	Details     JSONB     `gorm:"type:jsonb" json:"details,omitempty"`
+	Details     JSONB     `gorm:"serializer:json" json:"details,omitempty"`
 
 	// Timing
 	Timestamp   time.Time `gorm:"not null;index" json:"timestamp"`
 
 	// Request/Response tracking
-	RequestData  JSONB `gorm:"type:jsonb" json:"request_data,omitempty"`
-	ResponseData JSONB `gorm:"type:jsonb" json:"response_data,omitempty"`
+	RequestData  JSONB `gorm:"serializer:json" json:"request_data,omitempty"`
+	ResponseData JSONB `gorm:"serializer:json" json:"response_data,omitempty"`
 
 	// Provider information
 	Provider         string `gorm:"type:varchar(100)" json:"provider,omitempty"`
@@ -223,7 +223,7 @@ type NotificationAudit struct {
 	ActorType string     `gorm:"type:varchar(50)" json:"actor_type,omitempty"` // "system", "user", "api"
 
 	// Additional metadata
-	Metadata JSONB `gorm:"type:jsonb" json:"metadata,omitempty"`
+	Metadata JSONB `gorm:"serializer:json" json:"metadata,omitempty"`
 
 	// Relationships
 	Notification *Notification `gorm:"foreignKey:NotificationID" json:"notification,omitempty"`
@@ -252,7 +252,7 @@ type NotificationPreference struct {
 	MaxPerMonth int `json:"max_per_month,omitempty"`
 
 	// Metadata
-	Metadata JSONB `gorm:"type:jsonb" json:"metadata,omitempty"`
+	Metadata JSONB `gorm:"serializer:json" json:"metadata,omitempty"`
 
 	// Unique constraint on user + channel + type
 	// This ensures one preference record per user per channel per type
@@ -289,7 +289,7 @@ type NotificationBatch struct {
 	CreatedBy *uuid.UUID `gorm:"type:uuid" json:"created_by,omitempty"`
 
 	// Metadata
-	Metadata JSONB `gorm:"type:jsonb" json:"metadata,omitempty"`
+	Metadata JSONB `gorm:"serializer:json" json:"metadata,omitempty"`
 }
 
 // NotificationProvider represents configuration for notification providers
@@ -320,7 +320,7 @@ type NotificationProvider struct {
 	LastError      string     `gorm:"type:text" json:"last_error,omitempty"`
 
 	// Metadata
-	Metadata JSONB `gorm:"type:jsonb" json:"metadata,omitempty"`
+	Metadata JSONB `gorm:"serializer:json" json:"metadata,omitempty"`
 }
 
 // TableName overrides
