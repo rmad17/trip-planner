@@ -13,6 +13,7 @@ func RouterGroupTripPlans(router *gin.RouterGroup) {
 	// AI-powered trip generation
 	router.POST("/generate", GenerateTripWithAI)                 // POST /trip/generate
 	router.POST("/generate/confirm", CreateTripFromAIGeneration) // POST /trip/generate/confirm
+	router.POST("/refine", RefineTripWithFeedback)               // POST /trip/refine
 	router.GET("/suggest-cities", GetMultiCitySuggestions)       // GET /trip/suggest-cities
 
 	// Trip Plans CRUD

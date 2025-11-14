@@ -13,14 +13,16 @@ import (
 )
 
 var claudeService = NewClaudeService()
+var llmFactory = NewLLMProviderFactory()
 
 // GenerateTripWithAI handles the AI-powered trip generation
 // @Summary Generate trip using AI
-// @Description Uses Claude AI to generate a complete trip plan with hops, days, and activities
+// @Description Uses AI (Gemini/Claude/GPT) to generate a complete trip plan with hops, days, and activities
 // @Tags trips
 // @Accept json
 // @Produce json
 // @Param request body TripGenerationRequest true "Trip generation parameters"
+// @Param provider query string false "LLM provider (gemini, claude, gpt). Defaults to gemini"
 // @Success 200 {object} map[string]interface{} "Generated trip plan with preview"
 // @Failure 400 {object} map[string]interface{} "Bad request"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
@@ -43,8 +45,25 @@ func GenerateTripWithAI(c *gin.Context) {
 		req.Currency = CurrencyUSD
 	}
 
-	// Generate trip plan using Claude
-	tripPlan, err := claudeService.GenerateTrip(req)
+	// Get LLM provider from query parameter or use default (Gemini)
+	providerStr := c.Query("provider")
+	var provider LLMProvider
+	var err error
+
+	if providerStr != "" {
+		provider, err = llmFactory.GetProvider(LLMProviderType(providerStr))
+	} else {
+		provider, err = llmFactory.GetDefaultProvider()
+	}
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to initialize LLM provider: " + err.Error()})
+		return
+	}
+
+	// Generate trip plan using the selected LLM provider
+	ctx := c.Request.Context()
+	tripPlan, err := provider.GenerateTrip(ctx, req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate trip plan: " + err.Error()})
 		return
@@ -54,6 +73,7 @@ func GenerateTripWithAI(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"success":   true,
 		"trip_plan": tripPlan,
+		"provider":  provider.GetProviderName(),
 		"message":   "Trip plan generated successfully. Review and confirm to save.",
 	})
 }
@@ -344,8 +364,8 @@ func CreateTripFromAIGeneration(c *gin.Context) {
 // @Produce json
 // @Param source query string true "Source city"
 // @Param destination query string true "Primary destination"
-// @Param duration query int true "Trip duration in days"
 // @Param preferences query string false "Comma-separated preferences (e.g., 'adventure,culture')"
+// @Param provider query string false "LLM provider (gemini, claude, gpt). Defaults to gemini"
 // @Success 200 {object} map[string]interface{} "City suggestions"
 // @Failure 400 {object} map[string]interface{} "Bad request"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
@@ -353,17 +373,11 @@ func CreateTripFromAIGeneration(c *gin.Context) {
 func GetMultiCitySuggestions(c *gin.Context) {
 	source := c.Query("source")
 	destination := c.Query("destination")
-	durationStr := c.Query("duration")
 	preferencesStr := c.Query("preferences")
+	providerStr := c.Query("provider")
 
-	if source == "" || destination == "" || durationStr == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "source, destination, and duration are required"})
-		return
-	}
-
-	duration := 0
-	if _, err := fmt.Sscanf(durationStr, "%d", &duration); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "duration must be a valid number"})
+	if source == "" || destination == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "source and destination are required"})
 		return
 	}
 
@@ -372,7 +386,23 @@ func GetMultiCitySuggestions(c *gin.Context) {
 		preferences = strings.Split(preferencesStr, ",")
 	}
 
-	suggestions, err := claudeService.SuggestMultiCityRoute(source, destination, duration, preferences)
+	// Get LLM provider
+	var provider LLMProvider
+	var err error
+
+	if providerStr != "" {
+		provider, err = llmFactory.GetProvider(LLMProviderType(providerStr))
+	} else {
+		provider, err = llmFactory.GetDefaultProvider()
+	}
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to initialize LLM provider: " + err.Error()})
+		return
+	}
+
+	ctx := c.Request.Context()
+	suggestions, err := provider.SuggestCities(ctx, source, destination, preferences)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get suggestions: " + err.Error()})
 		return
@@ -381,5 +411,81 @@ func GetMultiCitySuggestions(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"success":     true,
 		"suggestions": suggestions,
+		"provider":    provider.GetProviderName(),
+	})
+}
+
+// RefineTripWithFeedback refines an existing trip plan based on user feedback
+// @Summary Refine trip with interactive feedback
+// @Description Refines a trip plan based on user feedback about their interests and preferences
+// @Tags trips
+// @Accept json
+// @Produce json
+// @Param request body InteractiveFeedback true "User feedback for trip refinement"
+// @Param provider query string false "LLM provider (gemini, claude, gpt). Defaults to gemini"
+// @Success 200 {object} map[string]interface{} "Refined trip plan"
+// @Failure 400 {object} map[string]interface{} "Bad request"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /api/v1/trip/refine [post]
+func RefineTripWithFeedback(c *gin.Context) {
+	var feedback InteractiveFeedback
+	if err := c.ShouldBindJSON(&feedback); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Parse the current trip plan from JSON string
+	var currentTrip AITripResponse
+	if feedback.CurrentPlan != "" {
+		if err := parseJSONResponse(feedback.CurrentPlan, &currentTrip); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid current plan format: " + err.Error()})
+			return
+		}
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "current_plan is required"})
+		return
+	}
+
+	// Build comprehensive feedback string including interests
+	feedbackText := feedback.Feedback
+	if len(feedback.Interests) > 0 {
+		feedbackText += fmt.Sprintf("\n\nUser Interests: %s", strings.Join(feedback.Interests, ", "))
+	}
+	if feedback.ModifiedBudget > 0 {
+		feedbackText += fmt.Sprintf("\n\nRevised Budget: %.2f", feedback.ModifiedBudget)
+	}
+	if feedback.ModifiedDates.StartDate != "" || feedback.ModifiedDates.EndDate != "" {
+		feedbackText += fmt.Sprintf("\n\nRevised Dates: %s to %s", feedback.ModifiedDates.StartDate, feedback.ModifiedDates.EndDate)
+	}
+
+	// Get LLM provider
+	providerStr := c.Query("provider")
+	var provider LLMProvider
+	var err error
+
+	if providerStr != "" {
+		provider, err = llmFactory.GetProvider(LLMProviderType(providerStr))
+	} else {
+		provider, err = llmFactory.GetDefaultProvider()
+	}
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to initialize LLM provider: " + err.Error()})
+		return
+	}
+
+	// Refine the trip
+	ctx := c.Request.Context()
+	refinedTrip, err := provider.RefineTrip(ctx, &currentTrip, feedbackText)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to refine trip: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success":      true,
+		"refined_plan": refinedTrip,
+		"provider":     provider.GetProviderName(),
+		"message":      "Trip plan refined successfully based on your feedback.",
 	})
 }
