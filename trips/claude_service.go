@@ -475,3 +475,103 @@ Return ONLY a JSON array of city suggestions (no markdown, no explanations):
 
 	return result, nil
 }
+
+// executeRequest executes a Claude API request and returns the parsed trip response
+func (cs *ClaudeService) executeRequest(req ClaudeRequest) (*TripGenerationResponse, error) {
+	reqBody, err := json.Marshal(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	httpReq, err := http.NewRequest("POST", cs.BaseURL+"/messages", bytes.NewBuffer(reqBody))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("x-api-key", cs.APIKey)
+	httpReq.Header.Set("anthropic-version", "2023-06-01")
+
+	resp, err := cs.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("failed to call Claude API: %w", err)
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("claude API error (status %d): %s", resp.StatusCode, string(body))
+	}
+
+	var claudeResp ClaudeResponse
+	if err := json.Unmarshal(body, &claudeResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal response: %w", err)
+	}
+
+	if len(claudeResp.Content) == 0 {
+		return nil, fmt.Errorf("empty response from Claude")
+	}
+
+	var tripPlan TripGenerationResponse
+	if err := json.Unmarshal([]byte(claudeResp.Content[0].Text), &tripPlan); err != nil {
+		return nil, fmt.Errorf("failed to parse trip plan: %w", err)
+	}
+
+	return &tripPlan, nil
+}
+
+// executeRawRequest executes a Claude API request and returns the raw text response
+func (cs *ClaudeService) executeRawRequest(req ClaudeRequest) (string, error) {
+	reqBody, err := json.Marshal(req)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	httpReq, err := http.NewRequest("POST", cs.BaseURL+"/messages", bytes.NewBuffer(reqBody))
+	if err != nil {
+		return "", fmt.Errorf("failed to create request: %w", err)
+	}
+
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("x-api-key", cs.APIKey)
+	httpReq.Header.Set("anthropic-version", "2023-06-01")
+
+	resp, err := cs.HTTPClient.Do(httpReq)
+	if err != nil {
+		return "", fmt.Errorf("failed to call Claude API: %w", err)
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("failed to read response: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("claude API error (status %d): %s", resp.StatusCode, string(body))
+	}
+
+	var claudeResp ClaudeResponse
+	if err := json.Unmarshal(body, &claudeResp); err != nil {
+		return "", fmt.Errorf("failed to unmarshal response: %w", err)
+	}
+
+	if len(claudeResp.Content) == 0 {
+		return "", fmt.Errorf("empty response from Claude")
+	}
+
+	return claudeResp.Content[0].Text, nil
+}
+
+// Helper functions for JSON operations
+func serializeTripToJSON(trip *TripGenerationResponse) ([]byte, error) {
+	return json.Marshal(trip)
+}
+
+func parseJSONResponse(text string, v interface{}) error {
+	return json.Unmarshal([]byte(text), v)
+}
