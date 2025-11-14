@@ -5,6 +5,7 @@ import (
 	"triplanner/core"
 	"triplanner/documents"
 	"triplanner/expenses"
+	"triplanner/notifications"
 	"triplanner/trips"
 )
 
@@ -25,5 +26,6 @@ func GetAllModels() []interface{} {
 	models = append(models, trips.GetModels()...)
 	models = append(models, documents.GetModels()...)
 	models = append(models, expenses.GetModels()...)
+	models = append(models, notifications.GetModels()...)
 	return models
 }
