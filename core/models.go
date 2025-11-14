@@ -26,9 +26,14 @@ func (b *BaseModel) BeforeCreate(tx *gorm.DB) error {
 
 // Date is a custom type that handles date-only values in JSON
 // It accepts both "2006-01-02" and "2006-01-02T15:04:05Z07:00" formats
+// @Description Date in YYYY-MM-DD format
 type Date struct {
 	time.Time
 }
+
+// swagger:strfmt date
+// swaggertype string
+// format date
 
 // UnmarshalJSON implements json.Unmarshaler interface
 func (d *Date) UnmarshalJSON(b []byte) error {

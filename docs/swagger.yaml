@@ -1,5 +1,1235 @@
 basePath: /api/v1
 definitions:
+  accounts.AuthInput:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  documents.Document:
+    properties:
+      category:
+        allOf:
+        - $ref: '#/definitions/documents.DocumentCategory'
+        example: tickets
+      content_type:
+        example: application/pdf
+        type: string
+      createdAt:
+        type: string
+      description:
+        example: Return flight ticket from NYC to Paris
+        type: string
+      entity_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      entity_type:
+        example: trip_plan
+        type: string
+      expires_at:
+        example: "2024-12-31T23:59:59Z"
+        type: string
+      file_size:
+        example: 2048576
+        type: integer
+      id:
+        type: string
+      is_public:
+        type: boolean
+      name:
+        example: Flight Ticket
+        type: string
+      notes:
+        example: Keep this handy at airport
+        type: string
+      original_name:
+        example: ticket_flight_123.pdf
+        type: string
+      storage_path:
+        example: documents/2024/01/15/abc123.pdf
+        type: string
+      storage_provider:
+        allOf:
+        - $ref: '#/definitions/documents.StorageProvider'
+        example: digitalocean
+      tags:
+        example:
+        - flight
+        - business-class
+        items:
+          type: string
+        type: array
+      updatedAt:
+        type: string
+      uploaded_at:
+        type: string
+      user_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+    type: object
+  documents.DocumentCategory:
+    enum:
+    - tickets
+    - invoices
+    - identity_proofs
+    - medical
+    - hotel_bookings
+    - insurance
+    - visas
+    - receipts
+    - itineraries
+    - other
+    type: string
+    x-enum-varnames:
+    - CategoryTickets
+    - CategoryInvoices
+    - CategoryIdentityProofs
+    - CategoryMedical
+    - CategoryHotelBookings
+    - CategoryInsurance
+    - CategoryVisas
+    - CategoryReceipts
+    - CategoryItineraries
+    - CategoryOther
+  documents.DocumentUpdateRequest:
+    properties:
+      category:
+        allOf:
+        - $ref: '#/definitions/documents.DocumentCategory'
+        example: tickets
+      description:
+        example: Updated description
+        type: string
+      expires_at:
+        example: "2024-12-31T23:59:59Z"
+        type: string
+      is_public:
+        example: false
+        type: boolean
+      name:
+        example: Flight Ticket Updated
+        type: string
+      notes:
+        example: Updated notes
+        type: string
+      tags:
+        example:
+        - flight
+        - business-class
+        items:
+          type: string
+        type: array
+    type: object
+  documents.StorageProvider:
+    enum:
+    - digitalocean
+    - s3
+    - gcs
+    - local
+    - cloudflare
+    type: string
+    x-enum-varnames:
+    - StorageProviderDigitalOcean
+    - StorageProviderS3
+    - StorageProviderGCS
+    - StorageProviderLocal
+    - StorageProviderCloudflare
+  expenses.Expense:
+    properties:
+      activity:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      amount:
+        example: 250.75
+        type: number
+      category:
+        allOf:
+        - $ref: '#/definitions/expenses.ExpenseCategory'
+        example: food
+      created_by:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      createdAt:
+        type: string
+      currency:
+        example: EUR
+        type: string
+      date:
+        example: "2024-06-02T19:00:00Z"
+        type: string
+      description:
+        example: Romantic dinner at Eiffel Tower restaurant
+        type: string
+      expense_splits:
+        description: Related records
+        items:
+          $ref: '#/definitions/expenses.ExpenseSplit'
+        type: array
+      id:
+        type: string
+      is_recurring:
+        type: boolean
+      location:
+        example: Eiffel Tower, Paris
+        type: string
+      notes:
+        example: Included 18% service charge
+        type: string
+      other_category:
+        example: Local transport
+        type: string
+      paid_by:
+        description: Who paid and splits
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      payment_method:
+        allOf:
+        - $ref: '#/definitions/expenses.PaymentMethod'
+        example: card
+      receipt_url:
+        example: https://storage.example.com/receipts/abc123.pdf
+        type: string
+      split_method:
+        allOf:
+        - $ref: '#/definitions/expenses.SplitMethod'
+        example: equal
+      tags:
+        example:
+        - romantic
+        - special-occasion
+        items:
+          type: string
+        type: array
+      title:
+        example: Dinner at Le Jules Verne
+        type: string
+      trip_day:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      trip_hop:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      trip_plan:
+        description: Entity Relationships - expense can be linked to trip, hop, or
+          day
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      updatedAt:
+        type: string
+      vendor:
+        example: Le Jules Verne Restaurant
+        type: string
+    type: object
+  expenses.ExpenseCategory:
+    enum:
+    - accommodation
+    - transportation
+    - food
+    - activities
+    - shopping_gifts
+    - insurance
+    - visas_fees
+    - medical
+    - communication
+    - miscellaneous
+    - other
+    type: string
+    x-enum-comments:
+      ExpenseCategoryAccommodation: Hotels, lodging
+      ExpenseCategoryActivities: Tours, tickets, entertainment
+      ExpenseCategoryCommunication: Internet, phone, roaming
+      ExpenseCategoryFood: Meals, restaurants, groceries
+      ExpenseCategoryInsurance: Travel insurance
+      ExpenseCategoryMedical: Medical expenses
+      ExpenseCategoryMiscellaneous: Tips, laundry, etc.
+      ExpenseCategoryOther: Other expenses with custom notes
+      ExpenseCategoryShoppingGifts: Shopping and souvenirs
+      ExpenseCategoryTransportation: Flights, trains, taxis, etc.
+      ExpenseCategoryVisasFees: Visa processing fees
+    x-enum-descriptions:
+    - Hotels, lodging
+    - Flights, trains, taxis, etc.
+    - Meals, restaurants, groceries
+    - Tours, tickets, entertainment
+    - Shopping and souvenirs
+    - Travel insurance
+    - Visa processing fees
+    - Medical expenses
+    - Internet, phone, roaming
+    - Tips, laundry, etc.
+    - Other expenses with custom notes
+    x-enum-varnames:
+    - ExpenseCategoryAccommodation
+    - ExpenseCategoryTransportation
+    - ExpenseCategoryFood
+    - ExpenseCategoryActivities
+    - ExpenseCategoryShoppingGifts
+    - ExpenseCategoryInsurance
+    - ExpenseCategoryVisasFees
+    - ExpenseCategoryMedical
+    - ExpenseCategoryCommunication
+    - ExpenseCategoryMiscellaneous
+    - ExpenseCategoryOther
+  expenses.ExpenseCreateRequest:
+    properties:
+      activity:
+        type: string
+      amount:
+        type: number
+      category:
+        $ref: '#/definitions/expenses.ExpenseCategory'
+      currency:
+        type: string
+      date:
+        type: string
+      description:
+        type: string
+      is_recurring:
+        type: boolean
+      location:
+        type: string
+      notes:
+        type: string
+      other_category:
+        type: string
+      paid_by:
+        description: Who paid
+        type: string
+      payment_method:
+        $ref: '#/definitions/expenses.PaymentMethod'
+      receipt_url:
+        type: string
+      split_method:
+        $ref: '#/definitions/expenses.SplitMethod'
+      splits:
+        description: Splits (optional - if not provided, will auto-split based on
+          split_method)
+        items:
+          $ref: '#/definitions/expenses.ExpenseSplitRequest'
+        type: array
+      tags:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+      trip_day:
+        type: string
+      trip_hop:
+        description: Entity Relationships - expense can be linked to trip, hop, day,
+          or activity
+        type: string
+      vendor:
+        type: string
+    required:
+    - amount
+    - category
+    - currency
+    - date
+    - paid_by
+    - payment_method
+    - split_method
+    - title
+    type: object
+  expenses.ExpenseSettlement:
+    properties:
+      amount:
+        example: 150.5
+        type: number
+      createdAt:
+        type: string
+      currency:
+        example: USD
+        type: string
+      from_traveller:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      id:
+        type: string
+      notes:
+        example: Paid via bank transfer on 2024-06-15
+        type: string
+      payment_method:
+        example: bank_transfer
+        type: string
+      settled_at:
+        type: string
+      status:
+        example: pending
+        type: string
+      to_traveller:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      trip_plan:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  expenses.ExpenseSettlementRequest:
+    properties:
+      amount:
+        type: number
+      currency:
+        type: string
+      from_traveller:
+        type: string
+      notes:
+        type: string
+      payment_method:
+        type: string
+      to_traveller:
+        type: string
+    required:
+    - amount
+    - currency
+    - from_traveller
+    - to_traveller
+    type: object
+  expenses.ExpenseSplit:
+    properties:
+      amount:
+        example: 125.38
+        type: number
+      createdAt:
+        type: string
+      expense:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      id:
+        type: string
+      is_paid:
+        type: boolean
+      notes:
+        example: Paid via UPI
+        type: string
+      paid_at:
+        type: string
+      percentage:
+        example: 50
+        type: number
+      shares:
+        example: 2
+        type: integer
+      traveller:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  expenses.ExpenseSplitRequest:
+    properties:
+      amount:
+        type: number
+      is_paid:
+        type: boolean
+      notes:
+        type: string
+      percentage:
+        maximum: 100
+        minimum: 0
+        type: number
+      shares:
+        type: integer
+      traveller:
+        type: string
+    required:
+    - amount
+    - traveller
+    type: object
+  expenses.ExpenseSplitUpdateRequest:
+    properties:
+      amount:
+        type: number
+      is_paid:
+        type: boolean
+      notes:
+        type: string
+      paid_at:
+        type: string
+      percentage:
+        maximum: 100
+        minimum: 0
+        type: number
+      shares:
+        type: integer
+    type: object
+  expenses.ExpenseSummaryResponse:
+    properties:
+      category_totals:
+        additionalProperties:
+          format: float64
+          type: number
+        type: object
+      currency:
+        type: string
+      expense_count:
+        type: integer
+      pending_settlements:
+        items:
+          $ref: '#/definitions/expenses.SettlementSummary'
+        type: array
+      total_expenses:
+        type: number
+      traveller_totals:
+        additionalProperties:
+          $ref: '#/definitions/expenses.TravellerExpenseSummary'
+        type: object
+      trip_plan:
+        type: string
+    type: object
+  expenses.ExpenseUpdateRequest:
+    properties:
+      amount:
+        type: number
+      category:
+        $ref: '#/definitions/expenses.ExpenseCategory'
+      currency:
+        type: string
+      date:
+        type: string
+      description:
+        type: string
+      is_recurring:
+        type: boolean
+      location:
+        type: string
+      notes:
+        type: string
+      other_category:
+        type: string
+      payment_method:
+        $ref: '#/definitions/expenses.PaymentMethod'
+      receipt_url:
+        type: string
+      split_method:
+        $ref: '#/definitions/expenses.SplitMethod'
+      tags:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+      vendor:
+        type: string
+    type: object
+  expenses.PaymentMethod:
+    enum:
+    - cash
+    - card
+    - digital_pay
+    - bank_transfer
+    - cheque
+    - other
+    type: string
+    x-enum-comments:
+      PaymentMethodDigitalPay: UPI, PayPal, etc.
+    x-enum-descriptions:
+    - ""
+    - ""
+    - UPI, PayPal, etc.
+    - ""
+    - ""
+    - ""
+    x-enum-varnames:
+    - PaymentMethodCash
+    - PaymentMethodCard
+    - PaymentMethodDigitalPay
+    - PaymentMethodBankTransfer
+    - PaymentMethodCheque
+    - PaymentMethodOther
+  expenses.SettlementSummary:
+    properties:
+      amount:
+        type: number
+      currency:
+        type: string
+      from_traveller:
+        type: string
+      from_traveller_name:
+        type: string
+      to_traveller:
+        type: string
+      to_traveller_name:
+        type: string
+    type: object
+  expenses.SplitMethod:
+    enum:
+    - equal
+    - exact
+    - percentage
+    - shares
+    - paid_by
+    type: string
+    x-enum-comments:
+      SplitMethodEqual: Split equally among all participants
+      SplitMethodExact: Exact amounts specified for each person
+      SplitMethodPaidBy: Paid entirely by specific person
+      SplitMethodPercentage: Split by percentage
+      SplitMethodShares: Split by shares/units
+    x-enum-descriptions:
+    - Split equally among all participants
+    - Exact amounts specified for each person
+    - Split by percentage
+    - Split by shares/units
+    - Paid entirely by specific person
+    x-enum-varnames:
+    - SplitMethodEqual
+    - SplitMethodExact
+    - SplitMethodPercentage
+    - SplitMethodShares
+    - SplitMethodPaidBy
+  expenses.TravellerExpenseSummary:
+    properties:
+      balance:
+        description: Positive if owed money, negative if owes money
+        type: number
+      total_owed:
+        type: number
+      total_paid:
+        type: number
+      traveller_id:
+        type: string
+      traveller_name:
+        type: string
+    type: object
+  notifications.BatchSendRequest:
+    properties:
+      channel:
+        $ref: '#/definitions/notifications.NotificationChannel'
+      description:
+        type: string
+      metadata:
+        additionalProperties: true
+        type: object
+      name:
+        type: string
+      priority:
+        $ref: '#/definitions/notifications.NotificationPriority'
+      recipients:
+        items:
+          $ref: '#/definitions/notifications.RecipientData'
+        minItems: 1
+        type: array
+      scheduled_at:
+        type: string
+      template_id:
+        type: string
+      type:
+        $ref: '#/definitions/notifications.NotificationType'
+    required:
+    - channel
+    - name
+    - recipients
+    - type
+    type: object
+  notifications.JSONB:
+    additionalProperties: true
+    type: object
+  notifications.Notification:
+    properties:
+      archived_at:
+        type: string
+      audits:
+        items:
+          $ref: '#/definitions/notifications.NotificationAudit'
+        type: array
+      channel:
+        $ref: '#/definitions/notifications.NotificationChannel'
+      channel_data:
+        $ref: '#/definitions/notifications.JSONB'
+      channel_provider:
+        description: Channel-specific data
+        type: string
+      content:
+        type: string
+      content_html:
+        type: string
+      createdAt:
+        type: string
+      delivered_at:
+        type: string
+      entity_id:
+        type: string
+      entity_type:
+        description: e.g., "trip", "expense"
+        type: string
+      expires_at:
+        description: Expiry and archival
+        type: string
+      external_id:
+        description: External tracking
+        type: string
+      external_response:
+        $ref: '#/definitions/notifications.JSONB'
+      failed_at:
+        type: string
+      id:
+        type: string
+      last_error:
+        type: string
+      max_retries:
+        type: integer
+      metadata:
+        allOf:
+        - $ref: '#/definitions/notifications.JSONB'
+        description: Metadata
+      next_retry_at:
+        type: string
+      priority:
+        $ref: '#/definitions/notifications.NotificationPriority'
+      read_at:
+        type: string
+      recipient_device_id:
+        type: string
+      recipient_email:
+        description: Delivery information
+        type: string
+      recipient_id:
+        type: string
+      recipient_phone:
+        type: string
+      recipient_webhook:
+        type: string
+      retry_count:
+        description: Retry mechanism
+        type: integer
+      scheduled_at:
+        description: Tracking
+        type: string
+      sender_id:
+        description: Sender and Recipient
+        type: string
+      sent_at:
+        type: string
+      status:
+        $ref: '#/definitions/notifications.NotificationStatus'
+      subject:
+        description: Content
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      template:
+        allOf:
+        - $ref: '#/definitions/notifications.NotificationTemplate'
+        description: Relationships
+      template_data:
+        $ref: '#/definitions/notifications.JSONB'
+      template_id:
+        description: Template information
+        type: string
+      type:
+        allOf:
+        - $ref: '#/definitions/notifications.NotificationType'
+        description: Core fields
+      updatedAt:
+        type: string
+    type: object
+  notifications.NotificationAudit:
+    properties:
+      actor_id:
+        description: Actor
+        type: string
+      actor_type:
+        description: '"system", "user", "api"'
+        type: string
+      createdAt:
+        type: string
+      details:
+        $ref: '#/definitions/notifications.JSONB'
+      error_code:
+        type: string
+      error_message:
+        type: string
+      event:
+        description: Event details
+        type: string
+      id:
+        type: string
+      is_error:
+        description: Error tracking
+        type: boolean
+      message:
+        type: string
+      metadata:
+        allOf:
+        - $ref: '#/definitions/notifications.JSONB'
+        description: Additional metadata
+      notification:
+        allOf:
+        - $ref: '#/definitions/notifications.Notification'
+        description: Relationships
+      notification_id:
+        type: string
+      provider:
+        description: Provider information
+        type: string
+      provider_response:
+        type: string
+      request_data:
+        allOf:
+        - $ref: '#/definitions/notifications.JSONB'
+        description: Request/Response tracking
+      response_data:
+        $ref: '#/definitions/notifications.JSONB'
+      status:
+        $ref: '#/definitions/notifications.NotificationStatus'
+      timestamp:
+        description: Timing
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  notifications.NotificationBatch:
+    properties:
+      channel:
+        allOf:
+        - $ref: '#/definitions/notifications.NotificationChannel'
+        description: Batch properties
+      completed_at:
+        type: string
+      created_by:
+        description: Creator
+        type: string
+      createdAt:
+        type: string
+      delivered_count:
+        type: integer
+      description:
+        type: string
+      failed_count:
+        type: integer
+      id:
+        type: string
+      metadata:
+        allOf:
+        - $ref: '#/definitions/notifications.JSONB'
+        description: Metadata
+      name:
+        type: string
+      priority:
+        $ref: '#/definitions/notifications.NotificationPriority'
+      scheduled_at:
+        type: string
+      sent_count:
+        type: integer
+      started_at:
+        type: string
+      status:
+        description: Status
+        type: string
+      template_id:
+        description: Template
+        type: string
+      total_count:
+        description: Tracking
+        type: integer
+      type:
+        $ref: '#/definitions/notifications.NotificationType'
+      updatedAt:
+        type: string
+    type: object
+  notifications.NotificationChannel:
+    enum:
+    - email
+    - sms
+    - firebase
+    - push
+    - webhook
+    - in_app
+    type: string
+    x-enum-varnames:
+    - ChannelEmail
+    - ChannelSMS
+    - ChannelFirebase
+    - ChannelPush
+    - ChannelWebhook
+    - ChannelInApp
+  notifications.NotificationPreference:
+    properties:
+      channel:
+        $ref: '#/definitions/notifications.NotificationChannel'
+      createdAt:
+        type: string
+      id:
+        type: string
+      is_enabled:
+        description: Preference settings
+        type: boolean
+      max_per_day:
+        description: Frequency control
+        type: integer
+      max_per_month:
+        type: integer
+      max_per_week:
+        type: integer
+      metadata:
+        allOf:
+        - $ref: '#/definitions/notifications.JSONB'
+        description: Metadata
+      priority:
+        $ref: '#/definitions/notifications.NotificationPriority'
+      quiet_hours_end:
+        type: string
+      quiet_hours_start:
+        description: Quiet hours
+        type: string
+      timezone:
+        type: string
+      type:
+        $ref: '#/definitions/notifications.NotificationType'
+      updatedAt:
+        type: string
+      user_id:
+        type: string
+    type: object
+  notifications.NotificationPriority:
+    enum:
+    - low
+    - normal
+    - high
+    - critical
+    type: string
+    x-enum-varnames:
+    - PriorityLow
+    - PriorityNormal
+    - PriorityHigh
+    - PriorityCritical
+  notifications.NotificationStatus:
+    enum:
+    - pending
+    - queued
+    - sending
+    - sent
+    - delivered
+    - failed
+    - retrying
+    - cancelled
+    - read
+    - archived
+    type: string
+    x-enum-varnames:
+    - StatusPending
+    - StatusQueued
+    - StatusSending
+    - StatusSent
+    - StatusDelivered
+    - StatusFailed
+    - StatusRetrying
+    - StatusCancelled
+    - StatusRead
+    - StatusArchived
+  notifications.NotificationTemplate:
+    properties:
+      channel:
+        $ref: '#/definitions/notifications.NotificationChannel'
+      content:
+        type: string
+      content_html:
+        type: string
+      created_by:
+        type: string
+      createdAt:
+        type: string
+      default_metadata:
+        $ref: '#/definitions/notifications.JSONB'
+      default_priority:
+        allOf:
+        - $ref: '#/definitions/notifications.NotificationPriority'
+        description: Default values
+      description:
+        type: string
+      id:
+        type: string
+      is_active:
+        description: Template settings
+        type: boolean
+      locale:
+        description: Localization
+        type: string
+      name:
+        type: string
+      notifications:
+        description: Relationships
+        items:
+          $ref: '#/definitions/notifications.Notification'
+        type: array
+      subject:
+        description: Template content (supports Go template syntax)
+        type: string
+      type:
+        $ref: '#/definitions/notifications.NotificationType'
+      updated_by:
+        type: string
+      updatedAt:
+        type: string
+      variables:
+        allOf:
+        - $ref: '#/definitions/notifications.JSONB'
+        description: Template variables documentation
+      version:
+        type: integer
+    type: object
+  notifications.NotificationType:
+    enum:
+    - transactional
+    - marketing
+    - alert
+    - reminder
+    - system
+    type: string
+    x-enum-varnames:
+    - TypeTransactional
+    - TypeMarketing
+    - TypeAlert
+    - TypeReminder
+    - TypeSystem
+  notifications.RecipientData:
+    properties:
+      metadata:
+        additionalProperties: true
+        type: object
+      recipient_device_id:
+        type: string
+      recipient_email:
+        type: string
+      recipient_id:
+        type: string
+      recipient_phone:
+        type: string
+      template_data:
+        additionalProperties: true
+        type: object
+    type: object
+  notifications.SendRequest:
+    properties:
+      channel:
+        $ref: '#/definitions/notifications.NotificationChannel'
+      channel_data:
+        additionalProperties: true
+        type: object
+      channel_provider:
+        description: Channel-specific data
+        type: string
+      content:
+        type: string
+      content_html:
+        type: string
+      entity_id:
+        type: string
+      entity_type:
+        type: string
+      expires_at:
+        description: Expiry
+        type: string
+      max_retries:
+        description: Retry settings
+        type: integer
+      metadata:
+        additionalProperties: true
+        description: Metadata
+        type: object
+      priority:
+        $ref: '#/definitions/notifications.NotificationPriority'
+      recipient_device_id:
+        type: string
+      recipient_email:
+        description: Delivery details
+        type: string
+      recipient_id:
+        type: string
+      recipient_phone:
+        type: string
+      recipient_webhook:
+        type: string
+      sender_id:
+        description: Sender and Recipient
+        type: string
+      subject:
+        description: Content
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      type:
+        $ref: '#/definitions/notifications.NotificationType'
+    required:
+    - channel
+    - content
+    - type
+    type: object
+  notifications.TemplateSendRequest:
+    properties:
+      channel:
+        allOf:
+        - $ref: '#/definitions/notifications.NotificationChannel'
+        description: Override template defaults
+      entity_id:
+        type: string
+      entity_type:
+        type: string
+      metadata:
+        additionalProperties: true
+        description: Metadata
+        type: object
+      priority:
+        $ref: '#/definitions/notifications.NotificationPriority'
+      recipient_device_id:
+        type: string
+      recipient_email:
+        description: Delivery details
+        type: string
+      recipient_id:
+        type: string
+      recipient_phone:
+        type: string
+      recipient_webhook:
+        type: string
+      scheduled_at:
+        description: Schedule
+        type: string
+      sender_id:
+        description: Sender and Recipient
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      template_data:
+        additionalProperties: true
+        type: object
+      template_id:
+        type: string
+      template_name:
+        type: string
+    required:
+    - template_data
+    - template_name
+    type: object
+  trips.Activity:
+    properties:
+      activity_type:
+        allOf:
+        - $ref: '#/definitions/trips.ActivityType'
+        example: sightseeing
+      actual_cost:
+        example: 30
+        type: number
+      booking_ref:
+        example: EIF123456
+        type: string
+      contact_info:
+        example: +33 1 44 11 23 23
+        type: string
+      createdAt:
+        type: string
+      description:
+        example: Take elevator to the top, enjoy views
+        type: string
+      duration:
+        example: 120
+        type: integer
+      end_time:
+        example: "2024-06-01T12:00:00Z"
+        type: string
+      estimated_cost:
+        example: 25.5
+        type: number
+      id:
+        type: string
+      location:
+        example: Champ de Mars, 5 Avenue Anatole France
+        type: string
+      map_source:
+        example: google
+        type: string
+      name:
+        example: Visit Eiffel Tower
+        type: string
+      notes:
+        example: Book tickets in advance to avoid queue
+        type: string
+      place_id:
+        example: ChIJLU7jMh9u5kcR4PcOOO6p3I0
+        type: string
+      priority:
+        example: 1
+        type: integer
+      start_time:
+        example: "2024-06-01T10:00:00Z"
+        type: string
+      status:
+        example: planned
+        type: string
+      tags:
+        example:
+        - must-see
+        - photo-op
+        items:
+          type: string
+        type: array
+      trip_day:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      trip_hop:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  trips.ActivityType:
+    enum:
+    - transport
+    - sightseeing
+    - dining
+    - shopping
+    - entertainment
+    - adventure
+    - cultural
+    - business
+    - personal
+    - other
+    type: string
+    x-enum-comments:
+      ActivityTypeAdventure: Adventure sports, hiking
+      ActivityTypeBusiness: Work-related activities
+      ActivityTypeCultural: Museums, historical sites
+      ActivityTypeDining: Restaurants, cafes
+      ActivityTypeEntertainment: Shows, movies, etc.
+      ActivityTypeOther: Other activities
+      ActivityTypePersonal: Personal time, rest
+      ActivityTypeShopping: Shopping activities
+      ActivityTypeSightseeing: Tourist attractions
+      ActivityTypeTransport: Transportation between places
+    x-enum-descriptions:
+    - Transportation between places
+    - Tourist attractions
+    - Restaurants, cafes
+    - Shopping activities
+    - Shows, movies, etc.
+    - Adventure sports, hiking
+    - Museums, historical sites
+    - Work-related activities
+    - Personal time, rest
+    - Other activities
+    x-enum-varnames:
+    - ActivityTypeTransport
+    - ActivityTypeSightseeing
+    - ActivityTypeDining
+    - ActivityTypeShopping
+    - ActivityTypeEntertainment
+    - ActivityTypeAdventure
+    - ActivityTypeCultural
+    - ActivityTypeBusiness
+    - ActivityTypePersonal
+    - ActivityTypeOther
   trips.CreateTripRequest:
     properties:
       end_date:
@@ -38,6 +1268,608 @@ definitions:
     required:
     - place_name
     type: object
+  trips.Currency:
+    enum:
+    - INR
+    - USD
+    - GBP
+    - EUR
+    - CAD
+    - AUD
+    - JPY
+    - OTHER
+    type: string
+    x-enum-comments:
+      CurrencyAUD: Australian Dollar
+      CurrencyCAD: Canadian Dollar
+      CurrencyEUR: Euro
+      CurrencyGBP: British Pound
+      CurrencyINR: Indian Rupee
+      CurrencyJPY: Japanese Yen
+      CurrencyOther: Other currencies
+      CurrencyUSD: US Dollar
+    x-enum-descriptions:
+    - Indian Rupee
+    - US Dollar
+    - British Pound
+    - Euro
+    - Canadian Dollar
+    - Australian Dollar
+    - Japanese Yen
+    - Other currencies
+    x-enum-varnames:
+    - CurrencyINR
+    - CurrencyUSD
+    - CurrencyGBP
+    - CurrencyEUR
+    - CurrencyCAD
+    - CurrencyAUD
+    - CurrencyJPY
+    - CurrencyOther
+  trips.GeneratedActivity:
+    properties:
+      activity_type:
+        description: '"sightseeing", "dining", etc.'
+        type: string
+      description:
+        type: string
+      duration:
+        description: minutes
+        type: integer
+      end_time:
+        description: '"11:00"'
+        type: string
+      estimated_cost:
+        type: number
+      location:
+        type: string
+      name:
+        type: string
+      priority:
+        description: 1-5
+        type: integer
+      start_time:
+        description: '"09:00"'
+        type: string
+      tips:
+        type: string
+    type: object
+  trips.GeneratedDay:
+    properties:
+      activities:
+        items:
+          $ref: '#/definitions/trips.GeneratedActivity'
+        type: array
+      date:
+        description: ISO format
+        type: string
+      day_number:
+        type: integer
+      day_type:
+        description: '"travel", "explore", etc.'
+        type: string
+      description:
+        type: string
+      estimated_budget:
+        type: number
+      location:
+        type: string
+      notes:
+        type: string
+      title:
+        type: string
+      travel_time:
+        type: string
+    type: object
+  trips.GeneratedHop:
+    properties:
+      activities:
+        items:
+          type: string
+        type: array
+      city:
+        type: string
+      country:
+        type: string
+      description:
+        type: string
+      duration:
+        description: days
+        type: integer
+      end_date:
+        type: string
+      estimated_budget:
+        type: number
+      hop_order:
+        type: integer
+      name:
+        type: string
+      pois:
+        items:
+          type: string
+        type: array
+      restaurants:
+        items:
+          type: string
+        type: array
+      start_date:
+        description: ISO format
+        type: string
+      transportation:
+        type: string
+    type: object
+  trips.Stay:
+    properties:
+      createdAt:
+        type: string
+      end_date:
+        example: "2024-06-03T00:00:00Z"
+        type: string
+      google_location:
+        example: ChIJD7fiBh9u5kcRYJSMaMOCCwQ
+        type: string
+      id:
+        type: string
+      is_prepaid:
+        example: true
+        type: boolean
+      mapbox_location:
+        example: paris.hotel.123
+        type: string
+      payment_mode:
+        example: credit_card
+        type: string
+      start_date:
+        example: "2024-06-01T00:00:00Z"
+        type: string
+      stay_notes:
+        example: Near Eiffel Tower
+        type: string
+      stay_type:
+        example: hotel
+        type: string
+      trip_hop:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  trips.Traveller:
+    properties:
+      createdAt:
+        type: string
+      date_of_birth:
+        example: "1990-01-15T00:00:00Z"
+        type: string
+      dietary_restrictions:
+        example: Vegetarian, No nuts
+        type: string
+      email:
+        example: john.doe@example.com
+        type: string
+      emergency_contact:
+        example: 'Jane Doe: +1-555-9876'
+        type: string
+      first_name:
+        example: John
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      joined_at:
+        type: string
+      last_name:
+        example: Doe
+        type: string
+      medical_notes:
+        example: Allergic to shellfish
+        type: string
+      nationality:
+        example: US
+        type: string
+      notes:
+        example: Prefers window seats
+        type: string
+      passport_expiry:
+        example: "2030-01-15T00:00:00Z"
+        type: string
+      passport_number:
+        example: A12345678
+        type: string
+      phone:
+        example: +1-555-0123
+        type: string
+      role:
+        example: organizer
+        type: string
+      trip_plan:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      updatedAt:
+        type: string
+      user_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+    type: object
+  trips.TravellerInvitation:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      message:
+        type: string
+      role:
+        type: string
+    required:
+    - email
+    - first_name
+    - last_name
+    - role
+    type: object
+  trips.TripBudgetBreakdown:
+    properties:
+      accommodation:
+        type: number
+      activities:
+        type: number
+      food:
+        type: number
+      miscellaneous:
+        type: number
+      shopping:
+        type: number
+      transportation:
+        type: number
+    type: object
+  trips.TripDay:
+    properties:
+      activities:
+        items:
+          $ref: '#/definitions/trips.Activity'
+        type: array
+      actual_budget:
+        example: 175.25
+        type: number
+      createdAt:
+        type: string
+      date:
+        example: "2024-06-01"
+        format: date
+        type: string
+      day_number:
+        example: 1
+        type: integer
+      day_type:
+        allOf:
+        - $ref: '#/definitions/trips.TripDayType'
+        example: explore
+      end_location:
+        example: Eiffel Tower
+        type: string
+      estimated_budget:
+        example: 150.5
+        type: number
+      from_trip_hop:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      id:
+        type: string
+      notes:
+        example: Start early to avoid crowds
+        type: string
+      start_location:
+        example: Hotel de Paris
+        type: string
+      title:
+        example: Exploring Paris
+        type: string
+      to_trip_hop:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      trip_plan:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      updatedAt:
+        type: string
+      weather:
+        example: Sunny, 22°C
+        type: string
+    type: object
+  trips.TripDayType:
+    enum:
+    - travel
+    - explore
+    - relax
+    - business
+    - adventure
+    - cultural
+    type: string
+    x-enum-comments:
+      TripDayTypeAdventure: Adventure activities
+      TripDayTypeBusiness: Business activities
+      TripDayTypeCultural: Cultural experiences
+      TripDayTypeExplore: Day for exploring/sightseeing
+      TripDayTypeRelax: Rest/leisure day
+      TripDayTypeTravel: Day primarily for traveling between locations
+    x-enum-descriptions:
+    - Day primarily for traveling between locations
+    - Day for exploring/sightseeing
+    - Rest/leisure day
+    - Business activities
+    - Adventure activities
+    - Cultural experiences
+    x-enum-varnames:
+    - TripDayTypeTravel
+    - TripDayTypeExplore
+    - TripDayTypeRelax
+    - TripDayTypeBusiness
+    - TripDayTypeAdventure
+    - TripDayTypeCultural
+  trips.TripGenerationRequest:
+    properties:
+      budget:
+        type: number
+      currency:
+        $ref: '#/definitions/trips.Currency'
+      destination_ids:
+        items:
+          type: string
+        type: array
+      destinations:
+        items:
+          type: string
+        minItems: 1
+        type: array
+      end_date:
+        type: string
+      num_travelers:
+        minimum: 1
+        type: integer
+      pace_preference:
+        description: '"relaxed", "moderate", "fast"'
+        type: string
+      source:
+        type: string
+      source_place_id:
+        type: string
+      start_date:
+        type: string
+      trip_preferences:
+        description: e.g., ["adventure", "culture", "food"]
+        items:
+          type: string
+        type: array
+    required:
+    - destinations
+    - end_date
+    - num_travelers
+    - source
+    - start_date
+    type: object
+  trips.TripGenerationResponse:
+    properties:
+      best_time_to_visit:
+        type: string
+      budget_breakdown:
+        $ref: '#/definitions/trips.TripBudgetBreakdown'
+      considerations:
+        items:
+          type: string
+        type: array
+      daily_itinerary:
+        items:
+          $ref: '#/definitions/trips.GeneratedDay'
+        type: array
+      description:
+        type: string
+      estimated_budget:
+        type: number
+      hops:
+        items:
+          $ref: '#/definitions/trips.GeneratedHop'
+        type: array
+      recommended_mode:
+        description: '"flight", "train", "car", "bus", "mixed"'
+        type: string
+      total_days:
+        type: integer
+      travel_tips:
+        items:
+          type: string
+        type: array
+      trip_name:
+        type: string
+    type: object
+  trips.TripHop:
+    properties:
+      activities:
+        example:
+        - Seine River Cruise
+        - Walking Tour
+        items:
+          type: string
+        type: array
+      actual_spent:
+        example: 750.5
+        type: number
+      city:
+        example: Paris
+        type: string
+      country:
+        example: France
+        type: string
+      createdAt:
+        type: string
+      description:
+        example: 3 days exploring the City of Light
+        type: string
+      end_date:
+        example: "2024-06-03T00:00:00Z"
+        type: string
+      estimated_budget:
+        example: 800
+        type: number
+      hop_order:
+        example: 1
+        type: integer
+      id:
+        type: string
+      latitude:
+        example: 48.8566
+        type: number
+      longitude:
+        example: 2.3522
+        type: number
+      map_source:
+        example: google
+        type: string
+      name:
+        example: Paris Visit
+        type: string
+      next_hop:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      notes:
+        example: Visit Eiffel Tower
+        type: string
+      place_id:
+        example: ChIJD7fiBh9u5kcRYJSMaMOCCwQ
+        type: string
+      pois:
+        example:
+        - Eiffel Tower
+        - Louvre Museum
+        items:
+          type: string
+        type: array
+      previous_hop:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      region:
+        example: Île-de-France
+        type: string
+      restaurants:
+        example:
+        - Le Jules Verne
+        - L'As du Fallafel
+        items:
+          type: string
+        type: array
+      start_date:
+        example: "2024-06-01T00:00:00Z"
+        type: string
+      stays:
+        items:
+          $ref: '#/definitions/trips.Stay'
+        type: array
+      transportation:
+        example: train
+        type: string
+      trip_days:
+        items:
+          $ref: '#/definitions/trips.TripDay'
+        type: array
+      trip_plan:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  trips.TripPlan:
+    properties:
+      actual_spent:
+        example: 4750.25
+        type: number
+      budget:
+        example: 5000
+        type: number
+      createdAt:
+        type: string
+      currency:
+        allOf:
+        - $ref: '#/definitions/trips.Currency'
+        example: EUR
+      description:
+        example: A romantic 10-day getaway to France
+        type: string
+      end_date:
+        example: "2024-06-10T00:00:00Z"
+        type: string
+      hotels:
+        example:
+        - Hotel de Paris
+        - Le Bristol
+        items:
+          type: string
+        type: array
+      id:
+        type: string
+      is_public:
+        example: false
+        type: boolean
+      max_days:
+        example: 14
+        type: integer
+      min_days:
+        example: 7
+        type: integer
+      name:
+        example: Trip to Paris
+        type: string
+      notes:
+        example: Romantic getaway
+        type: string
+      participants:
+        example:
+        - john@example.com
+        - jane@example.com
+        items:
+          type: string
+        type: array
+      share_code:
+        example: PARIS2024ABC
+        type: string
+      start_date:
+        example: "2024-06-01T00:00:00Z"
+        type: string
+      status:
+        example: planning
+        type: string
+      tags:
+        example:
+        - romantic
+        - europe
+        items:
+          type: string
+        type: array
+      travel_mode:
+        example: flight
+        type: string
+      travellers:
+        items:
+          $ref: '#/definitions/trips.Traveller'
+        type: array
+      trip_days:
+        items:
+          $ref: '#/definitions/trips.TripDay'
+        type: array
+      trip_hops:
+        items:
+          $ref: '#/definitions/trips.TripHop'
+        type: array
+      trip_type:
+        example: leisure
+        type: string
+      updatedAt:
+        type: string
+      user_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact: {}
@@ -45,16 +1877,23 @@ info:
   title: Trip Planner API
   version: "1.0"
 paths:
-  /trips:
-    get:
-      description: Retrieve all trips along with associated user data
-      produces:
-      - application/json
+  /activities/{id}:
+    delete:
+      description: Delete an activity
+      parameters:
+      - description: Activity ID
+        in: path
+        name: id
+        required: true
+        type: string
       responses:
-        "200":
-          description: List of trips with user information
+        "204":
+          description: No content
+        "404":
+          description: Activity not found
           schema:
-            additionalProperties: true
+            additionalProperties:
+              type: string
             type: object
         "500":
           description: Internal server error
@@ -64,7 +1903,2600 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Get all trips with user information
+      summary: Delete an activity
+      tags:
+      - activities
+    put:
+      consumes:
+      - application/json
+      description: Update an existing activity
+      parameters:
+      - description: Activity ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated activity data
+        in: body
+        name: activity
+        required: true
+        schema:
+          $ref: '#/definitions/trips.Activity'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated activity
+          schema:
+            $ref: '#/definitions/trips.Activity'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Activity not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update an activity
+      tags:
+      - activities
+  /auth/google:
+    get:
+      description: Render Google OAuth login page
+      produces:
+      - text/html
+      responses:
+        "200":
+          description: HTML page
+          schema:
+            type: string
+      summary: Google OAuth login page
+      tags:
+      - authentication
+  /auth/google/begin:
+    get:
+      description: Start Google OAuth authentication process
+      produces:
+      - application/json
+      responses:
+        "302":
+          description: Redirect to Google
+          schema:
+            type: string
+        "400":
+          description: Authentication error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Begin Google OAuth flow
+      tags:
+      - authentication
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user and return JWT token
+      parameters:
+      - description: Login credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/accounts.AuthInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: JWT token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid credentials
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: User login
+      tags:
+      - authentication
+  /auth/signup:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user account with username and password
+      parameters:
+      - description: User credentials
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/accounts.AuthInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User created successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register a new user
+      tags:
+      - authentication
+  /documents/{id}:
+    delete:
+      description: Delete a document and its associated file
+      parameters:
+      - description: Document ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No content
+        "404":
+          description: Document not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a document
+      tags:
+      - documents
+    get:
+      description: Retrieve a document by ID
+      parameters:
+      - description: Document ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Document details
+          schema:
+            $ref: '#/definitions/documents.Document'
+        "404":
+          description: Document not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get a specific document
+      tags:
+      - documents
+    put:
+      consumes:
+      - application/json
+      description: Update an existing document
+      parameters:
+      - description: Document ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated document data
+        in: body
+        name: document
+        required: true
+        schema:
+          $ref: '#/definitions/documents.DocumentUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated document
+          schema:
+            $ref: '#/definitions/documents.Document'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Document not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update a document
+      tags:
+      - documents
+  /documents/{id}/download:
+    get:
+      description: Download the actual file content of a document
+      parameters:
+      - description: Document ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: Document file
+          schema:
+            type: file
+        "404":
+          description: Document not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Download a document
+      tags:
+      - documents
+  /expense-splits/{id}:
+    put:
+      consumes:
+      - application/json
+      description: Update payment status or amount for an expense split
+      parameters:
+      - description: Expense Split ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated split data
+        in: body
+        name: split
+        required: true
+        schema:
+          $ref: '#/definitions/expenses.ExpenseSplitUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated expense split
+          schema:
+            $ref: '#/definitions/expenses.ExpenseSplit'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Expense split not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update an expense split
+      tags:
+      - expense-splits
+  /expense-splits/{id}/mark-paid:
+    post:
+      description: Mark a specific expense split as paid by the traveller
+      parameters:
+      - description: Expense Split ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Updated expense split
+          schema:
+            $ref: '#/definitions/expenses.ExpenseSplit'
+        "404":
+          description: Expense split not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Mark an expense split as paid
+      tags:
+      - expense-splits
+  /expenses/{id}:
+    delete:
+      description: Delete an expense and all associated splits
+      parameters:
+      - description: Expense ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No content
+        "404":
+          description: Expense not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete an expense
+      tags:
+      - expenses
+    get:
+      description: Retrieve an expense by ID with all splits
+      parameters:
+      - description: Expense ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Expense details
+          schema:
+            $ref: '#/definitions/expenses.Expense'
+        "404":
+          description: Expense not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get a specific expense
+      tags:
+      - expenses
+    put:
+      consumes:
+      - application/json
+      description: Update an existing expense
+      parameters:
+      - description: Expense ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated expense data
+        in: body
+        name: expense
+        required: true
+        schema:
+          $ref: '#/definitions/expenses.ExpenseUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated expense
+          schema:
+            $ref: '#/definitions/expenses.Expense'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Expense not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update an expense
+      tags:
+      - expenses
+  /notifications:
+    get:
+      description: List notifications with optional filters
+      parameters:
+      - description: Filter by channel
+        in: query
+        name: channel
+        type: string
+      - description: Filter by type
+        in: query
+        name: type
+        type: string
+      - description: Filter by status
+        in: query
+        name: status
+        type: string
+      - description: Filter by recipient ID
+        in: query
+        name: recipient_id
+        type: string
+      - default: 50
+        description: Limit results
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Offset results
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/notifications.Notification'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List notifications
+      tags:
+      - notifications
+  /notifications/{id}:
+    get:
+      description: Get notification details by ID
+      parameters:
+      - description: Notification ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/notifications.Notification'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get notification
+      tags:
+      - notifications
+  /notifications/{id}/audit:
+    get:
+      description: Get complete audit trail for a notification
+      parameters:
+      - description: Notification ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/notifications.NotificationAudit'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get notification audit trail
+      tags:
+      - notifications
+  /notifications/{id}/cancel:
+    post:
+      description: Cancel a pending or scheduled notification
+      parameters:
+      - description: Notification ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Cancel notification
+      tags:
+      - notifications
+  /notifications/{id}/retry:
+    post:
+      description: Retry a failed notification
+      parameters:
+      - description: Notification ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Retry notification
+      tags:
+      - notifications
+  /notifications/preferences:
+    post:
+      consumes:
+      - application/json
+      description: Set notification preference for a user
+      parameters:
+      - description: Preference details
+        in: body
+        name: preference
+        required: true
+        schema:
+          $ref: '#/definitions/notifications.NotificationPreference'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/notifications.NotificationPreference'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Set user preference
+      tags:
+      - preferences
+  /notifications/preferences/{user_id}:
+    get:
+      description: Get notification preferences for a user
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/notifications.NotificationPreference'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get user preferences
+      tags:
+      - preferences
+  /notifications/send:
+    post:
+      consumes:
+      - application/json
+      description: Send a single notification through specified channel
+      parameters:
+      - description: Notification details
+        in: body
+        name: notification
+        required: true
+        schema:
+          $ref: '#/definitions/notifications.SendRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/notifications.Notification'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Send a notification
+      tags:
+      - notifications
+  /notifications/send/batch:
+    post:
+      consumes:
+      - application/json
+      description: Send multiple notifications in a batch
+      parameters:
+      - description: Batch notification details
+        in: body
+        name: batch
+        required: true
+        schema:
+          $ref: '#/definitions/notifications.BatchSendRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/notifications.NotificationBatch'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Send batch notifications
+      tags:
+      - notifications
+  /notifications/send/template:
+    post:
+      consumes:
+      - application/json
+      description: Send a notification using a predefined template
+      parameters:
+      - description: Template notification details
+        in: body
+        name: template
+        required: true
+        schema:
+          $ref: '#/definitions/notifications.TemplateSendRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/notifications.Notification'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Send notification from template
+      tags:
+      - notifications
+  /notifications/templates:
+    get:
+      description: List all notification templates
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/notifications.NotificationTemplate'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List templates
+      tags:
+      - templates
+    post:
+      consumes:
+      - application/json
+      description: Create a new notification template
+      parameters:
+      - description: Template details
+        in: body
+        name: template
+        required: true
+        schema:
+          $ref: '#/definitions/notifications.NotificationTemplate'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/notifications.NotificationTemplate'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Create template
+      tags:
+      - templates
+  /notifications/templates/{id}:
+    delete:
+      description: Delete a template
+      parameters:
+      - description: Template ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Delete template
+      tags:
+      - templates
+    get:
+      description: Get template details by ID
+      parameters:
+      - description: Template ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/notifications.NotificationTemplate'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get template
+      tags:
+      - templates
+    put:
+      consumes:
+      - application/json
+      description: Update an existing template
+      parameters:
+      - description: Template ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Template details
+        in: body
+        name: template
+        required: true
+        schema:
+          $ref: '#/definitions/notifications.NotificationTemplate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/notifications.NotificationTemplate'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update template
+      tags:
+      - templates
+  /places/autocomplete/search:
+    get:
+      description: Get place suggestions from Mapbox API based on search text
+      parameters:
+      - description: Search text for autocomplete
+        in: query
+        name: text
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Autocomplete suggestions
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Search for place suggestions using autocomplete
+      tags:
+      - places
+  /places/details:
+    get:
+      description: Get detailed place information from Google Maps API using place
+        ID
+      parameters:
+      - description: Google Maps Place ID
+        in: query
+        name: place_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Place details
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get Google Maps place details
+      tags:
+      - places
+  /places/retrieve/{id}:
+    get:
+      description: Get detailed place information from Mapbox API using a place ID
+        obtained from autocomplete
+      parameters:
+      - description: Mapbox Place ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 'ISO language code (default: en)'
+        in: query
+        name: language
+        type: string
+      - description: Enable ETA calculation (only 'navigation' allowed)
+        in: query
+        name: eta_type
+        type: string
+      - description: Navigation profile for ETA (driving, walking, cycling)
+        in: query
+        name: navigation_profile
+        type: string
+      - description: Origin coordinates for ETA calculation (longitude,latitude)
+        in: query
+        name: origin
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Place details
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Retrieve detailed place information using Mapbox ID
+      tags:
+      - places
+  /stays/{id}:
+    delete:
+      description: Delete a stay
+      parameters:
+      - description: Stay ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No content
+        "404":
+          description: Stay not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a stay
+      tags:
+      - stays
+    get:
+      description: Retrieve a stay by ID
+      parameters:
+      - description: Stay ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Stay details
+          schema:
+            $ref: '#/definitions/trips.Stay'
+        "404":
+          description: Stay not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get a specific stay
+      tags:
+      - stays
+    put:
+      consumes:
+      - application/json
+      description: Update an existing stay
+      parameters:
+      - description: Stay ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated stay data
+        in: body
+        name: stay
+        required: true
+        schema:
+          $ref: '#/definitions/trips.Stay'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated stay
+          schema:
+            $ref: '#/definitions/trips.Stay'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Stay not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update a stay
+      tags:
+      - stays
+  /travellers/{id}:
+    delete:
+      description: Remove a traveller from a trip plan (soft delete by setting is_active=false)
+      parameters:
+      - description: Traveller ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No content
+        "404":
+          description: Traveller not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a traveller
+      tags:
+      - travellers
+    get:
+      description: Retrieve a traveller by ID
+      parameters:
+      - description: Traveller ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Traveller details
+          schema:
+            $ref: '#/definitions/trips.Traveller'
+        "404":
+          description: Traveller not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get a specific traveller
+      tags:
+      - travellers
+    put:
+      consumes:
+      - application/json
+      description: Update an existing traveller
+      parameters:
+      - description: Traveller ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated traveller data
+        in: body
+        name: traveller
+        required: true
+        schema:
+          $ref: '#/definitions/trips.Traveller'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated traveller
+          schema:
+            $ref: '#/definitions/trips.Traveller'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Traveller not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update a traveller
+      tags:
+      - travellers
+  /trip-days/{id}:
+    delete:
+      description: Delete a trip day and all associated activities
+      parameters:
+      - description: Trip Day ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No content
+        "404":
+          description: Trip day not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a trip day
+      tags:
+      - trip-days
+    get:
+      description: Retrieve a trip day by ID with all activities
+      parameters:
+      - description: Trip Day ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Trip day details
+          schema:
+            $ref: '#/definitions/trips.TripDay'
+        "404":
+          description: Trip day not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get a specific trip day
+      tags:
+      - trip-days
+    put:
+      consumes:
+      - application/json
+      description: Update an existing trip day
+      parameters:
+      - description: Trip Day ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated trip day data
+        in: body
+        name: day
+        required: true
+        schema:
+          $ref: '#/definitions/trips.TripDay'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated trip day
+          schema:
+            $ref: '#/definitions/trips.TripDay'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Trip day not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update a trip day
+      tags:
+      - trip-days
+  /trip-hops/{id}:
+    delete:
+      description: Delete a trip hop and all related data
+      parameters:
+      - description: Trip Hop ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No content
+        "404":
+          description: Trip hop not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a trip hop
+      tags:
+      - trip-hops
+    put:
+      consumes:
+      - application/json
+      description: Update an existing trip hop
+      parameters:
+      - description: Trip Hop ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated trip hop data
+        in: body
+        name: hop
+        required: true
+        schema:
+          $ref: '#/definitions/trips.TripHop'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated trip hop
+          schema:
+            $ref: '#/definitions/trips.TripHop'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Trip hop not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update a trip hop
+      tags:
+      - trip-hops
+  /trip-hops/{id}/stays:
+    get:
+      description: Retrieve all stays for a specific trip hop
+      parameters:
+      - description: Trip Hop ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of stays
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Trip hop not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get stays for a trip hop
+      tags:
+      - stays
+    post:
+      consumes:
+      - application/json
+      description: Add a new stay to a trip hop
+      parameters:
+      - description: Trip Hop ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Stay data
+        in: body
+        name: stay
+        required: true
+        schema:
+          $ref: '#/definitions/trips.Stay'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created stay
+          schema:
+            $ref: '#/definitions/trips.Stay'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Trip hop not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a new stay
+      tags:
+      - stays
+  /trip-plans:
+    get:
+      description: Retrieve all trip plans created by the current user with optional
+        pagination
+      parameters:
+      - description: 'Number of records to return (default: 50)'
+        in: query
+        name: limit
+        type: integer
+      - description: 'Number of records to skip (default: 0)'
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of trip plans
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all trip plans for the authenticated user
+      tags:
+      - trip-plans
+  /trip-plans/{id}:
+    delete:
+      description: Delete a trip plan and all related data
+      parameters:
+      - description: Trip Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No content
+        "404":
+          description: Trip plan not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a trip plan
+      tags:
+      - trip-plans
+    get:
+      description: Retrieve a trip plan by ID with all related data
+      parameters:
+      - description: Trip Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Trip plan details
+          schema:
+            $ref: '#/definitions/trips.TripPlan'
+        "404":
+          description: Trip plan not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get a specific trip plan
+      tags:
+      - trip-plans
+    put:
+      consumes:
+      - application/json
+      description: Update an existing trip plan
+      parameters:
+      - description: Trip Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated trip plan data
+        in: body
+        name: trip
+        required: true
+        schema:
+          $ref: '#/definitions/trips.TripPlan'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated trip plan
+          schema:
+            $ref: '#/definitions/trips.TripPlan'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Trip plan not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update a trip plan
+      tags:
+      - trip-plans
+  /trip-plans/{id}/activities:
+    get:
+      description: Retrieve all activities for a specific trip plan across all days
+      parameters:
+      - description: Trip Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of activities
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Trip plan not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get activities for a trip plan
+      tags:
+      - activities
+    post:
+      consumes:
+      - application/json
+      description: Add a new activity to a trip plan
+      parameters:
+      - description: Trip Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Activity data
+        in: body
+        name: activity
+        required: true
+        schema:
+          $ref: '#/definitions/trips.Activity'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created activity
+          schema:
+            $ref: '#/definitions/trips.Activity'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Trip plan not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a new activity
+      tags:
+      - activities
+  /trip-plans/{id}/complete:
+    get:
+      description: Retrieve a trip plan with all hops, days, travellers, stays and
+        activities in a single response
+      parameters:
+      - description: Trip Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Complete trip plan details
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Trip plan not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get complete trip details with all related data
+      tags:
+      - trip-plans
+  /trip-plans/{trip_id}/itinerary:
+    get:
+      description: Get activities and itinerary for all days of a trip, organized
+        by date
+      parameters:
+      - description: Trip Plan ID
+        in: path
+        name: trip_id
+        required: true
+        type: string
+      - description: Specific day number to get (optional)
+        in: query
+        name: day
+        type: integer
+      - description: Specific date to get (YYYY-MM-DD format, optional)
+        in: query
+        name: date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Daily itinerary
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Trip plan not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get daily itinerary for a trip
+      tags:
+      - itinerary
+  /trip-plans/{trip_id}/itinerary/day/{day_number}:
+    get:
+      description: Get detailed itinerary for a specific trip day including all activities
+      parameters:
+      - description: Trip Plan ID
+        in: path
+        name: trip_id
+        required: true
+        type: string
+      - description: Day number
+        in: path
+        name: day_number
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Day itinerary
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Trip day not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get itinerary for a specific day
+      tags:
+      - itinerary
+  /trip-plans/{trip_plan_id}/days:
+    get:
+      description: Retrieve all trip days for a specific trip plan
+      parameters:
+      - description: Trip Plan ID
+        in: path
+        name: trip_plan_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of trip days
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Trip plan not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get trip days for a trip plan
+      tags:
+      - trip-days
+    post:
+      consumes:
+      - application/json
+      description: Add a new day to a trip plan
+      parameters:
+      - description: Trip Plan ID
+        in: path
+        name: trip_plan_id
+        required: true
+        type: string
+      - description: Trip day data
+        in: body
+        name: day
+        required: true
+        schema:
+          $ref: '#/definitions/trips.TripDay'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created trip day
+          schema:
+            $ref: '#/definitions/trips.TripDay'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Trip plan not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a new trip day
+      tags:
+      - trip-days
+  /trip-plans/{trip_plan_id}/hops:
+    get:
+      description: Retrieve all trip hops for a specific trip plan
+      parameters:
+      - description: Trip Plan ID
+        in: path
+        name: trip_plan_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of trip hops
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Trip plan not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get trip hops for a trip plan
+      tags:
+      - trip-hops
+    post:
+      consumes:
+      - application/json
+      description: Add a new hop to a trip plan
+      parameters:
+      - description: Trip Plan ID
+        in: path
+        name: trip_plan_id
+        required: true
+        type: string
+      - description: Trip hop data
+        in: body
+        name: hop
+        required: true
+        schema:
+          $ref: '#/definitions/trips.TripHop'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created trip hop
+          schema:
+            $ref: '#/definitions/trips.TripHop'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Trip plan not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a new trip hop
+      tags:
+      - trip-hops
+  /trip-plans/{trip_plan_id}/travellers:
+    get:
+      description: Retrieve all travellers for a specific trip plan
+      parameters:
+      - description: Trip Plan ID
+        in: path
+        name: trip_plan_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of travellers
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Trip plan not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get travellers for a trip plan
+      tags:
+      - travellers
+    post:
+      consumes:
+      - application/json
+      description: Add a new traveller to a trip plan
+      parameters:
+      - description: Trip Plan ID
+        in: path
+        name: trip_plan_id
+        required: true
+        type: string
+      - description: Traveller data
+        in: body
+        name: traveller
+        required: true
+        schema:
+          $ref: '#/definitions/trips.Traveller'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created traveller
+          schema:
+            $ref: '#/definitions/trips.Traveller'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Trip plan not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a new traveller
+      tags:
+      - travellers
+  /trip-plans/{trip_plan_id}/travellers/invite:
+    post:
+      consumes:
+      - application/json
+      description: Send an invitation to a traveller to join a trip
+      parameters:
+      - description: Trip Plan ID
+        in: path
+        name: trip_plan_id
+        required: true
+        type: string
+      - description: Invitation data
+        in: body
+        name: invitation
+        required: true
+        schema:
+          $ref: '#/definitions/trips.TravellerInvitation'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Invitation sent
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Trip plan not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Invite a traveller via email
+      tags:
+      - travellers
+  /trip/{id}/documents:
+    get:
+      description: Retrieve all documents for a specific trip plan with optional filtering
+      parameters:
+      - description: Trip Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Filter by category
+        in: query
+        name: category
+        type: string
+      - description: Filter by entity type
+        in: query
+        name: entity_type
+        type: string
+      - description: 'Number of records to return (default: 50)'
+        in: query
+        name: limit
+        type: integer
+      - description: 'Number of records to skip (default: 0)'
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of documents
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Trip plan not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get documents for a trip plan
+      tags:
+      - documents
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload a new document to a trip plan
+      parameters:
+      - description: Trip Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Document file
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: Display name of the document
+        in: formData
+        name: name
+        required: true
+        type: string
+      - description: Document category
+        in: formData
+        name: category
+        required: true
+        type: string
+      - description: Optional description
+        in: formData
+        name: description
+        type: string
+      - description: Optional user notes
+        in: formData
+        name: notes
+        type: string
+      - description: Comma-separated tags
+        in: formData
+        name: tags
+        type: string
+      - description: Optional expiration date (RFC3339 format)
+        in: formData
+        name: expires_at
+        type: string
+      - description: Whether the document is publicly accessible
+        in: formData
+        name: is_public
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created document
+          schema:
+            $ref: '#/definitions/documents.Document'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Trip plan not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Upload a document for a trip plan
+      tags:
+      - documents
+  /trip/{id}/expense-summary:
+    get:
+      description: Get comprehensive expense summary including totals, splits, and
+        settlements
+      parameters:
+      - description: Trip Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Expense summary
+          schema:
+            $ref: '#/definitions/expenses.ExpenseSummaryResponse'
+        "404":
+          description: Trip plan not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get expense summary for a trip
+      tags:
+      - expenses
+  /trip/{id}/expenses:
+    get:
+      description: Retrieve all expenses for a specific trip plan with optional filtering
+      parameters:
+      - description: Trip Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Filter by category
+        in: query
+        name: category
+        type: string
+      - description: Filter by traveller who paid
+        in: query
+        name: traveller
+        type: string
+      - description: 'Number of records to return (default: 50)'
+        in: query
+        name: limit
+        type: integer
+      - description: 'Number of records to skip (default: 0)'
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of expenses
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Trip plan not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get expenses for a trip plan
+      tags:
+      - expenses
+    post:
+      consumes:
+      - application/json
+      description: Add a new expense to a trip plan
+      parameters:
+      - description: Trip Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Expense data
+        in: body
+        name: expense
+        required: true
+        schema:
+          $ref: '#/definitions/expenses.ExpenseCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created expense
+          schema:
+            $ref: '#/definitions/expenses.Expense'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Trip plan not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a new expense
+      tags:
+      - expenses
+  /trip/{id}/settlements:
+    get:
+      description: Retrieve all settlements for a specific trip plan
+      parameters:
+      - description: Trip Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of settlements
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Trip plan not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get settlements for a trip plan
+      tags:
+      - settlements
+    post:
+      consumes:
+      - application/json
+      description: Record a payment between travellers to settle expenses
+      parameters:
+      - description: Trip Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Settlement data
+        in: body
+        name: settlement
+        required: true
+        schema:
+          $ref: '#/definitions/expenses.ExpenseSettlementRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created settlement
+          schema:
+            $ref: '#/definitions/expenses.ExpenseSettlement'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Trip plan not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a settlement between travellers
+      tags:
+      - settlements
+  /trip/generate:
+    post:
+      consumes:
+      - application/json
+      description: Uses Claude AI to generate a complete trip plan with hops, days,
+        and activities
+      parameters:
+      - description: Trip generation parameters
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/trips.TripGenerationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Generated trip plan with preview
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Generate trip using AI
+      tags:
+      - trips
+  /trip/generate/confirm:
+    post:
+      consumes:
+      - application/json
+      description: Saves an AI-generated trip plan to the database with all hops,
+        days, and activities
+      parameters:
+      - description: AI-generated trip plan to save
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/trips.TripGenerationResponse'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created trip with ID
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Create trip from AI-generated plan
+      tags:
+      - trips
+  /trip/suggest-cities:
+    get:
+      consumes:
+      - application/json
+      description: Get AI-powered suggestions for additional cities to include in
+        a multi-city trip
+      parameters:
+      - description: Source city
+        in: query
+        name: source
+        required: true
+        type: string
+      - description: Primary destination
+        in: query
+        name: destination
+        required: true
+        type: string
+      - description: Trip duration in days
+        in: query
+        name: duration
+        required: true
+        type: integer
+      - description: Comma-separated preferences (e.g., 'adventure,culture')
+        in: query
+        name: preferences
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: City suggestions
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get multi-city suggestions
       tags:
       - trips
   /trips/create:
@@ -111,6 +4543,28 @@ paths:
       summary: Create a new trip
       tags:
       - trips
+  /user/profile:
+    get:
+      description: Retrieve current authenticated user's profile
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User profile
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get user profile
+      tags:
+      - user
 securityDefinitions:
   BearerAuth:
     description: Type "Bearer" followed by a space and JWT token.

@@ -24,7 +24,7 @@ var claudeService = NewClaudeService()
 // @Success 200 {object} map[string]interface{} "Generated trip plan with preview"
 // @Failure 400 {object} map[string]interface{} "Bad request"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /api/v1/trip/generate [post]
+// @Router /trip/generate [post]
 func GenerateTripWithAI(c *gin.Context) {
 	var req TripGenerationRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -68,7 +68,7 @@ func GenerateTripWithAI(c *gin.Context) {
 // @Success 201 {object} map[string]interface{} "Created trip with ID"
 // @Failure 400 {object} map[string]interface{} "Bad request"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /api/v1/trip/generate/confirm [post]
+// @Router /trip/generate/confirm [post]
 func CreateTripFromAIGeneration(c *gin.Context) {
 	var generatedPlan TripGenerationResponse
 	if err := c.ShouldBindJSON(&generatedPlan); err != nil {
@@ -349,7 +349,7 @@ func CreateTripFromAIGeneration(c *gin.Context) {
 // @Success 200 {object} map[string]interface{} "City suggestions"
 // @Failure 400 {object} map[string]interface{} "Bad request"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /api/v1/trip/suggest-cities [get]
+// @Router /trip/suggest-cities [get]
 func GetMultiCitySuggestions(c *gin.Context) {
 	source := c.Query("source")
 	destination := c.Query("destination")

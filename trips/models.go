@@ -123,7 +123,7 @@ type Stay struct {
 // TripDay represents a specific day within a trip, can span across trip hops
 type TripDay struct {
 	core.BaseModel
-	Date            core.Date   `json:"date" gorm:"not null" example:"2024-06-01" description:"The specific date of this day"`
+	Date            core.Date   `json:"date" gorm:"not null" swaggertype:"string" format:"date" example:"2024-06-01" description:"The specific date of this day"`
 	DayNumber       int         `json:"day_number" gorm:"not null" example:"1" description:"Sequential day number in the trip (1-based)"`
 	Title           *string     `json:"title" example:"Exploring Paris" description:"Title/theme for the day"`
 	DayType         TripDayType `json:"day_type" gorm:"type:varchar(20);not null" example:"explore" description:"Type of day (travel, explore, relax, etc.)"`

@@ -109,10 +109,10 @@ func TestWebhookProvider_BuildPayload(t *testing.T) {
 		Content:        "Test Content",
 		EntityType:     "trip",
 		EntityID:       &entityID,
-		Metadata: map[string]interface{}{
+		Metadata: notifications.JSONB{
 			"key": "value",
 		},
-		ChannelData: map[string]interface{}{
+		ChannelData: notifications.JSONB{
 			"custom": "data",
 		},
 		Tags: []string{"tag1", "tag2"},
@@ -137,12 +137,12 @@ func TestWebhookProvider_BuildPayload(t *testing.T) {
 	assert.Equal(t, "trip", payload["entity_type"])
 	assert.Equal(t, entityID.String(), payload["entity_id"])
 
-	metadata, ok := payload["metadata"].(map[string]interface{})
-	assert.True(t, ok)
+	metadata, ok := payload["metadata"].(notifications.JSONB)
+	assert.True(t, ok, "metadata should be present in payload")
 	assert.Equal(t, "value", metadata["key"])
 
-	channelData, ok := payload["channel_data"].(map[string]interface{})
-	assert.True(t, ok)
+	channelData, ok := payload["channel_data"].(notifications.JSONB)
+	assert.True(t, ok, "channel_data should be present in payload")
 	assert.Equal(t, "data", channelData["custom"])
 
 	tags, ok := payload["tags"].([]string)

@@ -165,9 +165,9 @@ func (wp *WebhookProvider) GetCapabilities() notifications.ProviderCapabilities 
 func (wp *WebhookProvider) buildPayload(notification *notifications.Notification) map[string]interface{} {
 	payload := map[string]interface{}{
 		"id":         notification.ID.String(),
-		"type":       notification.Type,
-		"channel":    notification.Channel,
-		"priority":   notification.Priority,
+		"type":       string(notification.Type),
+		"channel":    string(notification.Channel),
+		"priority":   string(notification.Priority),
 		"subject":    notification.Subject,
 		"content":    notification.Content,
 		"created_at": notification.CreatedAt,

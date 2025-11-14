@@ -121,6 +121,16 @@ func PlaceRetrieve(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": res})
 }
 
+// PlaceDetails godoc
+// @Summary Get Google Maps place details
+// @Description Get detailed place information from Google Maps API using place ID
+// @Tags places
+// @Produce json
+// @Security BearerAuth
+// @Param place_id query string true "Google Maps Place ID"
+// @Success 200 {object} map[string]interface{} "Place details"
+// @Failure 400 {object} map[string]string "Bad request"
+// @Router /places/details [get]
 func PlaceDetails(c *gin.Context) {
 
 	apiKey := os.Getenv("GOOGLE_API_KEY")

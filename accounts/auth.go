@@ -14,6 +14,16 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// CreateUser godoc
+// @Summary Register a new user
+// @Description Create a new user account with username and password
+// @Tags authentication
+// @Accept json
+// @Produce json
+// @Param user body AuthInput true "User credentials"
+// @Success 200 {object} map[string]interface{} "User created successfully"
+// @Failure 400 {object} map[string]string "Bad request"
+// @Router /auth/signup [post]
 func CreateUser(c *gin.Context) {
 
 	var authInput AuthInput
@@ -48,6 +58,16 @@ func CreateUser(c *gin.Context) {
 
 }
 
+// Login godoc
+// @Summary User login
+// @Description Authenticate user and return JWT token
+// @Tags authentication
+// @Accept json
+// @Produce json
+// @Param credentials body AuthInput true "Login credentials"
+// @Success 200 {object} map[string]string "JWT token"
+// @Failure 400 {object} map[string]string "Invalid credentials"
+// @Router /auth/login [post]
 func Login(c *gin.Context) {
 
 	var authInput AuthInput
@@ -86,6 +106,15 @@ func Login(c *gin.Context) {
 	})
 }
 
+// GetUserProfile godoc
+// @Summary Get user profile
+// @Description Retrieve current authenticated user's profile
+// @Tags user
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} map[string]interface{} "User profile"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Router /user/profile [get]
 func GetUserProfile(c *gin.Context) {
 
 	user, _ := c.Get("currentUser")
@@ -95,12 +124,27 @@ func GetUserProfile(c *gin.Context) {
 	})
 }
 
+// GoogleOAuthLogin godoc
+// @Summary Google OAuth login page
+// @Description Render Google OAuth login page
+// @Tags authentication
+// @Produce html
+// @Success 200 {string} string "HTML page"
+// @Router /auth/google [get]
 func GoogleOAuthLogin(c *gin.Context) {
 	c.HTML(http.StatusOK, "index.tmpl", gin.H{
 		"title": "Google Login",
 	})
 }
 
+// GoogleOAuthBegin godoc
+// @Summary Begin Google OAuth flow
+// @Description Start Google OAuth authentication process
+// @Tags authentication
+// @Produce json
+// @Success 302 {string} string "Redirect to Google"
+// @Failure 400 {object} map[string]string "Authentication error"
+// @Router /auth/google/begin [get]
 func GoogleOAuthBegin(c *gin.Context) {
 	key := "Secret-session-key" // Replace with your SESSION_SECRET or similar
 	maxAge := 86400 * 30        // 30 days
