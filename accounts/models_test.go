@@ -2,7 +2,6 @@ package accounts
 
 import (
 	"testing"
-	"triplanner/core"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"

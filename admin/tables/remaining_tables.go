@@ -4,13 +4,12 @@ import (
 	"github.com/GoAdminGroup/go-admin/context"
 	"github.com/GoAdminGroup/go-admin/modules/db"
 	"github.com/GoAdminGroup/go-admin/plugins/admin/modules/table"
-	"github.com/GoAdminGroup/go-admin/template/types"
 	"github.com/GoAdminGroup/go-admin/template/types/form"
 )
 
 // GetTripHopTable returns the trip hop table configuration
 func GetTripHopTable(ctx *context.Context) table.Table {
-	tripHopTable := table.NewDefaultTable(table.DefaultConfig())
+	tripHopTable := table.NewDefaultTable(ctx)
 
 	info := tripHopTable.GetInfo().HideFilterArea()
 	info.AddField("ID", "id", db.Text)
@@ -33,7 +32,7 @@ func GetTripHopTable(ctx *context.Context) table.Table {
 
 // GetTripDayTable returns the trip day table configuration
 func GetTripDayTable(ctx *context.Context) table.Table {
-	tripDayTable := table.NewDefaultTable(table.DefaultConfig())
+	tripDayTable := table.NewDefaultTable(ctx)
 
 	info := tripDayTable.GetInfo().HideFilterArea()
 	info.AddField("ID", "id", db.Text)
@@ -54,7 +53,7 @@ func GetTripDayTable(ctx *context.Context) table.Table {
 
 // GetActivityTable returns the activity table configuration
 func GetActivityTable(ctx *context.Context) table.Table {
-	activityTable := table.NewDefaultTable(table.DefaultConfig())
+	activityTable := table.NewDefaultTable(ctx)
 
 	info := activityTable.GetInfo().HideFilterArea()
 	info.AddField("ID", "id", db.Text)
@@ -75,7 +74,7 @@ func GetActivityTable(ctx *context.Context) table.Table {
 
 // GetStayTable returns the stay table configuration
 func GetStayTable(ctx *context.Context) table.Table {
-	stayTable := table.NewDefaultTable(table.DefaultConfig())
+	stayTable := table.NewDefaultTable(ctx)
 
 	info := stayTable.GetInfo().HideFilterArea()
 	info.AddField("ID", "id", db.Text)
@@ -95,7 +94,7 @@ func GetStayTable(ctx *context.Context) table.Table {
 
 // GetDocumentTable returns the document table configuration
 func GetDocumentTable(ctx *context.Context) table.Table {
-	documentTable := table.NewDefaultTable(table.DefaultConfig())
+	documentTable := table.NewDefaultTable(ctx)
 
 	info := documentTable.GetInfo().HideFilterArea()
 	info.AddField("ID", "id", db.Text)
@@ -117,7 +116,7 @@ func GetDocumentTable(ctx *context.Context) table.Table {
 
 // GetDocumentShareTable returns the document share table configuration
 func GetDocumentShareTable(ctx *context.Context) table.Table {
-	shareTable := table.NewDefaultTable(table.DefaultConfig())
+	shareTable := table.NewDefaultTable(ctx)
 
 	info := shareTable.GetInfo().HideFilterArea()
 	info.AddField("ID", "id", db.Text)
@@ -136,7 +135,7 @@ func GetDocumentShareTable(ctx *context.Context) table.Table {
 
 // GetExpenseSplitTable returns the expense split table configuration
 func GetExpenseSplitTable(ctx *context.Context) table.Table {
-	splitTable := table.NewDefaultTable(table.DefaultConfig())
+	splitTable := table.NewDefaultTable(ctx)
 
 	info := splitTable.GetInfo().HideFilterArea()
 	info.AddField("ID", "id", db.Text)
@@ -156,7 +155,7 @@ func GetExpenseSplitTable(ctx *context.Context) table.Table {
 
 // GetExpenseSettlementTable returns the expense settlement table configuration
 func GetExpenseSettlementTable(ctx *context.Context) table.Table {
-	settlementTable := table.NewDefaultTable(table.DefaultConfig())
+	settlementTable := table.NewDefaultTable(ctx)
 
 	info := settlementTable.GetInfo().HideFilterArea()
 	info.AddField("ID", "id", db.Text)

@@ -6,8 +6,8 @@ import (
 
 // StorageManager manages multiple storage providers
 type StorageManager struct {
-	providers map[string]StorageProvider
-	default   string
+	providers       map[string]StorageProvider
+	defaultProvider string
 }
 
 // NewStorageManager creates a new storage manager
@@ -20,19 +20,21 @@ func NewStorageManager() *StorageManager {
 // NewStorageManagerWithDefaults creates a new storage manager with local storage as default
 func NewStorageManagerWithDefaults() *StorageManager {
 	sm := NewStorageManager()
-	
+
 	// Set up local storage as default
 	localProvider, err := NewLocalStorageProvider(LocalStorageConfig{
 		BasePath:   "./uploads",
 		BaseURL:    "/uploads",
 		CreatePath: true,
 	})
-	
+
 	if err == nil {
 		sm.RegisterProvider("local", localProvider)
-		sm.SetDefault("local")
+		if err := sm.SetDefault("local"); err != nil {
+			return nil
+		}
 	}
-	
+
 	return sm
 }
 
@@ -46,21 +48,21 @@ func (sm *StorageManager) SetDefault(name string) error {
 	if _, exists := sm.providers[name]; !exists {
 		return fmt.Errorf("storage provider '%s' not found", name)
 	}
-	sm.default = name
+	sm.defaultProvider = name
 	return nil
 }
 
 // GetProvider returns a storage provider by name
 func (sm *StorageManager) GetProvider(name string) (StorageProvider, error) {
 	if name == "" {
-		name = sm.default
+		name = sm.defaultProvider
 	}
-	
+
 	provider, exists := sm.providers[name]
 	if !exists {
 		return nil, fmt.Errorf("storage provider '%s' not found", name)
 	}
-	
+
 	return provider, nil
 }
 

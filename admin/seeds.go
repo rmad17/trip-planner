@@ -206,17 +206,17 @@ func createGoAdminTables(conn db.Connection) error {
 		Icon     string
 		URI      string
 	}{
-		{1, 0, 1, "Admin", "fa-tasks", "", ""},
-		{2, 1, 1, "Users", "fa-users", "/info/users", ""},
-		{3, 1, 1, "Roles", "fa-user", "/info/roles", ""},
-		{4, 1, 1, "Permission", "fa-ban", "/info/permission", ""},
-		{5, 1, 1, "Menu", "fa-bars", "/menu", ""},
-		{6, 1, 1, "Operation log", "fa-history", "/info/op", ""},
-		{7, 0, 1, "Trip Management", "fa-plane", "", ""},
-		{8, 7, 1, "Trip Plans", "fa-map", "/info/trip_plans", ""},
-		{9, 7, 1, "Travellers", "fa-users", "/info/travellers", ""},
-		{10, 7, 1, "Expenses", "fa-money", "/info/expenses", ""},
-		{11, 7, 1, "Documents", "fa-file", "/info/documents", ""},
+		{1, 0, 1, "Admin", "fa-tasks", ""},
+		{2, 1, 1, "Users", "fa-users", "/info/users"},
+		{3, 1, 1, "Roles", "fa-user", "/info/roles"},
+		{4, 1, 1, "Permission", "fa-ban", "/info/permission"},
+		{5, 1, 1, "Menu", "fa-bars", "/menu"},
+		{6, 1, 1, "Operation log", "fa-history", "/info/op"},
+		{7, 0, 1, "Trip Management", "fa-plane", ""},
+		{8, 7, 1, "Trip Plans", "fa-map", "/info/trip_plans"},
+		{9, 7, 1, "Travellers", "fa-users", "/info/travellers"},
+		{10, 7, 1, "Expenses", "fa-money", "/info/expenses"},
+		{11, 7, 1, "Documents", "fa-file", "/info/documents"},
 	}
 
 	for _, item := range menuItems {

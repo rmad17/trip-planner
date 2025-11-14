@@ -83,17 +83,17 @@ type TripGenerationRequest struct {
 
 // TripGenerationResponse represents Claude's structured trip plan
 type TripGenerationResponse struct {
-	TripName        string                    `json:"trip_name"`
-	Description     string                    `json:"description"`
-	RecommendedMode string                    `json:"recommended_mode"` // "flight", "train", "car", "bus", "mixed"
-	TotalDays       int                       `json:"total_days"`
-	EstimatedBudget float64                   `json:"estimated_budget"`
-	BudgetBreakdown TripBudgetBreakdown       `json:"budget_breakdown"`
-	Hops            []GeneratedHop            `json:"hops"`
-	DailyItinerary  []GeneratedDay            `json:"daily_itinerary"`
-	TravelTips      []string                  `json:"travel_tips"`
-	BestTimeToVisit string                    `json:"best_time_to_visit"`
-	Considerations  []string                  `json:"considerations"`
+	TripName        string              `json:"trip_name"`
+	Description     string              `json:"description"`
+	RecommendedMode string              `json:"recommended_mode"` // "flight", "train", "car", "bus", "mixed"
+	TotalDays       int                 `json:"total_days"`
+	EstimatedBudget float64             `json:"estimated_budget"`
+	BudgetBreakdown TripBudgetBreakdown `json:"budget_breakdown"`
+	Hops            []GeneratedHop      `json:"hops"`
+	DailyItinerary  []GeneratedDay      `json:"daily_itinerary"`
+	TravelTips      []string            `json:"travel_tips"`
+	BestTimeToVisit string              `json:"best_time_to_visit"`
+	Considerations  []string            `json:"considerations"`
 }
 
 // TripBudgetBreakdown provides budget allocation
@@ -125,16 +125,16 @@ type GeneratedHop struct {
 
 // GeneratedDay represents a daily itinerary
 type GeneratedDay struct {
-	DayNumber       int                `json:"day_number"`
-	Date            string             `json:"date"` // ISO format
-	Title           string             `json:"title"`
-	DayType         string             `json:"day_type"` // "travel", "explore", etc.
-	Location        string             `json:"location"`
-	Description     string             `json:"description"`
-	EstimatedBudget float64            `json:"estimated_budget"`
+	DayNumber       int                 `json:"day_number"`
+	Date            string              `json:"date"` // ISO format
+	Title           string              `json:"title"`
+	DayType         string              `json:"day_type"` // "travel", "explore", etc.
+	Location        string              `json:"location"`
+	Description     string              `json:"description"`
+	EstimatedBudget float64             `json:"estimated_budget"`
 	Activities      []GeneratedActivity `json:"activities"`
-	TravelTime      string             `json:"travel_time,omitempty"`
-	Notes           string             `json:"notes,omitempty"`
+	TravelTime      string              `json:"travel_time,omitempty"`
+	Notes           string              `json:"notes,omitempty"`
 }
 
 // GeneratedActivity represents a suggested activity
@@ -190,7 +190,7 @@ func (cs *ClaudeService) GenerateTrip(req TripGenerationRequest) (*TripGeneratio
 	if err != nil {
 		return nil, fmt.Errorf("failed to call Claude API: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -198,7 +198,7 @@ func (cs *ClaudeService) GenerateTrip(req TripGenerationRequest) (*TripGeneratio
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("Claude API error (status %d): %s", resp.StatusCode, string(body))
+		return nil, fmt.Errorf("claude API error (status %d): %s", resp.StatusCode, string(body))
 	}
 
 	var claudeResp ClaudeResponse
@@ -431,7 +431,7 @@ Return ONLY a JSON array of city suggestions (no markdown, no explanations):
 	if err != nil {
 		return nil, fmt.Errorf("failed to call Claude API: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -439,7 +439,7 @@ Return ONLY a JSON array of city suggestions (no markdown, no explanations):
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("Claude API error (status %d): %s", resp.StatusCode, string(body))
+		return nil, fmt.Errorf("claude API error (status %d): %s", resp.StatusCode, string(body))
 	}
 
 	var claudeResp ClaudeResponse

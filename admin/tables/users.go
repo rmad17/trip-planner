@@ -10,7 +10,7 @@ import (
 
 // GetUserTable returns the user table configuration
 func GetUserTable(ctx *context.Context) table.Table {
-	userTable := table.NewDefaultTable(table.DefaultConfig())
+	userTable := table.NewDefaultTable(ctx)
 
 	info := userTable.GetInfo().HideFilterArea()
 

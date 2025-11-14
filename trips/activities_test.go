@@ -170,16 +170,16 @@ func TestGetValidActivityTypes(t *testing.T) {
 	}
 
 	expectedTypes := map[ActivityType]bool{
-		ActivityTypeTransport:      true,
-		ActivityTypeSightseeing:    true,
-		ActivityTypeDining:         true,
-		ActivityTypeShopping:       true,
-		ActivityTypeEntertainment:  true,
-		ActivityTypePersonal:       true,
-		ActivityTypeAdventure:      true,
-		ActivityTypeBusiness:       true,
-		ActivityTypeCultural:       true,
-		ActivityTypeOther:          true,
+		ActivityTypeTransport:     true,
+		ActivityTypeSightseeing:   true,
+		ActivityTypeDining:        true,
+		ActivityTypeShopping:      true,
+		ActivityTypeEntertainment: true,
+		ActivityTypePersonal:      true,
+		ActivityTypeAdventure:     true,
+		ActivityTypeBusiness:      true,
+		ActivityTypeCultural:      true,
+		ActivityTypeOther:         true,
 	}
 
 	for _, activityType := range types {

@@ -29,14 +29,14 @@ import (
 // @Router /trip/{id}/expenses [get]
 func GetExpenses(c *gin.Context) {
 	tripPlanIDStr := c.Param("id")
-	
+
 	// Validate UUID format
 	tripPlanID, err := uuid.Parse(tripPlanIDStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid trip plan ID format"})
 		return
 	}
-	
+
 	currentUser, exists := c.Get("currentUser")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
@@ -153,14 +153,14 @@ func GetExpense(c *gin.Context) {
 // @Router /trip/{id}/expenses [post]
 func CreateExpense(c *gin.Context) {
 	tripPlanIDStr := c.Param("id")
-	
+
 	// Validate UUID format
 	tripPlanID, err := uuid.Parse(tripPlanIDStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid trip plan ID format"})
 		return
 	}
-	
+
 	currentUser, exists := c.Get("currentUser")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
@@ -413,4 +413,3 @@ func DeleteExpense(c *gin.Context) {
 	tx.Commit()
 	c.Status(http.StatusNoContent)
 }
-

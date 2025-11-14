@@ -117,8 +117,10 @@ func TestLogin(t *testing.T) {
 	router.POST("/login", Login)
 
 	// Set SECRET for JWT
-	os.Setenv("SECRET", "test-secret-key")
-	defer os.Unsetenv("SECRET")
+	if err := os.Setenv("SECRET", "test-secret-key"); err != nil {
+		t.Fatalf("Failed to set SECRET environment variable: %v", err)
+	}
+	defer func() { _ = os.Unsetenv("SECRET") }()
 
 	// Create a test user
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("password123"), bcrypt.DefaultCost)
@@ -198,7 +200,9 @@ func TestLogin(t *testing.T) {
 			// Check if token is returned
 			if tt.checkToken && w.Code == http.StatusOK {
 				var response map[string]string
-				json.Unmarshal(w.Body.Bytes(), &response)
+				if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+					t.Fatalf("Failed to unmarshal response: %v", err)
+				}
 				assert.NotEmpty(t, response["token"])
 
 				// Verify token is valid
@@ -273,7 +277,9 @@ func TestGetUserProfile(t *testing.T) {
 
 			// Parse response
 			var response map[string]interface{}
-			json.Unmarshal(w.Body.Bytes(), &response)
+			if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+				t.Fatalf("Failed to unmarshal response: %v", err)
+			}
 
 			if tt.setUser {
 				assert.NotNil(t, response["user"])
@@ -336,8 +342,10 @@ func TestPasswordHashing(t *testing.T) {
 }
 
 func TestJWTTokenGeneration(t *testing.T) {
-	os.Setenv("SECRET", "test-secret-key")
-	defer os.Unsetenv("SECRET")
+	if err := os.Setenv("SECRET", "test-secret-key"); err != nil {
+		t.Fatalf("Failed to set SECRET environment variable: %v", err)
+	}
+	defer func() { _ = os.Unsetenv("SECRET") }()
 
 	testUserID := uuid.New()
 
@@ -366,8 +374,10 @@ func TestJWTTokenGeneration(t *testing.T) {
 }
 
 func TestJWTTokenExpiration(t *testing.T) {
-	os.Setenv("SECRET", "test-secret-key")
-	defer os.Unsetenv("SECRET")
+	if err := os.Setenv("SECRET", "test-secret-key"); err != nil {
+		t.Fatalf("Failed to set SECRET environment variable: %v", err)
+	}
+	defer func() { _ = os.Unsetenv("SECRET") }()
 
 	testUserID := uuid.New()
 
@@ -381,7 +391,7 @@ func TestJWTTokenExpiration(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Try to parse expired token
-	parsedToken, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+	parsedToken, _ := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 		return []byte(os.Getenv("SECRET")), nil
 	})
 

@@ -10,7 +10,7 @@ import (
 
 // GetTravellerTable returns the traveller table configuration
 func GetTravellerTable(ctx *context.Context) table.Table {
-	travellerTable := table.NewDefaultTable(table.DefaultConfig())
+	travellerTable := table.NewDefaultTable(ctx)
 
 	info := travellerTable.GetInfo().HideFilterArea()
 

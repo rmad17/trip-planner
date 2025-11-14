@@ -10,7 +10,7 @@ import (
 
 // GetExpenseTable returns the expense table configuration
 func GetExpenseTable(ctx *context.Context) table.Table {
-	expenseTable := table.NewDefaultTable(table.DefaultConfig())
+	expenseTable := table.NewDefaultTable(ctx)
 
 	info := expenseTable.GetInfo().HideFilterArea()
 

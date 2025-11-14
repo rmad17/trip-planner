@@ -297,7 +297,7 @@ func TestMakeHttpRequest_MockServer(t *testing.T) {
 		// Create a mock server
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(`{"suggestions": [], "attribution": "Mapbox"}`))
+			_, _ = w.Write([]byte(`{"suggestions": [], "attribution": "Mapbox"}`))
 		}))
 		defer server.Close()
 
@@ -313,7 +313,7 @@ func TestMakeHttpRequest_MockServer(t *testing.T) {
 		// Create a mock server that returns error
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(`{"error": "Bad request"}`))
+			_, _ = w.Write([]byte(`{"error": "Bad request"}`))
 		}))
 		defer server.Close()
 

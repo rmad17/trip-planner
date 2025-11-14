@@ -44,8 +44,10 @@ func TestCheckAuth_ValidToken(t *testing.T) {
 	// Setup
 	db := setupMiddlewareTestDB(t)
 	core.DB = db
-	os.Setenv("SECRET", "test-secret-key")
-	defer os.Unsetenv("SECRET")
+	if err := os.Setenv("SECRET", "test-secret-key"); err != nil {
+		t.Fatalf("Failed to set SECRET: %v", err)
+	}
+	defer func() { _ = os.Unsetenv("SECRET") }()
 
 	// Create test user
 	testUser := User{
@@ -163,8 +165,10 @@ func TestCheckAuth_InvalidToken(t *testing.T) {
 	// Setup
 	db := setupMiddlewareTestDB(t)
 	core.DB = db
-	os.Setenv("SECRET", "test-secret-key")
-	defer os.Unsetenv("SECRET")
+	if err := os.Setenv("SECRET", "test-secret-key"); err != nil {
+		t.Fatalf("Failed to set SECRET: %v", err)
+	}
+	defer func() { _ = os.Unsetenv("SECRET") }()
 
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
@@ -217,8 +221,10 @@ func TestCheckAuth_ExpiredToken(t *testing.T) {
 	// Setup
 	db := setupMiddlewareTestDB(t)
 	core.DB = db
-	os.Setenv("SECRET", "test-secret-key")
-	defer os.Unsetenv("SECRET")
+	if err := os.Setenv("SECRET", "test-secret-key"); err != nil {
+		t.Fatalf("Failed to set SECRET: %v", err)
+	}
+	defer func() { _ = os.Unsetenv("SECRET") }()
 
 	// Create test user
 	testUser := User{
@@ -253,8 +259,10 @@ func TestCheckAuth_UserNotFound(t *testing.T) {
 	// Setup
 	db := setupMiddlewareTestDB(t)
 	core.DB = db
-	os.Setenv("SECRET", "test-secret-key")
-	defer os.Unsetenv("SECRET")
+	if err := os.Setenv("SECRET", "test-secret-key"); err != nil {
+		t.Fatalf("Failed to set SECRET: %v", err)
+	}
+	defer func() { _ = os.Unsetenv("SECRET") }()
 
 	// Generate token with non-existent user ID
 	nonExistentUserID := uuid.New()
@@ -288,8 +296,10 @@ func TestCheckAuth_DifferentSigningMethod(t *testing.T) {
 	// Setup
 	db := setupMiddlewareTestDB(t)
 	core.DB = db
-	os.Setenv("SECRET", "test-secret-key")
-	defer os.Unsetenv("SECRET")
+	if err := os.Setenv("SECRET", "test-secret-key"); err != nil {
+		t.Fatalf("Failed to set SECRET: %v", err)
+	}
+	defer func() { _ = os.Unsetenv("SECRET") }()
 
 	// Generate token with different signing method (RS256 instead of HS256)
 	// This should be rejected
@@ -324,8 +334,10 @@ func TestCheckAuth_TokenWithoutExpiration(t *testing.T) {
 	// Setup
 	db := setupMiddlewareTestDB(t)
 	core.DB = db
-	os.Setenv("SECRET", "test-secret-key")
-	defer os.Unsetenv("SECRET")
+	if err := os.Setenv("SECRET", "test-secret-key"); err != nil {
+		t.Fatalf("Failed to set SECRET: %v", err)
+	}
+	defer func() { _ = os.Unsetenv("SECRET") }()
 
 	testUser := User{
 		Username: "testuser",

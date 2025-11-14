@@ -42,6 +42,7 @@ jobs:
       - name: Install dependencies
         run: |
           go mod download
+          go mod tidy
           go mod verify
 
       - name: Set up test environment
@@ -162,10 +163,16 @@ jobs:
           go-version: '1.21'
           cache: true
 
+      - name: Install dependencies
+        run: |
+          go mod download
+          go mod tidy
+          go mod verify
+
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v4
+        uses: golangci/golangci-lint-action@v7
         with:
-          version: latest
+          version: v2.6.1
           args: --timeout=5m
 
   build:

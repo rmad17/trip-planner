@@ -69,12 +69,12 @@ type Document struct {
 // DocumentShare represents sharing permissions for documents
 type DocumentShare struct {
 	core.BaseModel
-	DocumentID   uuid.UUID `json:"document_id" gorm:"type:uuid;not null" description:"ID of the shared document"`
-	SharedWith   uuid.UUID `json:"shared_with" gorm:"type:uuid;not null" description:"ID of user the document is shared with"`
-	SharedBy     uuid.UUID `json:"shared_by" gorm:"type:uuid;not null" description:"ID of user who shared the document"`
-	Permission   string    `json:"permission" gorm:"type:varchar(20);default:'view'" example:"view" description:"Permission level (view, download)"`
-	ExpiresAt    *time.Time `json:"expires_at" description:"Optional expiration for the share"`
-	IsActive     bool      `json:"is_active" gorm:"default:true" description:"Whether the share is currently active"`
+	DocumentID uuid.UUID  `json:"document_id" gorm:"type:uuid;not null" description:"ID of the shared document"`
+	SharedWith uuid.UUID  `json:"shared_with" gorm:"type:uuid;not null" description:"ID of user the document is shared with"`
+	SharedBy   uuid.UUID  `json:"shared_by" gorm:"type:uuid;not null" description:"ID of user who shared the document"`
+	Permission string     `json:"permission" gorm:"type:varchar(20);default:'view'" example:"view" description:"Permission level (view, download)"`
+	ExpiresAt  *time.Time `json:"expires_at" description:"Optional expiration for the share"`
+	IsActive   bool       `json:"is_active" gorm:"default:true" description:"Whether the share is currently active"`
 }
 
 // GetModels returns all models for Atlas/GORM

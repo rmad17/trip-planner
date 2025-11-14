@@ -11,12 +11,12 @@ import (
 
 // MockStorageProvider is a mock implementation of StorageProvider for testing
 type MockStorageProvider struct {
-	uploadFunc      func(key string, file io.Reader, contentType string) (*UploadResult, error)
-	downloadFunc    func(key string) (io.ReadCloser, error)
-	deleteFunc      func(key string) error
-	getURLFunc      func(key string, expiry time.Duration) (string, error)
+	uploadFunc       func(key string, file io.Reader, contentType string) (*UploadResult, error)
+	downloadFunc     func(key string) (io.ReadCloser, error)
+	deleteFunc       func(key string) error
+	getURLFunc       func(key string, expiry time.Duration) (string, error)
 	getPublicURLFunc func(key string) string
-	provider        string
+	provider         string
 }
 
 func (m *MockStorageProvider) Upload(key string, file io.Reader, contentType string) (*UploadResult, error) {
@@ -131,7 +131,10 @@ func TestStorageManager_SetDefault(t *testing.T) {
 		err := sm.SetDefault("test")
 
 		assert.NoError(t, err)
-		assert.Equal(t, "test", sm.default)
+		// Verify by getting the default provider
+		defaultProvider, err := sm.GetDefaultProvider()
+		assert.NoError(t, err)
+		assert.Equal(t, "mock", defaultProvider.GetProvider())
 	})
 
 	t.Run("Set non-existent provider as default", func(t *testing.T) {
@@ -171,7 +174,10 @@ func TestStorageManager_GetProvider(t *testing.T) {
 		mockProvider := &MockStorageProvider{provider: "mock"}
 
 		sm.RegisterProvider("test", mockProvider)
-		sm.SetDefault("test")
+		err := sm.SetDefault("test")
+		if err != nil {
+			t.Fatalf("Failed to set default provider: %v", err)
+		}
 
 		provider, err := sm.GetProvider("")
 		assert.NoError(t, err)
@@ -186,7 +192,10 @@ func TestStorageManager_GetDefaultProvider(t *testing.T) {
 		mockProvider := &MockStorageProvider{provider: "mock"}
 
 		sm.RegisterProvider("test", mockProvider)
-		sm.SetDefault("test")
+		err := sm.SetDefault("test")
+		if err != nil {
+			t.Fatalf("Failed to set default provider: %v", err)
+		}
 
 		provider, err := sm.GetDefaultProvider()
 		assert.NoError(t, err)
@@ -304,7 +313,7 @@ func TestMockStorageProvider_Download(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.NotNil(t, reader)
-		defer reader.Close()
+		defer func() { _ = reader.Close() }()
 
 		data, err := io.ReadAll(reader)
 		assert.NoError(t, err)

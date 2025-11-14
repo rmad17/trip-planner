@@ -7,12 +7,21 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type BaseModel struct {
-	ID        uuid.UUID `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
+	ID        uuid.UUID `gorm:"type:uuid;primaryKey" json:"id"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
+}
+
+// BeforeCreate hook to generate UUID for new records
+func (b *BaseModel) BeforeCreate(tx *gorm.DB) error {
+	if b.ID == uuid.Nil {
+		b.ID = uuid.New()
+	}
+	return nil
 }
 
 // Date is a custom type that handles date-only values in JSON
@@ -48,15 +57,15 @@ func (d *Date) UnmarshalJSON(b []byte) error {
 
 // MarshalJSON implements json.Marshaler interface
 func (d Date) MarshalJSON() ([]byte, error) {
-	if d.Time.IsZero() {
+	if d.IsZero() {
 		return []byte("null"), nil
 	}
-	return []byte(fmt.Sprintf("\"%s\"", d.Time.Format("2006-01-02"))), nil
+	return []byte(fmt.Sprintf("\"%s\"", d.Format("2006-01-02"))), nil
 }
 
 // Value implements driver.Valuer interface for database operations
 func (d Date) Value() (driver.Value, error) {
-	if d.Time.IsZero() {
+	if d.IsZero() {
 		return nil, nil
 	}
 	return d.Time, nil

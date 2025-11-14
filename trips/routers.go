@@ -11,9 +11,9 @@ func RouterGroupCreateTrip(router *gin.RouterGroup) {
 // RouterGroupTripPlans sets up comprehensive CRUD routes for trip plans
 func RouterGroupTripPlans(router *gin.RouterGroup) {
 	// AI-powered trip generation
-	router.POST("/generate", GenerateTripWithAI)              // POST /trip/generate
+	router.POST("/generate", GenerateTripWithAI)                 // POST /trip/generate
 	router.POST("/generate/confirm", CreateTripFromAIGeneration) // POST /trip/generate/confirm
-	router.GET("/suggest-cities", GetMultiCitySuggestions)    // GET /trip/suggest-cities
+	router.GET("/suggest-cities", GetMultiCitySuggestions)       // GET /trip/suggest-cities
 
 	// Trip Plans CRUD
 	router.GET("/:id", GetTripPlan)                  // GET /trip-plans/:id

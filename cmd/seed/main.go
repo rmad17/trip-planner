@@ -2,11 +2,12 @@ package main
 
 import (
 	"log"
+	"os"
 	"triplanner/admin"
 	"triplanner/core"
 
+	"github.com/GoAdminGroup/go-admin/modules/config"
 	"github.com/GoAdminGroup/go-admin/modules/db"
-	"github.com/GoAdminGroup/go-admin/plugins/admin/modules/parameter"
 
 	_ "github.com/GoAdminGroup/go-admin/modules/db/drivers/postgres"
 )
@@ -15,24 +16,30 @@ func init() {
 	core.LoadEnvs()
 }
 
+func getEnv(key, defaultValue string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return defaultValue
+}
+
 func main() {
 	// Initialize database connection for GoAdmin
-	cfg := db.Config{
-		Host:       core.GetEnv("DB_HOST", "localhost"),
-		Port:       core.GetEnv("DB_PORT", "5432"),
-		User:       core.GetEnv("DB_USER", "postgres"),
-		Pwd:        core.GetEnv("DB_PASSWORD", ""),
-		Name:       core.GetEnv("DB_NAME", "triplanner"),
-		MaxIdleCon: 50,
-		MaxOpenCon: 150,
-		Driver:     "postgres",
+	cfg := config.Database{
+		Host:         getEnv("DB_HOST", "localhost"),
+		Port:         getEnv("DB_PORT", "5432"),
+		User:         getEnv("DB_USER", "postgres"),
+		Pwd:          getEnv("DB_PASSWORD", ""),
+		Name:         getEnv("DB_NAME", "triplanner"),
+		MaxIdleConns: 50,
+		MaxOpenConns: 150,
+		Driver:       "postgres",
 	}
 
 	conn := db.GetConnectionByDriver("postgres")
-	conn.InitDB(map[string]db.Config{
+	conn.InitDB(map[string]config.Database{
 		"default": cfg,
 	})
-	conn.SetParams(parameter.Base{})
 
 	// Create admin user seed
 	if err := admin.CreateAdminUserSeed(conn); err != nil {

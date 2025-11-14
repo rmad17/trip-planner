@@ -10,7 +10,7 @@ import (
 
 // GetTripPlanTable returns the trip plan table configuration
 func GetTripPlanTable(ctx *context.Context) table.Table {
-	tripPlanTable := table.NewDefaultTable(table.DefaultConfig())
+	tripPlanTable := table.NewDefaultTable(ctx)
 
 	info := tripPlanTable.GetInfo().HideFilterArea()
 

@@ -9,19 +9,19 @@ import (
 type StorageProvider interface {
 	// Upload uploads a file to the storage provider
 	Upload(key string, file io.Reader, contentType string) (*UploadResult, error)
-	
+
 	// Download downloads a file from the storage provider
 	Download(key string) (io.ReadCloser, error)
-	
+
 	// Delete removes a file from the storage provider
 	Delete(key string) error
-	
+
 	// GetURL generates a presigned URL for accessing the file
 	GetURL(key string, expiry time.Duration) (string, error)
-	
+
 	// GetPublicURL returns a public URL if the file is publicly accessible
 	GetPublicURL(key string) string
-	
+
 	// GetProvider returns the provider name
 	GetProvider() string
 }

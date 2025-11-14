@@ -12,6 +12,7 @@
 package main
 
 import (
+	"log"
 	"triplanner/accounts"
 	"triplanner/core"
 	_ "triplanner/docs" // This line is necessary for go-swagger to find your docs!
@@ -64,13 +65,15 @@ func main() {
 	trips.RouterGroupStays(v1.Group("/stays"))           // Individual stay operations
 
 	// Expense Management Routes
-	expenses.RouterGroupExpenses(v1.Group("/trip"))         // Expenses nested under trip plans
+	expenses.RouterGroupExpenses(v1.Group("/trip"))                // Expenses nested under trip plans
 	expenses.RouterGroupExpenseItems(v1.Group("/expenses"))        // Individual expense operations
 	expenses.RouterGroupExpenseSplits(v1.Group("/expense-splits")) // Expense split operations
 
 	// Document Management Routes
-	documents.RouterGroupDocuments(v1.Group("/trip"))       // Documents nested under trip plans
+	documents.RouterGroupDocuments(v1.Group("/trip"))          // Documents nested under trip plans
 	documents.RouterGroupDocumentItems(v1.Group("/documents")) // Individual document operations
 
-	router.Run() // listen and serve on 0.0.0.0:8080
+	if err := router.Run(); err != nil {
+		log.Fatalf("Failed to start server: %v", err)
+	}
 }

@@ -11,17 +11,17 @@ import (
 type ExpenseCategory string
 
 const (
-	ExpenseCategoryAccommodation ExpenseCategory = "accommodation" // Hotels, lodging
+	ExpenseCategoryAccommodation  ExpenseCategory = "accommodation"  // Hotels, lodging
 	ExpenseCategoryTransportation ExpenseCategory = "transportation" // Flights, trains, taxis, etc.
-	ExpenseCategoryFood          ExpenseCategory = "food"          // Meals, restaurants, groceries
-	ExpenseCategoryActivities    ExpenseCategory = "activities"    // Tours, tickets, entertainment
-	ExpenseCategoryShoppingGifts ExpenseCategory = "shopping_gifts" // Shopping and souvenirs
-	ExpenseCategoryInsurance     ExpenseCategory = "insurance"     // Travel insurance
-	ExpenseCategoryVisasFees     ExpenseCategory = "visas_fees"    // Visa processing fees
-	ExpenseCategoryMedical       ExpenseCategory = "medical"       // Medical expenses
-	ExpenseCategoryCommunication ExpenseCategory = "communication" // Internet, phone, roaming
-	ExpenseCategoryMiscellaneous ExpenseCategory = "miscellaneous" // Tips, laundry, etc.
-	ExpenseCategoryOther         ExpenseCategory = "other"         // Other expenses with custom notes
+	ExpenseCategoryFood           ExpenseCategory = "food"           // Meals, restaurants, groceries
+	ExpenseCategoryActivities     ExpenseCategory = "activities"     // Tours, tickets, entertainment
+	ExpenseCategoryShoppingGifts  ExpenseCategory = "shopping_gifts" // Shopping and souvenirs
+	ExpenseCategoryInsurance      ExpenseCategory = "insurance"      // Travel insurance
+	ExpenseCategoryVisasFees      ExpenseCategory = "visas_fees"     // Visa processing fees
+	ExpenseCategoryMedical        ExpenseCategory = "medical"        // Medical expenses
+	ExpenseCategoryCommunication  ExpenseCategory = "communication"  // Internet, phone, roaming
+	ExpenseCategoryMiscellaneous  ExpenseCategory = "miscellaneous"  // Tips, laundry, etc.
+	ExpenseCategoryOther          ExpenseCategory = "other"          // Other expenses with custom notes
 )
 
 // SplitMethod represents how an expense is split among travellers
@@ -39,58 +39,58 @@ const (
 type PaymentMethod string
 
 const (
-	PaymentMethodCash        PaymentMethod = "cash"
-	PaymentMethodCard        PaymentMethod = "card"
-	PaymentMethodDigitalPay  PaymentMethod = "digital_pay" // UPI, PayPal, etc.
+	PaymentMethodCash         PaymentMethod = "cash"
+	PaymentMethodCard         PaymentMethod = "card"
+	PaymentMethodDigitalPay   PaymentMethod = "digital_pay" // UPI, PayPal, etc.
 	PaymentMethodBankTransfer PaymentMethod = "bank_transfer"
-	PaymentMethodCheque      PaymentMethod = "cheque"
-	PaymentMethodOther       PaymentMethod = "other"
+	PaymentMethodCheque       PaymentMethod = "cheque"
+	PaymentMethodOther        PaymentMethod = "other"
 )
 
 // Expense represents a single expense in a trip
 type Expense struct {
 	core.BaseModel
-	Title           string          `json:"title" gorm:"not null" example:"Dinner at Le Jules Verne" description:"Title/name of the expense"`
-	Description     *string         `json:"description" example:"Romantic dinner at Eiffel Tower restaurant" description:"Detailed description"`
-	Amount          float64         `json:"amount" gorm:"not null" example:"250.75" description:"Total amount of the expense"`
-	Currency        string          `json:"currency" gorm:"type:varchar(10);not null" example:"EUR" description:"Currency code (should match trip currency)"`
-	Category        ExpenseCategory `json:"category" gorm:"type:varchar(30);not null" example:"food" description:"Category of the expense"`
-	OtherCategory   *string         `json:"other_category" example:"Local transport" description:"Custom category when category is 'other'"`
-	Date            time.Time       `json:"date" gorm:"not null" example:"2024-06-02T19:00:00Z" description:"Date and time of the expense"`
-	Location        *string         `json:"location" example:"Eiffel Tower, Paris" description:"Location where expense occurred"`
-	Vendor          *string         `json:"vendor" example:"Le Jules Verne Restaurant" description:"Merchant/vendor name"`
-	PaymentMethod   PaymentMethod   `json:"payment_method" gorm:"type:varchar(20);not null" example:"card" description:"How the payment was made"`
-	SplitMethod     SplitMethod     `json:"split_method" gorm:"type:varchar(20);not null;default:'equal'" example:"equal" description:"How the expense is split"`
-	ReceiptURL      *string         `json:"receipt_url" example:"https://storage.example.com/receipts/abc123.pdf" description:"URL to receipt/invoice"`
-	Notes           *string         `json:"notes" example:"Included 18% service charge" description:"Additional notes"`
-	Tags            []string        `json:"tags" gorm:"type:text[]" example:"romantic,special-occasion" description:"Tags for categorization"`
-	IsRecurring     bool            `json:"is_recurring" gorm:"default:false" description:"Whether this is a recurring expense"`
-	
+	Title         string          `json:"title" gorm:"not null" example:"Dinner at Le Jules Verne" description:"Title/name of the expense"`
+	Description   *string         `json:"description" example:"Romantic dinner at Eiffel Tower restaurant" description:"Detailed description"`
+	Amount        float64         `json:"amount" gorm:"not null" example:"250.75" description:"Total amount of the expense"`
+	Currency      string          `json:"currency" gorm:"type:varchar(10);not null" example:"EUR" description:"Currency code (should match trip currency)"`
+	Category      ExpenseCategory `json:"category" gorm:"type:varchar(30);not null" example:"food" description:"Category of the expense"`
+	OtherCategory *string         `json:"other_category" example:"Local transport" description:"Custom category when category is 'other'"`
+	Date          time.Time       `json:"date" gorm:"not null" example:"2024-06-02T19:00:00Z" description:"Date and time of the expense"`
+	Location      *string         `json:"location" example:"Eiffel Tower, Paris" description:"Location where expense occurred"`
+	Vendor        *string         `json:"vendor" example:"Le Jules Verne Restaurant" description:"Merchant/vendor name"`
+	PaymentMethod PaymentMethod   `json:"payment_method" gorm:"type:varchar(20);not null" example:"card" description:"How the payment was made"`
+	SplitMethod   SplitMethod     `json:"split_method" gorm:"type:varchar(20);not null;default:'equal'" example:"equal" description:"How the expense is split"`
+	ReceiptURL    *string         `json:"receipt_url" example:"https://storage.example.com/receipts/abc123.pdf" description:"URL to receipt/invoice"`
+	Notes         *string         `json:"notes" example:"Included 18% service charge" description:"Additional notes"`
+	Tags          []string        `json:"tags" gorm:"type:text[]" example:"romantic,special-occasion" description:"Tags for categorization"`
+	IsRecurring   bool            `json:"is_recurring" gorm:"default:false" description:"Whether this is a recurring expense"`
+
 	// Entity Relationships - expense can be linked to trip, hop, or day
-	TripPlan        *uuid.UUID      `json:"trip_plan" gorm:"type:uuid" example:"123e4567-e89b-12d3-a456-426614174000" description:"ID of associated trip plan"`
-	TripHop         *uuid.UUID      `json:"trip_hop" gorm:"type:uuid" example:"123e4567-e89b-12d3-a456-426614174000" description:"ID of associated trip hop"`
-	TripDay         *uuid.UUID      `json:"trip_day" gorm:"type:uuid" example:"123e4567-e89b-12d3-a456-426614174000" description:"ID of associated trip day"`
-	Activity        *uuid.UUID      `json:"activity" gorm:"type:uuid" example:"123e4567-e89b-12d3-a456-426614174000" description:"ID of associated activity"`
-	
+	TripPlan *uuid.UUID `json:"trip_plan" gorm:"type:uuid" example:"123e4567-e89b-12d3-a456-426614174000" description:"ID of associated trip plan"`
+	TripHop  *uuid.UUID `json:"trip_hop" gorm:"type:uuid" example:"123e4567-e89b-12d3-a456-426614174000" description:"ID of associated trip hop"`
+	TripDay  *uuid.UUID `json:"trip_day" gorm:"type:uuid" example:"123e4567-e89b-12d3-a456-426614174000" description:"ID of associated trip day"`
+	Activity *uuid.UUID `json:"activity" gorm:"type:uuid" example:"123e4567-e89b-12d3-a456-426614174000" description:"ID of associated activity"`
+
 	// Who paid and splits
-	PaidBy          uuid.UUID       `json:"paid_by" gorm:"type:uuid;not null" example:"123e4567-e89b-12d3-a456-426614174000" description:"ID of traveller who paid"`
-	CreatedBy       uuid.UUID       `json:"created_by" gorm:"type:uuid;not null" example:"123e4567-e89b-12d3-a456-426614174000" description:"ID of traveller who created this expense record"`
-	
+	PaidBy    uuid.UUID `json:"paid_by" gorm:"type:uuid;not null" example:"123e4567-e89b-12d3-a456-426614174000" description:"ID of traveller who paid"`
+	CreatedBy uuid.UUID `json:"created_by" gorm:"type:uuid;not null" example:"123e4567-e89b-12d3-a456-426614174000" description:"ID of traveller who created this expense record"`
+
 	// Related records
-	ExpenseSplits   []ExpenseSplit  `json:"expense_splits,omitempty" gorm:"foreignKey:Expense" description:"How this expense is split among travellers"`
+	ExpenseSplits []ExpenseSplit `json:"expense_splits,omitempty" gorm:"foreignKey:Expense" description:"How this expense is split among travellers"`
 }
 
 // ExpenseSplit represents how an expense is divided among travellers
 type ExpenseSplit struct {
 	core.BaseModel
-	Expense       uuid.UUID `json:"expense" gorm:"type:uuid;not null" example:"123e4567-e89b-12d3-a456-426614174000" description:"ID of the parent expense"`
-	Traveller     uuid.UUID `json:"traveller" gorm:"type:uuid;not null" example:"123e4567-e89b-12d3-a456-426614174000" description:"ID of the traveller"`
-	Amount        float64   `json:"amount" gorm:"not null" example:"125.38" description:"Amount owed by this traveller"`
-	Percentage    *float64  `json:"percentage" example:"50.0" description:"Percentage of total expense (when split by percentage)"`
-	Shares        *int      `json:"shares" example:"2" description:"Number of shares (when split by shares)"`
-	IsPaid        bool      `json:"is_paid" gorm:"default:false" description:"Whether this traveller has paid their share"`
-	PaidAt        *time.Time `json:"paid_at" description:"When this traveller paid their share"`
-	Notes         *string   `json:"notes" example:"Paid via UPI" description:"Notes about this split/payment"`
+	Expense    uuid.UUID  `json:"expense" gorm:"type:uuid;not null" example:"123e4567-e89b-12d3-a456-426614174000" description:"ID of the parent expense"`
+	Traveller  uuid.UUID  `json:"traveller" gorm:"type:uuid;not null" example:"123e4567-e89b-12d3-a456-426614174000" description:"ID of the traveller"`
+	Amount     float64    `json:"amount" gorm:"not null" example:"125.38" description:"Amount owed by this traveller"`
+	Percentage *float64   `json:"percentage" example:"50.0" description:"Percentage of total expense (when split by percentage)"`
+	Shares     *int       `json:"shares" example:"2" description:"Number of shares (when split by shares)"`
+	IsPaid     bool       `json:"is_paid" gorm:"default:false" description:"Whether this traveller has paid their share"`
+	PaidAt     *time.Time `json:"paid_at" description:"When this traveller paid their share"`
+	Notes      *string    `json:"notes" example:"Paid via UPI" description:"Notes about this split/payment"`
 }
 
 // ExpenseSettlement represents settlements between travellers
@@ -191,7 +191,7 @@ func IsValidPaymentMethod(method string) bool {
 // CalculateSplitAmounts calculates how much each traveller owes based on split method
 func (e *Expense) CalculateSplitAmounts(travellerIDs []uuid.UUID) map[uuid.UUID]float64 {
 	splits := make(map[uuid.UUID]float64)
-	
+
 	switch e.SplitMethod {
 	case SplitMethodEqual:
 		amountPerPerson := e.Amount / float64(len(travellerIDs))
@@ -201,9 +201,9 @@ func (e *Expense) CalculateSplitAmounts(travellerIDs []uuid.UUID) map[uuid.UUID]
 	case SplitMethodPaidBy:
 		// Only the person who paid owes the amount (no split)
 		splits[e.PaidBy] = e.Amount
-	// For other methods (exact, percentage, shares), amounts should be set in ExpenseSplit records
+		// For other methods (exact, percentage, shares), amounts should be set in ExpenseSplit records
 	}
-	
+
 	return splits
 }
 
@@ -243,13 +243,13 @@ func (e *Expense) GetUnpaidAmount() float64 {
 func CalculateNetSettlements(tripID uuid.UUID, expenses []Expense) map[string]float64 {
 	// Map of "fromID-toID" -> net amount
 	settlements := make(map[string]float64)
-	
+
 	for _, expense := range expenses {
 		for _, split := range expense.ExpenseSplits {
 			if split.Traveller != expense.PaidBy && split.Amount > 0 {
 				key := split.Traveller.String() + "-" + expense.PaidBy.String()
 				reverseKey := expense.PaidBy.String() + "-" + split.Traveller.String()
-				
+
 				if existing, exists := settlements[reverseKey]; exists {
 					// Net out against existing reverse settlement
 					if existing > split.Amount {
@@ -266,6 +266,6 @@ func CalculateNetSettlements(tripID uuid.UUID, expenses []Expense) map[string]fl
 			}
 		}
 	}
-	
+
 	return settlements
 }

@@ -122,7 +122,7 @@ func GoogleOAuthBegin(c *gin.Context) {
 func GoogleOAuthCallback(c *gin.Context) {
 	user, err := gothic.CompleteUserAuth(c.Writer, c.Request)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 	fmt.Println("User Name: ", user.Name)

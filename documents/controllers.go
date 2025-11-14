@@ -29,13 +29,13 @@ type DocumentUploadRequest struct {
 
 // DocumentUpdateRequest represents the request structure for updating a document
 type DocumentUpdateRequest struct {
-	Name        *string          `json:"name" example:"Flight Ticket Updated" description:"Display name of the document"`
+	Name        *string           `json:"name" example:"Flight Ticket Updated" description:"Display name of the document"`
 	Category    *DocumentCategory `json:"category" example:"tickets" description:"Document category"`
-	Description *string          `json:"description" example:"Updated description" description:"Optional description"`
-	Notes       *string          `json:"notes" example:"Updated notes" description:"Optional user notes"`
-	Tags        []string         `json:"tags" example:"flight,business-class" description:"Optional tags for organization"`
-	ExpiresAt   *time.Time       `json:"expires_at" example:"2024-12-31T23:59:59Z" description:"Optional expiration date"`
-	IsPublic    *bool            `json:"is_public" example:"false" description:"Whether the document is publicly accessible"`
+	Description *string           `json:"description" example:"Updated description" description:"Optional description"`
+	Notes       *string           `json:"notes" example:"Updated notes" description:"Optional user notes"`
+	Tags        []string          `json:"tags" example:"flight,business-class" description:"Optional tags for organization"`
+	ExpiresAt   *time.Time        `json:"expires_at" example:"2024-12-31T23:59:59Z" description:"Optional expiration date"`
+	IsPublic    *bool             `json:"is_public" example:"false" description:"Whether the document is publicly accessible"`
 }
 
 // GetDocuments godoc
@@ -55,14 +55,14 @@ type DocumentUpdateRequest struct {
 // @Router /trip/{id}/documents [get]
 func GetDocuments(c *gin.Context) {
 	tripPlanIDStr := c.Param("id")
-	
+
 	// Validate UUID format
 	tripPlanID, err := uuid.Parse(tripPlanIDStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid trip plan ID format"})
 		return
 	}
-	
+
 	currentUser, exists := c.Get("currentUser")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
@@ -96,7 +96,7 @@ func GetDocuments(c *gin.Context) {
 	offset, _ := strconv.Atoi(c.DefaultQuery("offset", "0"))
 
 	// Build query for documents related to this trip
-	query := core.DB.Where("(entity_type = ? AND entity_id = ?) OR user_id = ?", "trip_plan", tripPlanID, user.BaseModel.ID)
+	query := core.DB.Where("(entity_type = ? AND entity_id = ?) OR user_id = ?", "trip_plan", tripPlanID, user.ID)
 
 	if category != "" {
 		query = query.Where("category = ?", category)
@@ -149,14 +149,14 @@ func GetDocuments(c *gin.Context) {
 // @Router /trip/{id}/documents [post]
 func UploadDocument(c *gin.Context) {
 	tripPlanIDStr := c.Param("id")
-	
+
 	// Validate UUID format
 	tripPlanID, err := uuid.Parse(tripPlanIDStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid trip plan ID format"})
 		return
 	}
-	
+
 	currentUser, exists := c.Get("currentUser")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
@@ -195,7 +195,7 @@ func UploadDocument(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "File is required"})
 		return
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	// Validate file size (max 50MB)
 	if fileHeader.Size > 50*1024*1024 {
@@ -258,7 +258,7 @@ func UploadDocument(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create file"})
 		return
 	}
-	defer dst.Close()
+	defer func() { _ = dst.Close() }()
 
 	_, err = io.Copy(dst, file)
 	if err != nil {
@@ -280,7 +280,7 @@ func UploadDocument(c *gin.Context) {
 		Tags:            tags,
 		EntityType:      stringPtr("trip_plan"),
 		EntityID:        &tripPlanID,
-		UserID:          user.BaseModel.ID,
+		UserID:          user.ID,
 		UploadedAt:      time.Now(),
 		ExpiresAt:       expiresAt,
 		IsPublic:        isPublic,
@@ -296,7 +296,7 @@ func UploadDocument(c *gin.Context) {
 	result = core.DB.Create(&document)
 	if result.Error != nil {
 		// Clean up file if database insert fails
-		os.Remove(filePath)
+		_ = os.Remove(filePath)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
 		return
 	}
@@ -407,7 +407,7 @@ func UpdateDocument(c *gin.Context) {
 	}
 
 	// Reload document
-	core.DB.First(&document, document.BaseModel.ID)
+	core.DB.First(&document, document.ID)
 
 	c.JSON(http.StatusOK, gin.H{"document": document})
 }

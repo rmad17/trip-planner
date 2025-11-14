@@ -91,7 +91,9 @@ func TestCreateActivity_Integration_InvalidTripDay_NotExists(t *testing.T) {
 	}
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
 
 	if response["error"] != "Invalid trip day for this trip plan" {
 		t.Errorf("Expected specific error message, got %v", response["error"])
@@ -178,7 +180,7 @@ func TestCreateActivity_WithValidUUIDConversion(t *testing.T) {
 		// In real code: WHERE id = ? AND trip_plan = ?, activity.TripDay, tripPlanUUID
 
 		c.JSON(http.StatusCreated, gin.H{
-			"activity": activity,
+			"activity":       activity,
 			"trip_plan_uuid": tripPlanUUID.String(),
 			"trip_plan_type": "uuid.UUID",
 		})
@@ -205,7 +207,9 @@ func TestCreateActivity_WithValidUUIDConversion(t *testing.T) {
 	}
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
 
 	if response["trip_plan_uuid"] != tripPlanID.String() {
 		t.Error("Trip plan UUID not correctly converted")
@@ -256,7 +260,9 @@ func TestCreateActivity_InvalidTripPlanUUID(t *testing.T) {
 	}
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
 
 	if response["error"] != "Invalid trip plan ID" {
 		t.Errorf("Expected 'Invalid trip plan ID' error, got %v", response["error"])

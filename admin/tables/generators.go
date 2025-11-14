@@ -1,11 +1,11 @@
 package tables
 
 import (
+	"html/template"
+
 	"github.com/GoAdminGroup/go-admin/context"
-	"github.com/GoAdminGroup/go-admin/modules/db"
 	"github.com/GoAdminGroup/go-admin/plugins/admin/modules/table"
 	"github.com/GoAdminGroup/go-admin/template/types"
-	"github.com/GoAdminGroup/go-admin/template/types/form"
 )
 
 // GetContent returns the dashboard content
@@ -29,24 +29,24 @@ func GetContent(ctx *context.Context) (types.Panel, error) {
 	`
 
 	return types.Panel{
-		Content: types.HTML(col1),
-		Title:   "Trip Planner Dashboard",
+		Content:     template.HTML(col1),
+		Title:       "Trip Planner Dashboard",
 		Description: "Administrative dashboard for the trip planning system",
 	}, nil
 }
 
 // Generators contains all table generators for the admin panel
 var Generators = map[string]table.Generator{
-	"users":              GetUserTable,
-	"trip_plans":         GetTripPlanTable,
-	"trip_hops":          GetTripHopTable,
-	"trip_days":          GetTripDayTable,
-	"activities":         GetActivityTable,
-	"travellers":         GetTravellerTable,
-	"stays":              GetStayTable,
-	"documents":          GetDocumentTable,
-	"document_shares":    GetDocumentShareTable,
-	"expenses":           GetExpenseTable,
-	"expense_splits":     GetExpenseSplitTable,
+	"users":               GetUserTable,
+	"trip_plans":          GetTripPlanTable,
+	"trip_hops":           GetTripHopTable,
+	"trip_days":           GetTripDayTable,
+	"activities":          GetActivityTable,
+	"travellers":          GetTravellerTable,
+	"stays":               GetStayTable,
+	"documents":           GetDocumentTable,
+	"document_shares":     GetDocumentShareTable,
+	"expenses":            GetExpenseTable,
+	"expense_splits":      GetExpenseSplitTable,
 	"expense_settlements": GetExpenseSettlementTable,
 }
