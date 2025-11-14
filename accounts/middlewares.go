@@ -30,6 +30,11 @@ func CheckAuth(c *gin.Context) {
 	}
 
 	tokenString := authToken[1]
+	if tokenString == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token format"})
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -49,7 +54,14 @@ func CheckAuth(c *gin.Context) {
 		return
 	}
 
-	if float64(time.Now().Unix()) > claims["exp"].(float64) {
+	// Check if exp claim exists and validate expiration
+	exp, ok := claims["exp"].(float64)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token: missing expiration"})
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+	if float64(time.Now().Unix()) > exp {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "token expired"})
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return

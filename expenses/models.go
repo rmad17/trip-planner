@@ -63,7 +63,7 @@ type Expense struct {
 	SplitMethod   SplitMethod     `json:"split_method" gorm:"type:varchar(20);not null;default:'equal'" example:"equal" description:"How the expense is split"`
 	ReceiptURL    *string         `json:"receipt_url" example:"https://storage.example.com/receipts/abc123.pdf" description:"URL to receipt/invoice"`
 	Notes         *string         `json:"notes" example:"Included 18% service charge" description:"Additional notes"`
-	Tags          []string        `json:"tags" gorm:"type:text[]" example:"romantic,special-occasion" description:"Tags for categorization"`
+	Tags          []string        `json:"tags" gorm:"serializer:json" example:"romantic,special-occasion" description:"Tags for categorization"`
 	IsRecurring   bool            `json:"is_recurring" gorm:"default:false" description:"Whether this is a recurring expense"`
 
 	// Entity Relationships - expense can be linked to trip, hop, or day

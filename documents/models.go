@@ -57,7 +57,7 @@ type Document struct {
 	Category        DocumentCategory `json:"category" gorm:"type:varchar(50);not null" example:"tickets" description:"Document category"`
 	Description     *string          `json:"description" example:"Return flight ticket from NYC to Paris" description:"Optional description"`
 	Notes           *string          `json:"notes" example:"Keep this handy at airport" description:"Optional user notes"`
-	Tags            []string         `json:"tags" gorm:"type:text[]" example:"flight,business-class" description:"Optional tags for organization"`
+	Tags            []string         `json:"tags" gorm:"serializer:json" example:"flight,business-class" description:"Optional tags for organization"`
 	EntityType      *string          `json:"entity_type" example:"trip_plan" description:"Type of entity this document is attached to (trip_plan, trip_hop, stay, etc.)"`
 	EntityID        *uuid.UUID       `json:"entity_id" example:"123e4567-e89b-12d3-a456-426614174000" description:"ID of the entity this document is attached to"`
 	UserID          uuid.UUID        `json:"user_id" gorm:"type:uuid;not null" example:"123e4567-e89b-12d3-a456-426614174000" description:"ID of the user who uploaded the document"`
