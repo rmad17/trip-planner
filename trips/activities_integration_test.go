@@ -260,7 +260,9 @@ func TestCreateActivity_InvalidTripPlanUUID(t *testing.T) {
 	}
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
 
 	if response["error"] != "Invalid trip plan ID" {
 		t.Errorf("Expected 'Invalid trip plan ID' error, got %v", response["error"])

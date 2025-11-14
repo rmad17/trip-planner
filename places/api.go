@@ -112,12 +112,12 @@ func PlaceRetrieve(c *gin.Context) {
 	var res RetrieveAPIResponse
 	err := json.Unmarshal(response_data, &res)
 	if err != nil {
-		pretty.Println("JSON unmarshal error:", err)
+		_, _ = pretty.Println("JSON unmarshal error:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse API response"})
 		return
 	}
 
-	pretty.Println("Response: ", res)
+	_, _ = pretty.Println("Response: ", res)
 	c.JSON(http.StatusOK, gin.H{"data": res})
 }
 
@@ -126,7 +126,7 @@ func PlaceDetails(c *gin.Context) {
 	apiKey := os.Getenv("GOOGLE_API_KEY")
 	client, _ := maps.NewClient(maps.WithAPIKey(apiKey))
 	data := c.Request.URL.Query()
-	pretty.Println("Json: ", data)
+	_, _ = pretty.Println("Json: ", data)
 
 	request := &maps.PlaceDetailsRequest{
 		PlaceID: data.Get("place_id"),
