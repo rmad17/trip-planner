@@ -59,7 +59,7 @@ type TripPlan struct {
 	EndDate      *time.Time     `json:"end_date" example:"2024-06-10T00:00:00Z" description:"End date of the trip"`
 	MinDays      *int8          `json:"min_days" example:"7" description:"Minimum number of days for the trip"`
 	MaxDays      *int8          `json:"max_days" example:"14" description:"Maximum number of days for the trip"`
-	TravelMode   *string        `json:"travel_mode" example:"flight" description:"Primary mode of travel"`
+	TravelModes  pq.StringArray `json:"travel_modes,omitempty" gorm:"type:text[]" swaggertype:"array,string" example:"flight,train" description:"Modes of travel (flight, car, train, bus, etc.)"`
 	TripType     *string        `json:"trip_type" example:"leisure" description:"Type of trip (leisure, business, adventure, family, etc.)"`
 	Budget       *float64       `json:"budget" example:"5000.00" description:"Total planned budget for the trip"`
 	ActualSpent  *float64       `json:"actual_spent" example:"4750.25" description:"Total amount actually spent"`
@@ -68,7 +68,7 @@ type TripPlan struct {
 	IsPublic     *bool          `json:"is_public" example:"false" description:"Whether the trip plan is publicly visible"`
 	ShareCode    *string        `json:"share_code" example:"PARIS2024ABC" description:"Shareable code for the trip"`
 	Notes        *string        `json:"notes" example:"Romantic getaway" description:"Additional notes"`
-	Hotels       pq.StringArray `json:"hotels" gorm:"type:text[]" swaggertype:"array,string" example:"Hotel de Paris,Le Bristol" description:"List of preferred hotels"`
+	Hotels       pq.StringArray `json:"hotels,omitempty" gorm:"type:text[]" swaggertype:"array,string" example:"Hotel de Paris,Le Bristol" description:"List of preferred hotels (optional)"`
 	Tags         pq.StringArray `json:"tags" gorm:"type:text[]" swaggertype:"array,string" example:"romantic,europe" description:"Trip tags"`
 	Participants pq.StringArray `json:"participants" gorm:"type:text[]" swaggertype:"array,string" example:"john@example.com,jane@example.com" description:"Email addresses of trip participants"`
 	UserID       uuid.UUID      `json:"user_id" gorm:"type:uuid;not null" example:"123e4567-e89b-12d3-a456-426614174000" description:"ID of the user who created the trip"`

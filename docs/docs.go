@@ -132,6 +132,61 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/trip/refine": {
+            "post": {
+                "description": "Refines a trip plan based on user feedback about their interests and preferences",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "trips"
+                ],
+                "summary": "Refine trip with interactive feedback",
+                "parameters": [
+                    {
+                        "description": "User feedback for trip refinement",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/trips.InteractiveFeedback"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "LLM provider (gemini, claude, gpt). Defaults to gemini",
+                        "name": "provider",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Refined trip plan",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/auth/google": {
             "get": {
                 "description": "Render Google OAuth login page",
@@ -3350,7 +3405,7 @@ const docTemplate = `{
         },
         "/trip/generate": {
             "post": {
-                "description": "Uses Claude AI to generate a complete trip plan with hops, days, and activities",
+                "description": "Uses AI (Gemini/Claude/GPT) to generate a complete trip plan with hops, days, and activities",
                 "consumes": [
                     "application/json"
                 ],
@@ -3370,6 +3425,12 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/trips.TripGenerationRequest"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "LLM provider (gemini, claude, gpt). Defaults to gemini",
+                        "name": "provider",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -3475,16 +3536,15 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "integer",
-                        "description": "Trip duration in days",
-                        "name": "duration",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
                         "type": "string",
                         "description": "Comma-separated preferences (e.g., 'adventure,culture')",
                         "name": "preferences",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "LLM provider (gemini, claude, gpt). Defaults to gemini",
+                        "name": "provider",
                         "in": "query"
                     }
                 ],
@@ -5909,9 +5969,15 @@ const docTemplate = `{
                         "culture"
                     ]
                 },
-                "travel_mode": {
-                    "type": "string",
-                    "example": "flight"
+                "travel_modes": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "flight",
+                        "train"
+                    ]
                 }
             }
         },
@@ -6089,6 +6155,43 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "transportation": {
+                    "type": "string"
+                }
+            }
+        },
+        "trips.InteractiveFeedback": {
+            "type": "object",
+            "required": [
+                "feedback"
+            ],
+            "properties": {
+                "current_plan": {
+                    "type": "string"
+                },
+                "feedback": {
+                    "type": "string"
+                },
+                "interests": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "modified_budget": {
+                    "type": "number"
+                },
+                "modified_dates": {
+                    "type": "object",
+                    "properties": {
+                        "end_date": {
+                            "type": "string"
+                        },
+                        "start_date": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "trip_plan_id": {
                     "type": "string"
                 }
             }
@@ -6720,9 +6823,15 @@ const docTemplate = `{
                         "europe"
                     ]
                 },
-                "travel_mode": {
-                    "type": "string",
-                    "example": "flight"
+                "travel_modes": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "flight",
+                        "train"
+                    ]
                 },
                 "travellers": {
                     "type": "array",

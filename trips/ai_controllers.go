@@ -139,6 +139,12 @@ func CreateTripFromAIGeneration(c *gin.Context) {
 	totalDays := int8(generatedPlan.TotalDays)
 	budget := generatedPlan.EstimatedBudget
 
+	// Convert single travel mode to array for backward compatibility
+	var travelModes pq.StringArray
+	if travelMode != "" {
+		travelModes = pq.StringArray{travelMode}
+	}
+
 	trip := TripPlan{
 		BaseModel:   core.BaseModel{ID: uuid.New()},
 		Name:        &tripName,
@@ -147,7 +153,7 @@ func CreateTripFromAIGeneration(c *gin.Context) {
 		EndDate:     endDate,
 		MinDays:     &totalDays,
 		MaxDays:     &totalDays,
-		TravelMode:  &travelMode,
+		TravelModes: travelModes,
 		TripType:    &tripType,
 		Budget:      &budget,
 		Currency:    CurrencyUSD, // Default, should get from request

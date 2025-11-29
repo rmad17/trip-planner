@@ -110,14 +110,14 @@ func TestCreateTrip_Success(t *testing.T) {
 	router := setupTestRouter()
 
 	tripRequest := CreateTripRequest{
-		Name:       stringPtr("Trip to Paris"),
-		StartDate:  timePtr(time.Date(2024, 6, 1, 0, 0, 0, 0, time.UTC)),
-		EndDate:    timePtr(time.Date(2024, 6, 10, 0, 0, 0, 0, time.UTC)),
-		MinDays:    int16Ptr(7),
-		TravelMode: stringPtr("flight"),
-		Notes:      stringPtr("Romantic getaway"),
-		Hotels:     pq.StringArray{"Hotel de Paris", "Le Bristol"},
-		Tags:       pq.StringArray{"romantic", "europe", "culture"},
+		Name:        stringPtr("Trip to Paris"),
+		StartDate:   timePtr(time.Date(2024, 6, 1, 0, 0, 0, 0, time.UTC)),
+		EndDate:     timePtr(time.Date(2024, 6, 10, 0, 0, 0, 0, time.UTC)),
+		MinDays:     int16Ptr(7),
+		TravelModes: pq.StringArray{"flight"},
+		Notes:       stringPtr("Romantic getaway"),
+		Hotels:      pq.StringArray{"Hotel de Paris", "Le Bristol"},
+		Tags:        pq.StringArray{"romantic", "europe", "culture"},
 	}
 
 	jsonData, _ := json.Marshal(tripRequest)
@@ -197,14 +197,14 @@ func TestCreateTrip_WithAllFields(t *testing.T) {
 	router := setupTestRouter()
 
 	tripRequest := CreateTripRequest{
-		Name:       stringPtr("Complete Trip"),
-		StartDate:  timePtr(time.Date(2024, 7, 1, 0, 0, 0, 0, time.UTC)),
-		EndDate:    timePtr(time.Date(2024, 7, 15, 0, 0, 0, 0, time.UTC)),
-		MinDays:    int16Ptr(10),
-		TravelMode: stringPtr("car"),
-		Notes:      stringPtr("Road trip across the country"),
-		Hotels:     pq.StringArray{"Motel 6", "Holiday Inn", "Best Western"},
-		Tags:       pq.StringArray{"adventure", "road-trip", "family"},
+		Name:        stringPtr("Complete Trip"),
+		StartDate:   timePtr(time.Date(2024, 7, 1, 0, 0, 0, 0, time.UTC)),
+		EndDate:     timePtr(time.Date(2024, 7, 15, 0, 0, 0, 0, time.UTC)),
+		MinDays:     int16Ptr(10),
+		TravelModes: pq.StringArray{"car", "train"},
+		Notes:       stringPtr("Road trip across the country"),
+		Hotels:      pq.StringArray{"Motel 6", "Holiday Inn", "Best Western"},
+		Tags:        pq.StringArray{"adventure", "road-trip", "family"},
 	}
 
 	jsonData, _ := json.Marshal(tripRequest)
@@ -224,8 +224,10 @@ func TestCreateTrip_WithAllFields(t *testing.T) {
 	}
 
 	tripData := response["trip"].(map[string]interface{})
-	if tripData["travel_mode"] != "car" {
-		t.Errorf("Expected travel_mode 'car', got %v", tripData["travel_mode"])
+	if travelModes, ok := tripData["travel_modes"].([]interface{}); ok {
+		if len(travelModes) < 1 || travelModes[0] != "car" {
+			t.Errorf("Expected travel_modes to contain 'car', got %v", tripData["travel_modes"])
+		}
 	}
 	if tripData["notes"] != "Road trip across the country" {
 		t.Errorf("Expected specific notes, got %v", tripData["notes"])

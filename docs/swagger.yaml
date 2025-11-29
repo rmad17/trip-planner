@@ -1262,9 +1262,13 @@ definitions:
         items:
           type: string
         type: array
-      travel_mode:
-        example: flight
-        type: string
+      travel_modes:
+        example:
+        - flight
+        - train
+        items:
+          type: string
+        type: array
     required:
     - place_name
     type: object
@@ -1397,6 +1401,30 @@ definitions:
         type: string
       transportation:
         type: string
+    type: object
+  trips.InteractiveFeedback:
+    properties:
+      current_plan:
+        type: string
+      feedback:
+        type: string
+      interests:
+        items:
+          type: string
+        type: array
+      modified_budget:
+        type: number
+      modified_dates:
+        properties:
+          end_date:
+            type: string
+          start_date:
+            type: string
+        type: object
+      trip_plan_id:
+        type: string
+    required:
+    - feedback
     type: object
   trips.Stay:
     properties:
@@ -1846,9 +1874,13 @@ definitions:
         items:
           type: string
         type: array
-      travel_mode:
-        example: flight
-        type: string
+      travel_modes:
+        example:
+        - flight
+        - train
+        items:
+          type: string
+        type: array
       travellers:
         items:
           $ref: '#/definitions/trips.Traveller'
@@ -1952,6 +1984,44 @@ paths:
       summary: Update an activity
       tags:
       - activities
+  /api/v1/trip/refine:
+    post:
+      consumes:
+      - application/json
+      description: Refines a trip plan based on user feedback about their interests
+        and preferences
+      parameters:
+      - description: User feedback for trip refinement
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/trips.InteractiveFeedback'
+      - description: LLM provider (gemini, claude, gpt). Defaults to gemini
+        in: query
+        name: provider
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Refined trip plan
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Refine trip with interactive feedback
+      tags:
+      - trips
   /auth/google:
     get:
       description: Render Google OAuth login page
@@ -4388,8 +4458,8 @@ paths:
     post:
       consumes:
       - application/json
-      description: Uses Claude AI to generate a complete trip plan with hops, days,
-        and activities
+      description: Uses AI (Gemini/Claude/GPT) to generate a complete trip plan with
+        hops, days, and activities
       parameters:
       - description: Trip generation parameters
         in: body
@@ -4397,6 +4467,10 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/trips.TripGenerationRequest'
+      - description: LLM provider (gemini, claude, gpt). Defaults to gemini
+        in: query
+        name: provider
+        type: string
       produces:
       - application/json
       responses:
@@ -4469,14 +4543,13 @@ paths:
         name: destination
         required: true
         type: string
-      - description: Trip duration in days
-        in: query
-        name: duration
-        required: true
-        type: integer
       - description: Comma-separated preferences (e.g., 'adventure,culture')
         in: query
         name: preferences
+        type: string
+      - description: LLM provider (gemini, claude, gpt). Defaults to gemini
+        in: query
+        name: provider
         type: string
       produces:
       - application/json

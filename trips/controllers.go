@@ -40,14 +40,14 @@ func CreateTrip(c *gin.Context) {
 
 	// Create trip plan
 	tripPlan := TripPlan{
-		Name:       newTrip.Name,
-		StartDate:  newTrip.StartDate,
-		EndDate:    newTrip.EndDate,
-		TravelMode: newTrip.TravelMode,
-		Notes:      newTrip.Notes,
-		Hotels:     newTrip.Hotels,
-		Tags:       newTrip.Tags,
-		UserID:     user.ID,
+		Name:        newTrip.Name,
+		StartDate:   newTrip.StartDate,
+		EndDate:     newTrip.EndDate,
+		TravelModes: newTrip.TravelModes,
+		Notes:       newTrip.Notes,
+		Hotels:      newTrip.Hotels,
+		Tags:        newTrip.Tags,
+		UserID:      user.ID,
 	}
 
 	// Handle MinDays conversion if provided
