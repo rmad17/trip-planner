@@ -20,7 +20,12 @@ func RouterGroupUserProfile(router *gin.RouterGroup) {
 func RouterGroupGoogleOAuth(router *gin.RouterGroup) {
 	google_client_id := os.Getenv("GOOGLE_OAUTH_CLIENT_ID")
 	google_client_secret := os.Getenv("GOOGLE_OAUTH_CLIENT_SECRET")
-	google_provider := google.New(google_client_id, google_client_secret, "http://localhost:8080/auth/google/callback", "email", "profile")
+	// Use environment variable for callback URL, fallback to localhost for development
+	callback_url := os.Getenv("GOOGLE_OAUTH_CALLBACK_URL")
+	if callback_url == "" {
+		callback_url = "http://localhost:8080/auth/google/callback"
+	}
+	google_provider := google.New(google_client_id, google_client_secret, callback_url, "email", "profile")
 	goth.UseProviders(google_provider)
 	router.GET("/auth/google/login", GoogleOAuthLogin)
 	router.GET("/:provider/begin", GoogleOAuthBegin)

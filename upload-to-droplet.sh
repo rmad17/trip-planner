@@ -5,7 +5,7 @@
 set -e
 
 # Configuration
-DROPLET_IP="your.droplet.ip.here"  # Replace with your droplet IP
+DROPLET_IP="157.245.111.32"  # Replace with your droplet IP
 DROPLET_USER="root"  # or "deploy" if using non-root user
 APP_DIR="/opt/trip-planner"
 

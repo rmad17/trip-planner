@@ -17,17 +17,21 @@ COPY . .
 
 # Build the application
 # CGO_ENABLED=0 for static binary
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o main ./cmd
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o main app.go
+
+# Build migration utility
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o migrate ./cmd/migrate
 
 # Stage 2: Runtime
 FROM alpine:latest
 
-# Install runtime dependencies
+# Install runtime dependencies including postgresql-client for migrations
 RUN apk --no-cache add \
     ca-certificates \
     tzdata \
     wget \
-    curl
+    curl \
+    postgresql-client
 
 # Create non-root user
 RUN addgroup -g 1000 appuser && \
@@ -35,11 +39,18 @@ RUN addgroup -g 1000 appuser && \
 
 WORKDIR /app
 
-# Copy binary from builder
+# Copy binaries from builder
 COPY --from=builder /app/main .
+COPY --from=builder /app/migrate .
 
-# Copy migrations if you have them
+# Copy migrations and scripts
 COPY --from=builder /app/migrations ./migrations
+COPY --from=builder /app/scripts/run-migrations.sh ./scripts/run-migrations.sh
+
+# Make scripts executable
+USER root
+RUN chmod +x ./scripts/run-migrations.sh
+USER appuser
 
 # Create necessary directories
 RUN mkdir -p uploads logs && \

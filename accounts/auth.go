@@ -163,17 +163,101 @@ func GoogleOAuthBegin(c *gin.Context) {
 	gothic.BeginAuthHandler(c.Writer, c.Request)
 }
 
+// GoogleOAuthCallback godoc
+// @Summary Google OAuth callback
+// @Description Handle Google OAuth callback and create/login user
+// @Tags authentication
+// @Produce json
+// @Success 200 {object} map[string]interface{} "JWT token and user data"
+// @Failure 500 {object} map[string]string "Authentication error"
+// @Router /auth/google/callback [get]
 func GoogleOAuthCallback(c *gin.Context) {
-	user, err := gothic.CompleteUserAuth(c.Writer, c.Request)
+	gothUser, err := gothic.CompleteUserAuth(c.Writer, c.Request)
 	if err != nil {
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to authenticate with Google"})
 		return
 	}
-	fmt.Println("User Name: ", user.Name)
-	fmt.Println("User AT: ", user.AccessToken)
-	fmt.Println("User Email: ", user.Email)
-	fmt.Println("User Expiry: ", user.ExpiresAt)
-	fmt.Println("User Id: ", user.UserID)
-	fmt.Println("User Raw Data: ", user.RawData)
-	c.HTML(http.StatusOK, "success.tmpl", user)
+
+	// Find or create user in database
+	var dbUser User
+	result := core.DB.Where("google_id = ?", gothUser.UserID).First(&dbUser)
+
+	expiresAt := gothUser.ExpiresAt.Unix()
+	provider := "google"
+
+	if result.Error != nil {
+		// User doesn't exist, create new user
+		dbUser = User{
+			Username:     gothUser.Email, // Use email as username
+			Email:        &gothUser.Email,
+			GoogleID:     &gothUser.UserID,
+			Name:         &gothUser.Name,
+			FirstName:    &gothUser.FirstName,
+			LastName:     &gothUser.LastName,
+			AvatarURL:    &gothUser.AvatarURL,
+			Provider:     &provider,
+			AccessToken:  &gothUser.AccessToken,
+			RefreshToken: &gothUser.RefreshToken,
+			ExpiresAt:    &expiresAt,
+		}
+
+		if createErr := core.DB.Create(&dbUser).Error; createErr != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+			return
+		}
+	} else {
+		// User exists, update their info
+		updates := map[string]interface{}{
+			"name":          gothUser.Name,
+			"first_name":    gothUser.FirstName,
+			"last_name":     gothUser.LastName,
+			"avatar_url":    gothUser.AvatarURL,
+			"access_token":  gothUser.AccessToken,
+			"refresh_token": gothUser.RefreshToken,
+			"expires_at":    expiresAt,
+		}
+
+		if updateErr := core.DB.Model(&dbUser).Updates(updates).Error; updateErr != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user"})
+			return
+		}
+	}
+
+	// Generate JWT token
+	generateToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"id":  dbUser.ID,
+		"exp": time.Now().Add(time.Hour * 24).Unix(),
+	})
+
+	token, err := generateToken.SignedString([]byte(os.Getenv("SECRET")))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		return
+	}
+
+	// Get frontend URL from environment variable
+	frontendURL := os.Getenv("FRONTEND_URL")
+	if frontendURL == "" {
+		frontendURL = "http://localhost:3000" // Default for development
+	}
+
+	// Redirect back to frontend with token
+	// Frontend should handle this route and store the token
+	redirectURL := fmt.Sprintf("%s/auth/callback?token=%s", frontendURL, token)
+	c.Redirect(http.StatusTemporaryRedirect, redirectURL)
+
+	// Alternative: Return JSON if requested via API (for mobile apps, etc.)
+	// You can detect this by checking Accept header or a query parameter
+	// if c.GetHeader("Accept") == "application/json" {
+	//     c.JSON(http.StatusOK, gin.H{
+	//         "token": token,
+	//         "user": gin.H{
+	//             "id":         dbUser.ID,
+	//             "username":   dbUser.Username,
+	//             "email":      dbUser.Email,
+	//             "name":       dbUser.Name,
+	//             "avatar_url": dbUser.AvatarURL,
+	//         },
+	//     })
+	// }
 }

@@ -27,10 +27,22 @@ type UserPreferences struct {
 
 type User struct {
 	core.BaseModel
-	Username    string           `json:"username" gorm:"unique"`
-	Password    string           `json:"password"`
-	Email       *string          `json:"email"`
-	Preferences *UserPreferences `json:"preferences" gorm:"foreignKey:UserID"`
+	Username      string           `json:"username" gorm:"unique"`
+	Password      string           `json:"password"`
+	Email         *string          `json:"email" gorm:"unique"`
+	// Google OAuth fields
+	GoogleID      *string          `json:"google_id" gorm:"unique"`
+	Name          *string          `json:"name"`
+	FirstName     *string          `json:"first_name"`
+	LastName      *string          `json:"last_name"`
+	AvatarURL     *string          `json:"avatar_url"`
+	Locale        *string          `json:"locale"`
+	// OAuth metadata
+	Provider      *string          `json:"provider"`
+	AccessToken   *string          `json:"-" gorm:"type:text"` // Hidden from JSON
+	RefreshToken  *string          `json:"-" gorm:"type:text"` // Hidden from JSON
+	ExpiresAt     *int64           `json:"-"`
+	Preferences   *UserPreferences `json:"preferences" gorm:"foreignKey:UserID"`
 }
 
 // Add method to get models for Atlas

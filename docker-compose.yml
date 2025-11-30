@@ -19,6 +19,26 @@ services:
     depends_on:
       - api
 
+  # Database Migration Service (runs once before API starts)
+  migration:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: trip-planner-migration
+    restart: "no"  # Only run once
+    environment:
+      - DB_HOST=db
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - MIGRATION_METHOD=sql  # Options: sql, gorm
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - trip-planner-network
+    command: ["/app/scripts/run-migrations.sh"]
+
   # Go API Backend
   api:
     build:
@@ -34,10 +54,16 @@ services:
       - MAPBOX_TOKEN=${MAPBOX_TOKEN}
       - PORT=8080
       - ENVIRONMENT=production
-      - ALLOWED_ORIGINS=https://trip-planner-fe.blr1.digitaloceanspaces.com,https://trip-planner-fe.blr1.cdn.digitaloceanspaces.com
+      - ALLOWED_ORIGINS=https://trip-planner-fe.blr1.digitaloceanspaces.com,https://trip-planner-fe.blr1.cdn.digitaloceanspaces.com,https://trip-planner-fe-mlmam.ondigitalocean.app/,https://162.159.140.98
+      - GOOGLE_OAUTH_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID}
+      - GOOGLE_OAUTH_CLIENT_SECRET=${GOOGLE_OAUTH_CLIENT_SECRET}
+      - GOOGLE_OAUTH_CALLBACK_URL=${GOOGLE_OAUTH_CALLBACK_URL}
+      - FRONTEND_URL=${FRONTEND_URL}
     depends_on:
       db:
         condition: service_healthy
+      migration:
+        condition: service_completed_successfully
     volumes:
       - ./uploads:/app/uploads
       - ./logs:/app/logs

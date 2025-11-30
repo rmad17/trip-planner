@@ -28,6 +28,9 @@ docker-compose down
 echo -e "${YELLOW}🏗️  Building containers...${NC}"
 docker-compose build --no-cache
 
+echo -e "${YELLOW}🗄️  Running database migrations...${NC}"
+docker-compose up migration
+
 echo -e "${YELLOW}🚀 Starting containers...${NC}"
 docker-compose up -d
 
@@ -42,10 +45,6 @@ else
     docker-compose logs --tail=50
     exit 1
 fi
-
-echo -e "${YELLOW}🗄️  Running database migrations...${NC}"
-# Uncomment if you have migrations
-# docker-compose exec -T api ./main migrate
 
 echo -e "${YELLOW}📊 Service Status:${NC}"
 docker-compose ps
