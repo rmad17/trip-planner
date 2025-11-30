@@ -24,8 +24,8 @@ if [ "$DROPLET_IP" = "your.droplet.ip.here" ]; then
 fi
 
 # Create rsync exclude file
+# .git/
 cat > .rsync-exclude <<EOF
-.git/
 .env
 node_modules/
 build/
