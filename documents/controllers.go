@@ -11,6 +11,7 @@ import (
 	"time"
 	"triplanner/accounts"
 	"triplanner/core"
+	"triplanner/storage"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -164,17 +165,25 @@ func UploadDocument(c *gin.Context) {
 	}
 	user := currentUser.(accounts.User)
 
-	// Verify access
+	// Verify access and fetch trip details
 	var hasAccess bool
-	var tripPlan struct{ ID uuid.UUID }
-	result := core.DB.Table("trip_plans").Select("id").Where("id = ? AND user_id = ?", tripPlanID, user.BaseModel.ID).First(&tripPlan)
+	var tripPlan struct {
+		ID   uuid.UUID
+		Name *string
+	}
+	result := core.DB.Table("trip_plans").Select("id, name").Where("id = ? AND user_id = ?", tripPlanID, user.BaseModel.ID).First(&tripPlan)
 	if result.Error == nil {
 		hasAccess = true
 	} else {
+		// Check if user is a traveller
 		var traveller struct{ ID uuid.UUID }
 		result = core.DB.Table("travellers").Select("id").
 			Where("trip_plan = ? AND user_id = ? AND is_active = ?", tripPlanID, user.BaseModel.ID, true).First(&traveller)
-		hasAccess = result.Error == nil
+		if result.Error == nil {
+			hasAccess = true
+			// Fetch trip plan details for travellers too
+			core.DB.Table("trip_plans").Select("id, name").Where("id = ?", tripPlanID).First(&tripPlan)
+		}
 	}
 
 	if !hasAccess {
@@ -240,29 +249,52 @@ func UploadDocument(c *gin.Context) {
 		expiresAt = &parsedTime
 	}
 
-	// Create uploads directory if it doesn't exist
-	uploadsDir := "uploads/documents"
-	if err := os.MkdirAll(uploadsDir, 0755); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create upload directory"})
+	// Get storage provider
+	storageProvider, err := storage.GetDefaultProvider()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Storage provider not available"})
 		return
 	}
 
-	// Generate unique filename
+	// Build structured storage path: username/trip_name/trip_id/category/file_name
+	// Sanitize each component for filesystem safety
+	username := sanitizePath(user.Username)
+
+	tripName := "untitled-trip"
+	if tripPlan.Name != nil && *tripPlan.Name != "" {
+		tripName = sanitizePath(*tripPlan.Name)
+	}
+
+	tripIDStr := tripPlanID.String()
+	categoryStr := sanitizePath(category)
+
+	// Use the name provided by user, add extension from original file if not present
+	fileName := sanitizePath(name)
 	fileExt := filepath.Ext(fileHeader.Filename)
-	fileName := fmt.Sprintf("%s_%d%s", uuid.New().String(), time.Now().Unix(), fileExt)
-	filePath := filepath.Join(uploadsDir, fileName)
+	if !strings.HasSuffix(strings.ToLower(fileName), strings.ToLower(fileExt)) {
+		fileName = fileName + fileExt
+	}
 
-	// Save file to disk
-	dst, err := os.Create(filePath)
+	// Build the full storage key
+	storageKey := fmt.Sprintf("%s/%s/%s/%s/%s", username, tripName, tripIDStr, categoryStr, fileName)
+
+	// Get content type
+	contentType := fileHeader.Header.Get("Content-Type")
+	if contentType == "" {
+		contentType = "application/octet-stream"
+	}
+
+	// Reset file reader to beginning
+	_, err = file.Seek(0, 0)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create file"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read file"})
 		return
 	}
-	defer func() { _ = dst.Close() }()
 
-	_, err = io.Copy(dst, file)
+	// Upload to storage provider
+	uploadResult, err := storageProvider.Upload(storageKey, file, contentType)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save file"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to upload file: %v", err)})
 		return
 	}
 
@@ -270,10 +302,10 @@ func UploadDocument(c *gin.Context) {
 	document := Document{
 		Name:            name,
 		OriginalName:    fileHeader.Filename,
-		StorageProvider: StorageProviderLocal,
-		StoragePath:     filePath,
-		FileSize:        fileHeader.Size,
-		ContentType:     fileHeader.Header.Get("Content-Type"),
+		StorageProvider: StorageProvider(uploadResult.Provider),
+		StoragePath:     uploadResult.Key,
+		FileSize:        uploadResult.Size,
+		ContentType:     uploadResult.ContentType,
 		Category:        DocumentCategory(category),
 		Description:     &description,
 		Notes:           &notes,
@@ -296,7 +328,7 @@ func UploadDocument(c *gin.Context) {
 	result = core.DB.Create(&document)
 	if result.Error != nil {
 		// Clean up file if database insert fails
-		_ = os.Remove(filePath)
+		_ = storageProvider.Delete(storageKey)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
 		return
 	}
@@ -439,9 +471,18 @@ func DeleteDocument(c *gin.Context) {
 		return
 	}
 
-	// Delete file from storage if it's local storage
+	// Delete file from storage
+	var storageProvider storage.StorageProvider
+	var err error
+
 	if document.StorageProvider == StorageProviderLocal {
-		if err := os.Remove(document.StoragePath); err != nil {
+		storageProvider, err = storage.GetProvider("local")
+	} else {
+		storageProvider, err = storage.GetProvider(string(document.StorageProvider))
+	}
+
+	if err == nil {
+		if err := storageProvider.Delete(document.StoragePath); err != nil {
 			// Log error but don't fail the request
 			fmt.Printf("Failed to delete file %s: %v\n", document.StoragePath, err)
 		}
@@ -485,6 +526,21 @@ func DownloadDocument(c *gin.Context) {
 		return
 	}
 
+	// Get storage provider
+	var storageProvider storage.StorageProvider
+	var err error
+
+	if document.StorageProvider == StorageProviderLocal {
+		storageProvider, err = storage.GetProvider("local")
+	} else {
+		storageProvider, err = storage.GetProvider(string(document.StorageProvider))
+	}
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Storage provider not available"})
+		return
+	}
+
 	// For local storage, serve the file directly
 	if document.StorageProvider == StorageProviderLocal {
 		if _, err := os.Stat(document.StoragePath); os.IsNotExist(err) {
@@ -500,11 +556,56 @@ func DownloadDocument(c *gin.Context) {
 		return
 	}
 
-	// For other storage providers, implement download logic here
-	c.JSON(http.StatusNotImplemented, gin.H{"error": "Download from external storage not implemented yet"})
+	// For remote storage providers, download from provider
+	fileReader, err := storageProvider.Download(document.StoragePath)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to download file: %v", err)})
+		return
+	}
+	defer func() { _ = fileReader.Close() }()
+
+	c.Header("Content-Description", "File Transfer")
+	c.Header("Content-Transfer-Encoding", "binary")
+	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", document.OriginalName))
+	c.Header("Content-Type", document.ContentType)
+	c.Header("Content-Length", fmt.Sprintf("%d", document.FileSize))
+
+	_, err = io.Copy(c.Writer, fileReader)
+	if err != nil {
+		// Error occurred after headers were sent, log it
+		fmt.Printf("Error streaming file: %v\n", err)
+	}
 }
 
 // Helper function to get string pointer
 func stringPtr(s string) *string {
 	return &s
+}
+
+// sanitizePath sanitizes a string to be used in file paths
+// Removes special characters, replaces spaces with hyphens, converts to lowercase
+func sanitizePath(s string) string {
+	// Convert to lowercase
+	s = strings.ToLower(s)
+	// Replace spaces with hyphens
+	s = strings.ReplaceAll(s, " ", "-")
+	// Remove or replace special characters - keep only alphanumeric, hyphens, and underscores
+	var result strings.Builder
+	for _, r := range s {
+		if (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') || r == '-' || r == '_' {
+			result.WriteRune(r)
+		}
+	}
+	sanitized := result.String()
+	// Remove consecutive hyphens
+	for strings.Contains(sanitized, "--") {
+		sanitized = strings.ReplaceAll(sanitized, "--", "-")
+	}
+	// Trim hyphens from start and end
+	sanitized = strings.Trim(sanitized, "-")
+	// If empty after sanitization, use a default
+	if sanitized == "" {
+		sanitized = "untitled"
+	}
+	return sanitized
 }

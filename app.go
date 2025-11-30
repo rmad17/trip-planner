@@ -18,7 +18,9 @@ import (
 	_ "triplanner/docs" // This line is necessary for go-swagger to find your docs!
 	"triplanner/documents"
 	"triplanner/expenses"
+	"triplanner/middlewares"
 	"triplanner/places"
+	"triplanner/storage"
 	"triplanner/trips"
 
 	"github.com/gin-gonic/gin"
@@ -29,10 +31,19 @@ import (
 func init() {
 	core.LoadEnvs()
 	core.ConnectDB()
+
+	// Initialize storage provider
+	if err := storage.InitializeStorage(); err != nil {
+		log.Fatalf("Failed to initialize storage: %v", err)
+	}
 }
 
 func main() {
 	router := gin.Default()
+
+	// CORS middleware - must be applied before routes
+	router.Use(middlewares.CORSMiddleware())
+
 	router.LoadHTMLGlob("templates/*")
 
 	// Initialize GoAdmin
@@ -40,6 +51,14 @@ func main() {
 
 	// Swagger endpoint
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	// Health check endpoint for Caddy and monitoring
+	router.GET("/health", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"status":  "healthy",
+			"message": "Trip Planner API is running",
+		})
+	})
 
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{

@@ -28,8 +28,9 @@ type StorageProvider string
 
 const (
 	StorageProviderDigitalOcean StorageProvider = "digitalocean"
-	StorageProviderS3           StorageProvider = "s3"
-	StorageProviderGCS          StorageProvider = "gcs"
+	StorageProviderS3           StorageProvider = "s3"           // AWS S3
+	StorageProviderGCS          StorageProvider = "gcs"          // Google Cloud Storage
+	StorageProviderAzure        StorageProvider = "azure"        // Azure Blob Storage
 	StorageProviderLocal        StorageProvider = "local"
 	StorageProviderCloudflare   StorageProvider = "cloudflare"
 )
@@ -117,6 +118,7 @@ func GetValidStorageProviders() []StorageProvider {
 		StorageProviderDigitalOcean,
 		StorageProviderS3,
 		StorageProviderGCS,
+		StorageProviderAzure,
 		StorageProviderLocal,
 		StorageProviderCloudflare,
 	}
