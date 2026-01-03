@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	"triplanner/travelknowledge"
@@ -33,7 +34,7 @@ func (p *OpenAIProvider) GenerateContent(ctx context.Context, city travelknowled
 	prompt := buildContentPrompt(city)
 
 	reqBody := map[string]interface{}{
-		"model": "gpt-4-turbo-preview",
+		"model": "gpt-5",
 		"messages": []map[string]string{
 			{
 				"role":    "system",
@@ -149,6 +150,97 @@ func (p *OpenAIProvider) GenerateEmbedding(ctx context.Context, text string) ([]
 	return result.Data[0].Embedding, nil
 }
 
+// OllamaProvider implements AIProvider using local Ollama
+type OllamaProvider struct {
+	model      string
+	baseURL    string
+	httpClient *http.Client
+}
+
+// NewOllamaProvider creates a new Ollama provider
+func NewOllamaProvider(model string) *OllamaProvider {
+	if model == "" {
+		model = "llama3.1:8b"
+	}
+	return &OllamaProvider{
+		model:   model,
+		baseURL: "http://localhost:11434",
+		httpClient: &http.Client{
+			Timeout: 5 * time.Minute,
+		},
+	}
+}
+
+func (p *OllamaProvider) GenerateContent(
+	ctx context.Context,
+	city travelknowledge.City,
+) (*travelknowledge.GeneratedContent, error) {
+
+	prompt := buildContentPrompt(city)
+
+	reqBody := map[string]interface{}{
+		"model":  p.model,
+		"prompt": prompt,
+		"stream": false,
+	}
+
+	jsonData, err := json.Marshal(reqBody)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	req, err := http.NewRequestWithContext(
+		ctx,
+		"POST",
+		p.baseURL+"/api/generate",
+		bytes.NewBuffer(jsonData),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := p.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("ollama request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("ollama returned status %d: %s", resp.StatusCode, string(body))
+	}
+
+	var result struct {
+		Response string `json:"response"`
+		Done     bool   `json:"done"`
+	}
+
+	if err := json.Unmarshal(body, &result); err != nil {
+		return nil, fmt.Errorf("failed to parse ollama response: %w", err)
+	}
+
+	if strings.TrimSpace(result.Response) == "" {
+		return nil, fmt.Errorf("ollama returned empty content")
+	}
+
+	// Reuse your existing parser
+	return parseGeneratedContent(city, result.Response), nil
+}
+
+func (p *OllamaProvider) GenerateEmbedding(
+	ctx context.Context,
+	text string,
+) ([]float32, error) {
+	// Free-mode: skip embeddings
+	return nil, fmt.Errorf("embeddings disabled for Ollama provider")
+}
+
 // ClaudeProvider implements AIProvider using Anthropic Claude API
 type ClaudeProvider struct {
 	apiKey     string
@@ -170,7 +262,7 @@ func (p *ClaudeProvider) GenerateContent(ctx context.Context, city travelknowled
 	prompt := buildContentPrompt(city)
 
 	reqBody := map[string]interface{}{
-		"model": "claude-3-5-sonnet-20241022",
+		"model":      "claude-4-5-sonnet-20241022",
 		"max_tokens": 4000,
 		"messages": []map[string]string{
 			{

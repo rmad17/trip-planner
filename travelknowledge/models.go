@@ -42,16 +42,16 @@ func (TravelDocument) TableName() string {
 
 // TravelDocumentMetadata represents the structured metadata
 type TravelDocumentMetadata struct {
-	Tags        []string           `json:"tags,omitempty"`
-	Sources     []string           `json:"sources,omitempty"`
-	Coordinates *GeoCoordinates    `json:"coordinates,omitempty"`
-	Season      string             `json:"season,omitempty"`
-	PriceRange  string             `json:"price_range,omitempty"`
-	Duration    string             `json:"duration,omitempty"`
-	BestTime    string             `json:"best_time,omitempty"`
-	Language    string             `json:"language,omitempty"`
-	Keywords    []string           `json:"keywords,omitempty"`
-	RelatedDocs []uuid.UUID        `json:"related_docs,omitempty"`
+	Tags        []string               `json:"tags,omitempty"`
+	Sources     []string               `json:"sources,omitempty"`
+	Coordinates *GeoCoordinates        `json:"coordinates,omitempty"`
+	Season      string                 `json:"season,omitempty"`
+	PriceRange  string                 `json:"price_range,omitempty"`
+	Duration    string                 `json:"duration,omitempty"`
+	BestTime    string                 `json:"best_time,omitempty"`
+	Language    string                 `json:"language,omitempty"`
+	Keywords    []string               `json:"keywords,omitempty"`
+	RelatedDocs []uuid.UUID            `json:"related_docs,omitempty"`
 	Extra       map[string]interface{} `json:"extra,omitempty"`
 }
 
@@ -77,11 +77,11 @@ func (m *TravelDocumentMetadata) Scan(value interface{}) error {
 
 // CityTravelInfo aggregates all travel information for a city
 type CityTravelInfo struct {
-	CityName     string                        `json:"city_name"`
-	CityCountry  string                        `json:"city_country"`
-	Documents    map[DocumentType][]TravelDocument `json:"documents"`
-	TotalDocs    int                           `json:"total_docs"`
-	LastUpdated  time.Time                     `json:"last_updated"`
+	CityName    string                            `json:"city_name"`
+	CityCountry string                            `json:"city_country"`
+	Documents   map[DocumentType][]TravelDocument `json:"documents"`
+	TotalDocs   int                               `json:"total_docs"`
+	LastUpdated time.Time                         `json:"last_updated"`
 }
 
 // SearchResult represents a semantic search result with similarity score
@@ -125,10 +125,10 @@ type ContentSection struct {
 
 // City represents a city for which to generate travel content
 type City struct {
-	Name        string  `json:"name"`
-	Country     string  `json:"country"`
-	State       string  `json:"state,omitempty"`
+	Name        string          `json:"name"`
+	Country     string          `json:"country"`
+	State       string          `json:"state,omitempty"`
 	Coordinates *GeoCoordinates `json:"coordinates,omitempty"`
-	Population  int     `json:"population,omitempty"`
-	Description string  `json:"description,omitempty"`
+	Population  int             `json:"population,omitempty"`
+	Description string          `json:"description,omitempty"`
 }

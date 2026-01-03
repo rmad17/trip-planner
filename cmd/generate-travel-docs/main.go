@@ -70,7 +70,7 @@ func (cg *ContentGenerator) GenerateForCity(ctx context.Context, city travelknow
 				Language: "en",
 				Keywords: extractKeywords(chunk),
 				Extra: map[string]interface{}{
-					"chunk_index": chunkIdx,
+					"chunk_index":  chunkIdx,
 					"total_chunks": len(chunks),
 					"generated_at": time.Now().Format(time.RFC3339),
 				},
@@ -316,10 +316,10 @@ func main() {
 	}
 
 	// Auto-migrate the schema
-	if err := db.AutoMigrate(&travelknowledge.TravelDocument{}); err != nil {
-		log.Fatalf("❌ Failed to migrate database: %v", err)
-	}
-	log.Println("✅ Database schema ready!")
+	// if err := db.AutoMigrate(&travelknowledge.TravelDocument{}); err != nil {
+	// 	log.Fatalf("❌ Failed to migrate database: %v", err)
+	// }
+	// log.Println("✅ Database schema ready!")
 
 	// Determine which AI provider to use
 	apiKey := os.Getenv("OPENAI_API_KEY")
@@ -333,7 +333,10 @@ func main() {
 
 	// Create AI provider
 	var provider AIProvider
-	if apiKey != "" && strings.HasPrefix(apiKey, "sk-") {
+	if os.Getenv("USE_OLLAMA") == "true" {
+		provider = NewOllamaProvider(os.Getenv("OLLAMA_MODEL"))
+		log.Println("🦙 Using Ollama local LLM")
+	} else if apiKey != "" && strings.HasPrefix(apiKey, "sk-") {
 		// OpenAI key detected
 		provider = NewOpenAIProvider(apiKey)
 		log.Println("🤖 Using OpenAI provider")

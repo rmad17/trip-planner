@@ -24,7 +24,7 @@ func NewGPTProvider(apiKey string) *GPTProvider {
 	return &GPTProvider{
 		APIKey:  apiKey,
 		BaseURL: "https://api.openai.com/v1",
-		Model:   "gpt-4-turbo-preview", // Using GPT-4 Turbo for best results
+		Model:   "gpt-5", // Using GPT-5 for best results
 		HTTPClient: &http.Client{
 			Timeout: 60 * time.Second,
 		},
@@ -33,13 +33,13 @@ func NewGPTProvider(apiKey string) *GPTProvider {
 
 // GPTRequest represents the request structure for OpenAI API
 type GPTRequest struct {
-	Model            string        `json:"model"`
-	Messages         []GPTMessage  `json:"messages"`
-	Temperature      float64       `json:"temperature,omitempty"`
-	MaxTokens        int           `json:"max_tokens,omitempty"`
-	TopP             float64       `json:"top_p,omitempty"`
-	FrequencyPenalty float64       `json:"frequency_penalty,omitempty"`
-	PresencePenalty  float64       `json:"presence_penalty,omitempty"`
+	Model            string             `json:"model"`
+	Messages         []GPTMessage       `json:"messages"`
+	Temperature      float64            `json:"temperature,omitempty"`
+	MaxTokens        int                `json:"max_tokens,omitempty"`
+	TopP             float64            `json:"top_p,omitempty"`
+	FrequencyPenalty float64            `json:"frequency_penalty,omitempty"`
+	PresencePenalty  float64            `json:"presence_penalty,omitempty"`
 	ResponseFormat   *GPTResponseFormat `json:"response_format,omitempty"`
 }
 
