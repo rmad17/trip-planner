@@ -152,21 +152,27 @@ func (p *OpenAIProvider) GenerateEmbedding(ctx context.Context, text string) ([]
 
 // OllamaProvider implements AIProvider using local Ollama
 type OllamaProvider struct {
-	model      string
-	baseURL    string
-	httpClient *http.Client
+	model          string
+	embeddingModel string
+	baseURL        string
+	httpClient     *http.Client
 }
 
 // NewOllamaProvider creates a new Ollama provider
-func NewOllamaProvider(model string) *OllamaProvider {
+func NewOllamaProvider(model string, embeddingModel string) *OllamaProvider {
 	if model == "" {
 		model = "llama3.1:8b"
 	}
+	if embeddingModel == "" {
+		// Default to nomic-embed-text for embeddings
+		embeddingModel = "nomic-embed-text"
+	}
 	return &OllamaProvider{
-		model:   model,
-		baseURL: "http://localhost:11434",
+		model:          model,
+		embeddingModel: embeddingModel,
+		baseURL:        "http://localhost:11434",
 		httpClient: &http.Client{
-			Timeout: 5 * time.Minute,
+			Timeout: 10 * time.Minute, // Increased timeout for local models
 		},
 	}
 }
@@ -237,23 +243,85 @@ func (p *OllamaProvider) GenerateEmbedding(
 	ctx context.Context,
 	text string,
 ) ([]float32, error) {
-	// Free-mode: skip embeddings
-	return nil, fmt.Errorf("embeddings disabled for Ollama provider")
+	reqBody := map[string]interface{}{
+		"model":  p.embeddingModel,
+		"prompt": text,
+	}
+
+	jsonData, err := json.Marshal(reqBody)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal embedding request: %w", err)
+	}
+
+	req, err := http.NewRequestWithContext(
+		ctx,
+		"POST",
+		p.baseURL+"/api/embeddings",
+		bytes.NewBuffer(jsonData),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create embedding request: %w", err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := p.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("ollama embeddings request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read embedding response: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("ollama embeddings returned status %d: %s", resp.StatusCode, string(body))
+	}
+
+	var result struct {
+		Embedding []float64 `json:"embedding"`
+	}
+
+	if err := json.Unmarshal(body, &result); err != nil {
+		return nil, fmt.Errorf("failed to parse ollama embeddings response: %w", err)
+	}
+
+	if len(result.Embedding) == 0 {
+		return nil, fmt.Errorf("ollama returned empty embedding")
+	}
+
+	// Convert []float64 to []float32
+	embedding := make([]float32, len(result.Embedding))
+	for i, v := range result.Embedding {
+		embedding[i] = float32(v)
+	}
+
+	return embedding, nil
 }
 
 // ClaudeProvider implements AIProvider using Anthropic Claude API
 type ClaudeProvider struct {
-	apiKey     string
-	httpClient *http.Client
+	apiKey            string
+	openAIKey         string // For embeddings
+	httpClient        *http.Client
+	embeddingProvider *OpenAIProvider // Reuse OpenAI for embeddings
 }
 
 // NewClaudeProvider creates a new Claude provider
-func NewClaudeProvider(apiKey string) *ClaudeProvider {
+func NewClaudeProvider(apiKey string, openAIKey string) *ClaudeProvider {
+	var embeddingProvider *OpenAIProvider
+	if openAIKey != "" {
+		embeddingProvider = NewOpenAIProvider(openAIKey)
+	}
 	return &ClaudeProvider{
-		apiKey: apiKey,
+		apiKey:            apiKey,
+		openAIKey:         openAIKey,
 		httpClient: &http.Client{
 			Timeout: 60 * time.Second,
 		},
+		embeddingProvider: embeddingProvider,
 	}
 }
 
@@ -322,9 +390,11 @@ func (p *ClaudeProvider) GenerateContent(ctx context.Context, city travelknowled
 
 // GenerateEmbedding generates embeddings - Claude doesn't have embedding endpoint, so we use OpenAI
 func (p *ClaudeProvider) GenerateEmbedding(ctx context.Context, text string) ([]float32, error) {
-	// For now, require OpenAI key for embeddings when using Claude
-	// In production, consider using Voyage AI or other embedding services
-	return nil, fmt.Errorf("embedding generation not available with Claude provider - please set OPENAI_API_KEY for embeddings")
+	if p.embeddingProvider == nil {
+		return nil, fmt.Errorf("embedding generation requires OPENAI_API_KEY when using Claude provider")
+	}
+	// Delegate to OpenAI for embeddings (1536 dimensions)
+	return p.embeddingProvider.GenerateEmbedding(ctx, text)
 }
 
 // MockProvider implements AIProvider for testing without API keys

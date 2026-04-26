@@ -21,6 +21,7 @@ import (
 	"triplanner/middlewares"
 	"triplanner/places"
 	"triplanner/storage"
+	"triplanner/travelknowledge"
 	"triplanner/trips"
 
 	"github.com/gin-gonic/gin"
@@ -91,6 +92,10 @@ func main() {
 	// Document Management Routes
 	documents.RouterGroupDocuments(v1.Group("/trip"))          // Documents nested under trip plans
 	documents.RouterGroupDocumentItems(v1.Group("/documents")) // Individual document operations
+
+	// Travel Knowledge Routes (public - no auth required for reading travel docs)
+	travelKnowledgePublic := router.Group("/api/v1/travel-knowledge")
+	travelknowledge.RouterGroupTravelKnowledge(travelKnowledgePublic)
 
 	if err := router.Run(); err != nil {
 		log.Fatalf("Failed to start server: %v", err)

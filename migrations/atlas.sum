@@ -1,7 +1,8 @@
-h1:bI2YRrEi7THS+QQpNeE4a/Kybr4zkeVE1+2rhUs9TpY=
+h1:V8hU8OSHtLjCWV08wsnE7s7M5NUJwoEi9KNewVGkKUk=
 20250629104718_initial.sql h1:oJf7HQgEkz+c8QGDcEMwk6kF/Z2V2+KIBcfiNJidt0c=
 20250718190738_add_trip_models.sql h1:olTIkpvogrT+4Cf0f7yg4VVHNPl3f08n2SJnNQ8YgYI=
 20250810133721_add_new_models.sql h1:T9zzo62fzoAvSFxLIZ8YiMC7XzZmia6cVCvBdwQje/U=
 20251129110232_update_trip_travel_mode.sql h1:voyk9uGN/IEgEHCMsad3nRHkcVgE9+OeOEbzFfmsp2o=
 20251130100619_add_google_oauth_fields.sql h1:x33fhgQbc2NZIIEyDo+OY/y4uIUL+wBtLDkgzRmqHV0=
 20251231000000_create_travel_documents.sql h1:+ElNE00RsxQl5+btKBbB62WdrVLERBrFFTj3dtFTvGQ=
+20260104000000_update_to_ollama_embeddings.sql h1:e49+8U6nMVt+lig2bfq/2dGpOnf/qfnSgXhR94S9NFk=

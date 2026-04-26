@@ -30,7 +30,7 @@ type TravelDocument struct {
 	Title        string          `gorm:"type:varchar(500);not null" json:"title"`
 	Content      string          `gorm:"type:text;not null" json:"content"`
 	Metadata     json.RawMessage `gorm:"type:jsonb;default:'{}'" json:"metadata"`
-	Embedding    pgvector.Vector `gorm:"type:vector(1536)" json:"-"`
+	Embedding    pgvector.Vector `gorm:"type:vector(768)" json:"-"` // Ollama nomic-embed-text (768), OpenAI ada-002 (1536)
 	CreatedAt    time.Time       `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt    time.Time       `gorm:"autoUpdateTime" json:"updated_at"`
 }

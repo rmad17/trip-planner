@@ -322,32 +322,53 @@ func main() {
 	// log.Println("✅ Database schema ready!")
 
 	// Determine which AI provider to use
-	apiKey := os.Getenv("OPENAI_API_KEY")
-	if apiKey == "" {
-		apiKey = os.Getenv("ANTHROPIC_API_KEY")
-		if apiKey == "" {
-			log.Println("⚠️  No API key found. Set OPENAI_API_KEY or ANTHROPIC_API_KEY")
-			log.Println("💡 Using mock provider for testing...")
-		}
-	}
+	// Priority: Ollama (default) > Claude > OpenAI > Mock
+	openAIKey := os.Getenv("OPENAI_API_KEY")
+	anthropicKey := os.Getenv("ANTHROPIC_API_KEY")
+	useOllama := os.Getenv("USE_OLLAMA")
 
 	// Create AI provider
 	var provider AIProvider
-	if os.Getenv("USE_OLLAMA") == "true" {
-		provider = NewOllamaProvider(os.Getenv("OLLAMA_MODEL"))
-		log.Println("🦙 Using Ollama local LLM")
-	} else if apiKey != "" && strings.HasPrefix(apiKey, "sk-") {
-		// OpenAI key detected
-		provider = NewOpenAIProvider(apiKey)
-		log.Println("🤖 Using OpenAI provider")
-	} else if apiKey != "" && strings.HasPrefix(apiKey, "sk-ant-") {
-		// Anthropic key detected
-		provider = NewClaudeProvider(apiKey)
-		log.Println("🤖 Using Claude provider")
+
+	// Default to Ollama if no explicit provider is set
+	if useOllama == "" && openAIKey == "" && anthropicKey == "" {
+		useOllama = "true"
+		log.Println("💡 No provider specified, defaulting to Ollama (free & local)")
+	}
+
+	if useOllama == "true" {
+		// First priority: Ollama (local, free, default)
+		provider = NewOllamaProvider(os.Getenv("OLLAMA_MODEL"), os.Getenv("OLLAMA_EMBEDDING_MODEL"))
+		log.Println("🦙 Using Ollama local LLM (default)")
+		ollamaModel := os.Getenv("OLLAMA_MODEL")
+		ollamaEmbedding := os.Getenv("OLLAMA_EMBEDDING_MODEL")
+		if ollamaModel == "" {
+			ollamaModel = "llama3.1:8b"
+		}
+		if ollamaEmbedding == "" {
+			ollamaEmbedding = "nomic-embed-text"
+		}
+		log.Printf("   Content model: %s", ollamaModel)
+		log.Printf("   Embedding model: %s (768 dimensions)", ollamaEmbedding)
+	} else if anthropicKey != "" && strings.HasPrefix(anthropicKey, "sk-ant-") {
+		// Second priority: Anthropic Claude
+		provider = NewClaudeProvider(anthropicKey, openAIKey)
+		log.Println("🤖 Using Claude provider for content")
+		if openAIKey != "" {
+			log.Println("   Using OpenAI for embeddings (1536 dimensions)")
+		} else {
+			log.Println("   ⚠️  Warning: No OPENAI_API_KEY set - embeddings will fail!")
+		}
+	} else if openAIKey != "" && strings.HasPrefix(openAIKey, "sk-") {
+		// Third priority: OpenAI
+		provider = NewOpenAIProvider(openAIKey)
+		log.Println("🤖 Using OpenAI provider (1536 dimensions)")
 	} else {
-		// Mock provider for testing
+		// Final fallback: Mock provider for testing
+		log.Println("⚠️  No valid provider configuration found")
+		log.Println("💡 Using mock provider for testing...")
 		provider = NewMockProvider()
-		log.Println("🎭 Using mock provider (for testing)")
+		log.Println("🎭 Mock provider (for testing only)")
 	}
 
 	// Create content generator
@@ -358,7 +379,6 @@ func main() {
 	log.Printf("\n🌍 Processing %d cities...\n\n", len(cities))
 
 	// Process each city
-	ctx := context.Background()
 	successCount := 0
 	failCount := 0
 
@@ -367,15 +387,20 @@ func main() {
 		log.Printf("City %d/%d: %s, %s\n", i+1, len(cities), city.Name, city.Country)
 		log.Printf("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 
+		// Create a context with timeout for each city (15 minutes per city)
+		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
+
 		if err := generator.GenerateForCity(ctx, city); err != nil {
 			log.Printf("❌ Failed to process %s: %v\n\n", city.Name, err)
 			failCount++
+			cancel()
 			continue
 		}
+		cancel()
 
 		successCount++
 
-		// Add a small delay between cities to avoid rate limiting
+		// Add a small delay between cities to avoid overwhelming the system
 		if i < len(cities)-1 {
 			log.Println("⏸️  Waiting 2 seconds before next city...")
 			time.Sleep(2 * time.Second)

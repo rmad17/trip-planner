@@ -4,9 +4,10 @@ This script generates comprehensive travel content for cities and stores them in
 
 ## Features
 
-- 🤖 **AI-Powered Content Generation**: Uses OpenAI GPT-4 or Claude to generate rich travel content
-- 🎯 **Multi-Category Coverage**: Historical, Logistics, Food, Activities, and Nearby Places
+- 🤖 **AI-Powered Content Generation**: Uses OpenAI GPT-4, Claude, or Ollama (local) to generate rich travel content
 - 🔍 **Vector Embeddings**: Automatically generates and stores embeddings for semantic search
+- 🦙 **Ollama Support**: Fully local AI with embedding generation (no API costs!)
+- 🎯 **Multi-Category Coverage**: Historical, Logistics, Food, Activities, and Nearby Places
 - 📊 **PostgreSQL + pgvector**: Leverages pgvector for efficient similarity search
 - 🌍 **Initial Dataset**: Includes 8 Indian cities (Varanasi, Ayodhya, Vrindavan, Ujjain, Dwarka, Asansol, Kolkata, New Delhi)
 
@@ -41,7 +42,36 @@ psql -h localhost -U postgres -d trip
 CREATE EXTENSION IF NOT EXISTS vector;
 ```
 
-### 3. Environment Variables
+### 3. AI Provider Setup
+
+#### Option A: Ollama (Local, Free, No API Key Required) 🦙
+
+```bash
+# Install Ollama
+curl -fsSL https://ollama.com/install.sh | sh
+
+# Pull the models you need
+ollama pull llama3.1:8b           # For content generation
+ollama pull nomic-embed-text      # For embeddings
+
+# Verify models are installed
+ollama list
+```
+
+#### Option B: OpenAI
+
+```bash
+export OPENAI_API_KEY=sk-...
+```
+
+#### Option C: Claude (requires OpenAI for embeddings)
+
+```bash
+export ANTHROPIC_API_KEY=sk-ant-...
+export OPENAI_API_KEY=sk-...  # Still needed for embeddings
+```
+
+### 4. Environment Variables
 
 Set up your `.env` file:
 
@@ -53,10 +83,17 @@ DB_USER=postgres
 DB_PASSWORD=postgres
 DB_NAME=trip
 
-# AI Provider API Key (choose one)
-OPENAI_API_KEY=sk-...           # For OpenAI GPT-4 + embeddings
-# OR
-ANTHROPIC_API_KEY=sk-ant-...    # For Claude (requires OPENAI_API_KEY for embeddings)
+# Default: Ollama (local, free) - runs automatically if no API keys are set
+# Optional: Set models explicitly (defaults shown below)
+# OLLAMA_MODEL=llama3.1:8b               # Or llama2, mistral, etc.
+# OLLAMA_EMBEDDING_MODEL=nomic-embed-text # Or mxbai-embed-large, all-minilm
+
+# Alternative: Use Claude (requires API credits)
+# ANTHROPIC_API_KEY=sk-ant-...
+# OPENAI_API_KEY=sk-...  # Still needed for embeddings
+
+# Alternative: Use OpenAI (requires API credits)
+# OPENAI_API_KEY=sk-...
 ```
 
 ## Installation
@@ -74,25 +111,43 @@ go build -o generate-travel-docs
 ### Running the Generator
 
 ```bash
-# Basic usage (uses mock provider if no API key)
+# Default: Uses Ollama automatically (Local, Free!)
+# Just make sure Ollama is installed with required models
+ollama pull llama3.1:8b
+ollama pull nomic-embed-text
 go run main.go providers.go
 
-# With OpenAI
-export OPENAI_API_KEY=sk-...
+# Or explicitly set Ollama models (optional)
+export OLLAMA_MODEL=llama3.1:8b
+export OLLAMA_EMBEDDING_MODEL=nomic-embed-text
 go run main.go providers.go
 
-# With Claude
+# Override with Claude (requires API credits)
 export ANTHROPIC_API_KEY=sk-ant-...
 export OPENAI_API_KEY=sk-...  # Still needed for embeddings
 go run main.go providers.go
+
+# Override with OpenAI (requires API credits)
+export OPENAI_API_KEY=sk-...
+go run main.go providers.go
 ```
+
+**Note**: The script automatically uses Ollama if no API keys are set. To use cloud providers, simply set their API keys.
 
 ### Running Migrations First
 
 ```bash
-# Apply the database migration
-psql -h localhost -U postgres -d trip < ../../migrations/20251231000000_create_travel_documents.sql
+# For Ollama (default, 768 dimensions) - Use the latest migration
+psql -h localhost -U postgres -d trip < ../../migrations/20260104000000_update_to_ollama_embeddings.sql
+
+# For OpenAI/Claude (1536 dimensions) - Use the original migration
+# psql -h localhost -U postgres -d trip < ../../migrations/20251231000000_create_travel_documents.sql
 ```
+
+**Important**:
+- The new migration (20260104) is configured for **Ollama with 768 dimensions**
+- The old migration (20251231) is for **OpenAI/Claude with 1536 dimensions**
+- Use the migration that matches your provider choice
 
 ## Content Categories
 
@@ -153,7 +208,7 @@ CREATE TABLE travel_documents (
     title VARCHAR(500) NOT NULL,
     content TEXT NOT NULL,
     metadata JSONB DEFAULT '{}',
-    embedding vector(1536),
+    embedding vector(768),  -- Ollama default (768), OpenAI/Claude (1536)
     created_at TIMESTAMP WITH TIME ZONE,
     updated_at TIMESTAMP WITH TIME ZONE
 );
@@ -215,6 +270,14 @@ Edit `main.go` and add cities to the `GetInitialCities()` function:
 
 ## Cost Estimation
 
+### Ollama (Local) 🦙
+
+- **Cost**: **FREE!** ✨
+- **Requirements**: Local machine with GPU (recommended) or CPU
+- **Models**: llama3.1:8b (~4.7GB), nomic-embed-text (~274MB)
+- **Performance**: Slower than cloud APIs but completely private and free
+- **Best for**: Development, privacy-conscious use, cost-sensitive projects
+
 ### OpenAI Pricing (as of 2024)
 
 - **GPT-4 Turbo**: ~$0.01 per 1K tokens (input) + $0.03 per 1K tokens (output)
@@ -238,6 +301,35 @@ Estimated cost for 8 cities:
 
 ## Troubleshooting
 
+### Ollama Timeout Issues
+
+If you're experiencing timeout errors with Ollama:
+
+```bash
+# 1. Check if Ollama is running
+curl http://localhost:11434/api/tags
+
+# 2. Verify models are installed
+ollama list
+
+# 3. Test model manually
+ollama run llama3.1:8b "Hello"
+ollama run nomic-embed-text "Test embedding"
+
+# 4. If models are missing, pull them
+ollama pull llama3.1:8b
+ollama pull nomic-embed-text
+
+# 5. Increase system resources (for slower machines)
+# Edit providers.go and increase timeout:
+# Timeout: 15 * time.Minute  // Increase from 10 to 15 minutes
+```
+
+**Note**: The script now has improved timeout handling:
+- HTTP client timeout: 10 minutes (configurable in providers.go:175)
+- Per-city context timeout: 15 minutes (main.go:372)
+- These timeouts are sufficient for most local LLMs
+
 ### pgvector extension not found
 
 ```bash
@@ -252,7 +344,7 @@ sudo apt install postgresql-16-pgvector
 brew install pgvector
 ```
 
-### API Rate Limiting
+### API Rate Limiting (OpenAI/Claude)
 
 The script includes a 2-second delay between cities to avoid rate limits. If you still hit limits:
 
@@ -263,15 +355,28 @@ time.Sleep(5 * time.Second)  // Change from 2 to 5 seconds
 
 ### Embedding Dimension Mismatch
 
-If using a different embedding model, update the vector dimension:
+Different embedding models have different vector dimensions:
+
+| Model | Dimensions | Notes |
+|-------|------------|-------|
+| text-embedding-ada-002 (OpenAI) | 1536 | Default |
+| nomic-embed-text (Ollama) | 768 | Recommended for local |
+| mxbai-embed-large (Ollama) | 1024 | Good quality |
+| all-minilm (Ollama) | 384 | Fastest, smallest |
+
+If using a model with different dimensions, update:
 
 ```sql
--- In migration file
-embedding vector(768)  -- For smaller models like sentence-transformers
+-- In migration file (migrations/20251231000000_create_travel_documents.sql)
+embedding vector(768)  -- Match your embedding model dimension
 
--- In models.go
+-- In models.go (travelknowledge/models.go)
 Embedding pgvector.Vector `gorm:"type:vector(768)"`
 ```
+
+**Important**: If you change embedding models, you'll need to:
+1. Drop and recreate the table (or migrate)
+2. Regenerate all embeddings with the new model
 
 ## Next Steps
 

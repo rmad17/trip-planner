@@ -57,10 +57,16 @@ Add to your `.env` file:
 # Database (required)
 DB_URL=postgres://postgres:postgres@localhost:5432/trip?sslmode=disable
 
-# AI Provider (choose one)
-OPENAI_API_KEY=sk-...           # For content + embeddings
+# AI Provider - Ollama is now the default (free & local)!
+# No API keys needed - just install Ollama and pull models:
+# ollama pull llama3.1:8b
+# ollama pull nomic-embed-text
+
+# Optional: Override with cloud providers
+# OPENAI_API_KEY=sk-...           # For OpenAI content + embeddings
 # OR
-ANTHROPIC_API_KEY=sk-ant-...    # For content (still needs OpenAI for embeddings)
+# ANTHROPIC_API_KEY=sk-ant-...    # For Claude (still needs OpenAI for embeddings)
+# OPENAI_API_KEY=sk-...
 ```
 
 ### 3. Generate Travel Content
@@ -110,7 +116,7 @@ go build -o ../../bin/query-travel-docs
 | title | VARCHAR(500) | Document title |
 | content | TEXT | Document content |
 | metadata | JSONB | Structured metadata |
-| embedding | vector(1536) | Vector embedding for semantic search |
+| embedding | vector(768) | Vector embedding for semantic search (Ollama default) |
 | created_at | TIMESTAMP | Creation timestamp |
 | updated_at | TIMESTAMP | Last update timestamp |
 
@@ -191,15 +197,33 @@ LIMIT 10;
 
 ## 🤖 AI Providers
 
-### OpenAI (Recommended)
+### Ollama (Default - Recommended) 🦙
+
+```bash
+# Install and pull models
+ollama pull llama3.1:8b
+ollama pull nomic-embed-text
+
+# No API keys needed!
+go run main.go providers.go
+```
+
+- **Content**: llama3.1:8b (or any Ollama model)
+- **Embeddings**: nomic-embed-text (768 dimensions)
+- **Cost**: **FREE!** ✨
+- **Privacy**: Runs entirely on your machine
+- **Speed**: Fast with GPU, decent with CPU
+
+### OpenAI
 
 ```bash
 export OPENAI_API_KEY=sk-...
 ```
 
 - **Content**: GPT-4 Turbo
-- **Embeddings**: text-embedding-ada-002
+- **Embeddings**: text-embedding-ada-002 (1536 dimensions)
 - **Cost**: ~$1-2 for 8 cities
+- **Note**: Requires changing vector dimensions to 1536
 
 ### Claude
 
@@ -209,15 +233,16 @@ export OPENAI_API_KEY=sk-...  # Still needed for embeddings
 ```
 
 - **Content**: Claude 3.5 Sonnet
-- **Embeddings**: OpenAI (Claude doesn't have embedding API)
+- **Embeddings**: OpenAI (Claude doesn't have embedding API, 1536 dimensions)
 - **Cost**: ~$0.50-1 for content + $0.10 for embeddings
+- **Note**: Requires changing vector dimensions to 1536
 
 ### Mock Provider
 
 No API key needed - generates placeholder content for testing.
 
 ```bash
-# Just don't set any API keys
+# Just don't set any API keys and don't install Ollama
 go run main.go providers.go
 ```
 
