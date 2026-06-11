@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 )
@@ -19,12 +20,17 @@ type GeminiProvider struct {
 	HTTPClient *http.Client
 }
 
-// NewGeminiProvider creates a new Gemini provider instance
+// NewGeminiProvider creates a new Gemini provider instance.
+// The model is configurable via GEMINI_MODEL (default: gemini-2.5-flash).
 func NewGeminiProvider(apiKey string) *GeminiProvider {
+	model := os.Getenv("GEMINI_MODEL")
+	if model == "" {
+		model = "gemini-2.5-flash"
+	}
 	return &GeminiProvider{
 		APIKey:  apiKey,
 		BaseURL: "https://generativelanguage.googleapis.com/v1beta",
-		Model:   "gemini-1.5-pro", // Using Gemini 1.5 Pro for best results
+		Model:   model,
 		HTTPClient: &http.Client{
 			Timeout: 60 * time.Second,
 		},
@@ -160,6 +166,11 @@ func (gp *GeminiProvider) GenerateTrip(ctx context.Context, request TripGenerati
 	if err := json.Unmarshal([]byte(responseText), &tripPlan); err != nil {
 		return nil, fmt.Errorf("failed to parse trip plan: %w. Response: %s", err, responseText)
 	}
+
+	// Enrich each hop with provider-sourced hotel/flight offers and a
+	// route-to-next polyline. Failures inside enrichment are logged and
+	// skipped — the trip plan returns even if every provider is offline.
+	enrichTripWithProviders(ctx, &tripPlan, request)
 
 	return &tripPlan, nil
 }

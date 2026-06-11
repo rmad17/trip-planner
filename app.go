@@ -18,8 +18,11 @@ import (
 	_ "triplanner/docs" // This line is necessary for go-swagger to find your docs!
 	"triplanner/documents"
 	"triplanner/expenses"
+	"triplanner/flights"
+	"triplanner/hotels"
 	"triplanner/middlewares"
 	"triplanner/places"
+	"triplanner/routes"
 	"triplanner/storage"
 	"triplanner/travelknowledge"
 	"triplanner/trips"
@@ -92,6 +95,11 @@ func main() {
 	// Document Management Routes
 	documents.RouterGroupDocuments(v1.Group("/trip"))          // Documents nested under trip plans
 	documents.RouterGroupDocumentItems(v1.Group("/documents")) // Individual document operations
+
+	// AI provider search endpoints (real hotel/flight offers, map routes)
+	hotels.RouterGroupHotels(v1.Group("/search/hotels"))
+	flights.RouterGroupFlights(v1.Group("/search/flights"))
+	routes.RouterGroupRoutes(v1.Group("/routes"))
 
 	// Travel Knowledge Routes (public - no auth required for reading travel docs)
 	travelKnowledgePublic := router.Group("/api/v1/travel-knowledge")

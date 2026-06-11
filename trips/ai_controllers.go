@@ -1,6 +1,7 @@
 package trips
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -206,6 +207,25 @@ func CreateTripFromAIGeneration(c *gin.Context) {
 			Activities:      pq.StringArray(generatedHop.Activities),
 			HopOrder:        &hopOrder,
 			TripPlan:        trip.ID,
+		}
+
+		// Persist AI-orchestrated provider data (selected hotel, selected flight, route-to-next)
+		// from the request body into the corresponding JSONB columns. The fields are optional
+		// — empty arrays/nil values produce NULL columns, not empty JSON.
+		if route := generatedHop.RouteToNext; route != nil {
+			if b, err := json.Marshal(route); err == nil {
+				hop.RouteToNext = b
+			}
+		}
+		if len(generatedHop.SuggestedHotels) > 0 {
+			if b, err := json.Marshal(generatedHop.SuggestedHotels[0]); err == nil {
+				hop.SelectedHotel = b
+			}
+		}
+		if len(generatedHop.SuggestedFlights) > 0 {
+			if b, err := json.Marshal(generatedHop.SuggestedFlights[0]); err == nil {
+				hop.SelectedFlight = b
+			}
 		}
 
 		// Link to previous hop

@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"os"
 	"time"
+	"triplanner/flights"
+	"triplanner/hotels"
 )
 
 // ClaudeService handles interactions with Anthropic's Claude API
@@ -83,17 +85,34 @@ type TripGenerationRequest struct {
 
 // TripGenerationResponse represents Claude's structured trip plan
 type TripGenerationResponse struct {
-	TripName        string              `json:"trip_name"`
-	Description     string              `json:"description"`
-	RecommendedMode string              `json:"recommended_mode"` // "flight", "train", "car", "bus", "mixed"
-	TotalDays       int                 `json:"total_days"`
-	EstimatedBudget float64             `json:"estimated_budget"`
-	BudgetBreakdown TripBudgetBreakdown `json:"budget_breakdown"`
-	Hops            []GeneratedHop      `json:"hops"`
-	DailyItinerary  []GeneratedDay      `json:"daily_itinerary"`
-	TravelTips      []string            `json:"travel_tips"`
-	BestTimeToVisit string              `json:"best_time_to_visit"`
-	Considerations  []string            `json:"considerations"`
+	TripName              string              `json:"trip_name"`
+	Description           string              `json:"description"`
+	RecommendedMode       string              `json:"recommended_mode"` // "flight", "train", "car", "bus", "mixed"
+	TotalDays             int                 `json:"total_days"`
+	EstimatedBudget       float64             `json:"estimated_budget"`
+	BudgetBreakdown       TripBudgetBreakdown `json:"budget_breakdown"`
+	Hops                  []GeneratedHop      `json:"hops"`
+	DailyItinerary        []GeneratedDay      `json:"daily_itinerary"`
+	TravelTips            []string            `json:"travel_tips"`
+	BestTimeToVisit       string              `json:"best_time_to_visit"`
+	Considerations        []string            `json:"considerations"`
+	ConsiderationsSources []SourceCitation    `json:"considerations_sources,omitempty"`
+}
+
+// SourceCitation is a {title, url} pointer to a web source backing a piece of
+// trip-planning content (visa, weather, events, etc.).
+type SourceCitation struct {
+	Title string `json:"title"`
+	URL   string `json:"url"`
+}
+
+// RouteSummary is the per-hop route blob attached to TripGenerationResponse hops.
+type RouteSummary struct {
+	DistanceKm      float64         `json:"distance_km"`
+	DurationMin     int             `json:"duration_min"`
+	Mode            string          `json:"mode"`
+	PolylineGeoJSON json.RawMessage `json:"polyline_geojson"`
+	Provider        string          `json:"provider"`
 }
 
 // TripBudgetBreakdown provides budget allocation
@@ -108,19 +127,22 @@ type TripBudgetBreakdown struct {
 
 // GeneratedHop represents a suggested destination/hop
 type GeneratedHop struct {
-	Name            string   `json:"name"`
-	City            string   `json:"city"`
-	Country         string   `json:"country"`
-	Description     string   `json:"description"`
-	StartDate       string   `json:"start_date"` // ISO format
-	EndDate         string   `json:"end_date"`
-	Duration        int      `json:"duration"` // days
-	Transportation  string   `json:"transportation"`
-	EstimatedBudget float64  `json:"estimated_budget"`
-	POIs            []string `json:"pois"`
-	Restaurants     []string `json:"restaurants"`
-	Activities      []string `json:"activities"`
-	HopOrder        int      `json:"hop_order"`
+	Name             string                `json:"name"`
+	City             string                `json:"city"`
+	Country          string                `json:"country"`
+	Description      string                `json:"description"`
+	StartDate        string                `json:"start_date"` // ISO format
+	EndDate          string                `json:"end_date"`
+	Duration         int                   `json:"duration"` // days
+	Transportation   string                `json:"transportation"`
+	EstimatedBudget  float64               `json:"estimated_budget"`
+	POIs             []string              `json:"pois"`
+	Restaurants      []string              `json:"restaurants"`
+	Activities       []string              `json:"activities"`
+	HopOrder         int                   `json:"hop_order"`
+	RouteToNext      *RouteSummary         `json:"route_to_next,omitempty"`
+	SuggestedHotels  []hotels.HotelOffer   `json:"suggested_hotels,omitempty"`
+	SuggestedFlights []flights.FlightOffer `json:"suggested_flights,omitempty"`
 }
 
 // GeneratedDay represents a daily itinerary

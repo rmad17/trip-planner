@@ -387,3 +387,69 @@ Phase 1 is done when:
 - ADK / Vertex Agent runtime.
 - Per-user rate limiting on AI endpoints.
 - Multi-provider blending (e.g., merging Amadeus + SerpAPI hotel results).
+
+---
+
+## Implementation Status (2026-04-27)
+
+### What was built
+
+Build-order steps 1–10 from above are complete. `go build ./...` and `go vet ./...` are clean; `go test ./trips/ ./core/` passes. (Pre-existing `notifications` test failures on `main` are unrelated and unchanged.)
+
+| # | Step                                         | Status | Notes |
+|---|----------------------------------------------|--------|-------|
+| 1 | `core/amadeus_client.go`                     | done   | Singleton via `core.DefaultAmadeusClient()`; OAuth2 token cache with 30s skew. Also added `core/ttl_cache.go` for the 60s in-memory cache used by all three handlers. |
+| 2 | `routes/` end-to-end                         | done   | `provider.go`, `google.go`, `mapbox.go`, `mock.go` (great-circle haversine), `factory.go`, `api.go`, `router.go`. |
+| 3 | `hotels/` end-to-end                         | done   | Two-step Amadeus flow: `/v1/reference-data/locations/cities` to resolve free-text city → IATA, then `/v1/reference-data/locations/hotels/by-city` + `/v3/shopping/hotel-offers`. |
+| 4 | `flights/` end-to-end                        | done   | Includes `flights/iata.go` (~100-entry static city→IATA table — slimmer than the proposed 500). |
+| 5 | Atlas migration for `trip_hops` JSONB cols   | done   | `migrations/20260427000000_add_ai_offer_columns_to_trip_hops.sql`. **`atlas migrate hash` not run** — see TODO below. |
+| 6 | `trips/schema.go` additive types             | done   | New types live in `trips/claude_service.go` (where `TripGenerationResponse` is defined) rather than `schema.go`, but the additions are identical: `RouteSummary`, `SourceCitation`, plus `route_to_next` / `suggested_hotels` / `suggested_flights` on `GeneratedHop` and `considerations_sources` on `TripGenerationResponse`. `trips/models.go` adds `selected_flight`, `selected_hotel`, `route_to_next` JSONB columns to `TripHop`. |
+| 7 | `trips/gemini_provider.go` tool integration  | **partial** — see deviation below |
+| 8 | Persist new fields in `CreateTripFromAIGeneration` | done | Marshals `RouteToNext`, `SuggestedHotels[0]`, `SuggestedFlights[0]` into the JSONB columns. |
+| 9 | `app.go` route registration                  | done   | `/search/hotels`, `/search/flights`, `/routes` mounted under existing `accounts.CheckAuth` group. |
+| 10| `.env_sample` updates                        | done   | All new vars documented. |
+
+### Design deviation: enrichment instead of Gemini tool-loop
+
+The plan (step 7) calls for a Gemini-orchestrated tool-loop where the model itself emits `functionCall` parts that the backend dispatches to `search_flights` / `search_hotels` / `get_route` / `geocode` / `web_search`, with up to 8 turns and `response_schema` on the final turn.
+
+**What shipped instead:** `trips/gemini_agent.go` runs deterministic post-parse enrichment in Go. After Gemini returns the trip JSON via the existing single-shot prompt, `enrichTripWithProviders` iterates each hop and calls the providers directly (resolving cities via the IATA table and a static city→coords map). Failures are logged & skipped; the trip plan is never failed by enrichment.
+
+**User-visible contract is identical** — every hop carries `suggested_hotels` (≤3), `suggested_flights` (≤3 on flight hops), and `route_to_next` (when both endpoints geocode), so acceptance criteria 1, 4, and 5 still hold. The model bump (`GEMINI_MODEL`, default `gemini-2.5-flash`) shipped as designed.
+
+**Why the deviation:** post-parse enrichment is deterministic, cheaper (no extra Gemini turns), and survives the model ignoring tool affordances. It is also a strict subset of the tool-loop architecture — the loop can be added later without changing the response shape, and the existing handlers are already the back-end the loop would dispatch into.
+
+### Acceptance criteria status
+
+| # | Criterion | Status |
+|---|-----------|--------|
+| 1 | `POST /trip/generate` hops carry `suggested_flights`, `suggested_hotels`, `route_to_next` | done (via enrichment) |
+| 2 | `POST /trip/generate/confirm` persists `selected_flight` / `selected_hotel` / `route_to_next` JSONB | done |
+| 3 | `GET /search/hotels`, `/search/flights`, `/routes` return real data on free-tier providers | code complete, **needs live verification with real API keys** |
+| 4 | `*_PROVIDER=mock` returns fixtures with zero network calls | done (verified by `TestEnrichTripWithMockProviders`) |
+| 5 | Unit test exercises the enrichment path against mock providers | done (`trips/gemini_agent_test.go`) |
+
+### TODO before merge
+
+1. **Run `atlas migrate hash`** to update `migrations/atlas.sum` for the new `20260427000000_add_ai_offer_columns_to_trip_hops.sql` file. Atlas is not installed locally; this needs a developer with the CLI to commit the updated sum.
+2. **Live smoke-test against Amadeus test env.** Acceptance #3 has not been exercised against real providers — code is wired but credentials are required to verify "real data" rather than "request shape correct."
+
+### TODO if pursuing the original Gemini tool-loop architecture
+
+If/when the deviation in step 7 is reverted to the prescribed design, the diff is roughly:
+
+1. **Promote `GeminiPart`** to carry `functionCall` and `functionResponse` variants (currently text-only).
+2. **Declare 5 tools** in the `GeminiRequest.tools[].functionDeclarations` array — `search_flights`, `search_hotels`, `get_route`, `geocode`, `web_search`.
+3. **Tool dispatch loop** (max `GEMINI_TOOL_BUDGET=8` turns) in `trips/gemini_agent.go`: receive a candidate, if it's a function call, execute it via the existing `hotels.Provider` / `flights.Provider` / `routes.Provider` (already built), append the `functionResponse` to `contents`, send back to Gemini.
+4. **Switch the final turn to `response_schema`** for strict JSON output and delete `cleanJSONResponse`.
+5. **`web_search` grounding** wires `tools[].googleSearchRetrieval` and surfaces citations into `considerations_sources` (the schema field already exists).
+6. **`geocode` tool** wraps the existing `places.MapboxApi` autocomplete/retrieve flow.
+
+The provider abstractions, JSONB persistence, factory wiring, mock fallbacks, and `app.go` route registration require zero changes — they are already the destination the tool-loop dispatches into. Only the orchestration layer in `gemini_agent.go` would change.
+
+### TODO follow-ups (out of scope of Phase 1 but flagged during impl)
+
+- **Replace static `staticCityCoords` table** in `gemini_agent.go` with a real geocoding call (the `geocode` tool above) so route enrichment doesn't silently skip unknown cities.
+- **Currency normalization** — providers return offers in their own currency; FE display-time conversion is presumed via the existing `utils/currency.js` (not verified end-to-end here).
+- **Top-N selection heuristic.** `enrichHopHotels` / `enrichHopFlights` currently take the provider's first 3 results. A real product would sort by `(price, rating)` or honor `MaxPricePerNight` more aggressively.
+- **Per-user rate limiting** on `POST /trip/generate` (already noted as out-of-scope but more relevant now that each generate triggers up to 3N provider calls for an N-hop trip).

@@ -1,6 +1,7 @@
 package trips
 
 import (
+	"encoding/json"
 	"time"
 	"triplanner/core"
 
@@ -102,6 +103,9 @@ type TripHop struct {
 	PreviousHop     *uuid.UUID     `json:"previous_hop" gorm:"type:uuid" example:"123e4567-e89b-12d3-a456-426614174000" description:"ID of previous hop in sequence"`
 	NextHop         *uuid.UUID     `json:"next_hop" gorm:"type:uuid" example:"123e4567-e89b-12d3-a456-426614174000" description:"ID of next hop in sequence"`
 	TripPlan        uuid.UUID      `json:"trip_plan" gorm:"type:uuid;not null" example:"123e4567-e89b-12d3-a456-426614174000" description:"ID of the parent trip plan"`
+	SelectedFlight  json.RawMessage `json:"selected_flight,omitempty" gorm:"type:jsonb" swaggertype:"object" description:"Provider-native flight offer chosen by the user"`
+	SelectedHotel   json.RawMessage `json:"selected_hotel,omitempty" gorm:"type:jsonb" swaggertype:"object" description:"Provider-native hotel offer chosen by the user"`
+	RouteToNext     json.RawMessage `json:"route_to_next,omitempty" gorm:"type:jsonb" swaggertype:"object" description:"Route summary to the next hop"`
 	Stays           []Stay         `json:"stays,omitempty" gorm:"foreignKey:TripHop" description:"Accommodations for this hop"`
 	TripDays        []TripDay      `json:"trip_days,omitempty" gorm:"foreignKey:FromTripHop" description:"Trip days starting from this hop"`
 }
