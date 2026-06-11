@@ -27,7 +27,7 @@ type RouteQuery struct {
 type Route struct {
 	DistanceKm      float64         `json:"distance_km"`
 	DurationMin     int             `json:"duration_min"`
-	PolylineGeoJSON json.RawMessage `json:"polyline_geojson"`
+	PolylineGeoJSON json.RawMessage `json:"polyline_geojson" swaggertype:"object"`
 	Steps           []RouteStep     `json:"steps,omitempty"`
 	Provider        string          `json:"provider"`
 }

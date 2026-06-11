@@ -1,6 +1,7 @@
 package accounts
 
 import (
+	"time"
 	"triplanner/core"
 
 	"github.com/google/uuid"
@@ -38,11 +39,17 @@ type User struct {
 	AvatarURL     *string          `json:"avatar_url"`
 	Locale        *string          `json:"locale"`
 	// OAuth metadata
-	Provider      *string          `json:"provider"`
-	AccessToken   *string          `json:"-" gorm:"type:text"` // Hidden from JSON
-	RefreshToken  *string          `json:"-" gorm:"type:text"` // Hidden from JSON
-	ExpiresAt     *int64           `json:"-"`
-	Preferences   *UserPreferences `json:"preferences" gorm:"foreignKey:UserID"`
+	Provider     *string          `json:"provider"`
+	AccessToken  *string          `json:"-" gorm:"type:text"`
+	RefreshToken *string          `json:"-" gorm:"type:text"`
+	ExpiresAt    *int64           `json:"-"`
+	// Email verification (email-signup users only; Google OAuth users are pre-verified)
+	EmailVerified          bool       `json:"email_verified" gorm:"default:false"`
+	EmailVerificationToken *string    `json:"-" gorm:"index"`
+	// Password reset (token stored as hex-encoded SHA-256 of the raw token)
+	PasswordResetToken  *string    `json:"-" gorm:"index"`
+	PasswordResetExpiry *time.Time `json:"-"`
+	Preferences         *UserPreferences `json:"preferences" gorm:"foreignKey:UserID"`
 }
 
 // Add method to get models for Atlas

@@ -236,6 +236,36 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/google/callback": {
+            "get": {
+                "description": "Handle Google OAuth callback and create/login user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "authentication"
+                ],
+                "summary": "Google OAuth callback",
+                "responses": {
+                    "200": {
+                        "description": "JWT token and user data",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Authentication error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/auth/login": {
             "post": {
                 "description": "Authenticate user and return JWT token",
@@ -272,6 +302,89 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Invalid credentials",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/password-reset/confirm": {
+            "post": {
+                "description": "Validates the reset token and updates the password.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Reset a user's password",
+                "parameters": [
+                    {
+                        "description": "Token and new password",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/accounts.PasswordResetConfirmInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "message",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid or expired token",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/password-reset/request": {
+            "post": {
+                "description": "Sends a password reset link to the given email. Always returns 200 to prevent email enumeration.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Request a password reset email",
+                "parameters": [
+                    {
+                        "description": "Email address",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/accounts.PasswordResetRequestInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "message",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -320,6 +433,276 @@ const docTemplate = `{
                             "type": "object",
                             "additionalProperties": {
                                 "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/verify-email": {
+            "get": {
+                "description": "Marks the user's email as verified using the token sent at signup.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Verify email address",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Verification token",
+                        "name": "token",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "message",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid token",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/verify-email/resend": {
+            "post": {
+                "description": "Regenerates and resends the email verification link.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Resend email verification",
+                "parameters": [
+                    {
+                        "description": "Email address",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/accounts.ResendVerificationInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "message",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/checklist/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "checklist"
+                ],
+                "summary": "Update a checklist item",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Checklist Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated item",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/trips.ChecklistItemRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/trips.ChecklistItem"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "checklist"
+                ],
+                "summary": "Delete a checklist item",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Checklist Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "deleted",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "boolean"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/checklist/{id}/toggle": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Flips is_completed; sets completed_at when marking done, clears when undoing.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "checklist"
+                ],
+                "summary": "Toggle completion of a checklist item",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Checklist Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/trips.ChecklistItem"
+                        }
+                    }
+                }
+            }
+        },
+        "/contacts/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "contacts"
+                ],
+                "summary": "Update a trip contact",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Contact ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated contact",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/trips.TripContactRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/trips.TripContact"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "contacts"
+                ],
+                "summary": "Soft-delete a trip contact",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Contact ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "deleted",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "boolean"
                             }
                         }
                     }
@@ -1688,6 +2071,267 @@ const docTemplate = `{
                 }
             }
         },
+        "/public/trip/{share_code}": {
+            "get": {
+                "description": "Returns a sanitized read-only view of a trip plan by share code. No authentication required.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sharing"
+                ],
+                "summary": "Get a publicly shared trip plan",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Share Code",
+                        "name": "share_code",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Sanitized trip plan",
+                        "schema": {
+                            "$ref": "#/definitions/trips.PublicTripPlan"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found or not public",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/routes": {
+            "get": {
+                "description": "Returns distance, duration, and a GeoJSON polyline for a route.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "routes"
+                ],
+                "summary": "Compute a multi-stop route",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Semicolon-separated lng,lat pairs (e.g. 2.35,48.85;4.83,45.76)",
+                        "name": "stops",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Travel mode: drive (default) | walk | transit | cycle",
+                        "name": "mode",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/routes.Route"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/search/flights": {
+            "get": {
+                "description": "Returns flight offers from the configured provider.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "flights"
+                ],
+                "summary": "Search flights",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Origin IATA code (or city name)",
+                        "name": "from",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Destination IATA code (or city name)",
+                        "name": "to",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Departure date YYYY-MM-DD",
+                        "name": "depart",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Return date YYYY-MM-DD (omit for one-way)",
+                        "name": "return",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of passengers (default 1)",
+                        "name": "pax",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Cabin: economy | premium_economy | business | first",
+                        "name": "cabin",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Currency code (e.g. EUR)",
+                        "name": "currency",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/flights.FlightOffer"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/search/hotels": {
+            "get": {
+                "description": "Returns hotel offers from the configured provider.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "hotels"
+                ],
+                "summary": "Search hotels",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "City name or IATA city code",
+                        "name": "city",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Check-in date YYYY-MM-DD",
+                        "name": "check_in",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Check-out date YYYY-MM-DD",
+                        "name": "check_out",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of guests (default 2)",
+                        "name": "guests",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Currency code (e.g. EUR)",
+                        "name": "currency",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Max price per night",
+                        "name": "max_price",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/hotels.HotelOffer"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/stays/{id}": {
             "get": {
                 "security": [
@@ -1841,6 +2485,409 @@ const docTemplate = `{
                             "additionalProperties": {
                                 "type": "string"
                             }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/transport/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "transport"
+                ],
+                "summary": "Get a transport segment by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Segment ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/trips.TransportSegment"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "transport"
+                ],
+                "summary": "Update a transport segment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Segment ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated fields",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/trips.TransportSegmentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/trips.TransportSegment"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "transport"
+                ],
+                "summary": "Soft-delete a transport segment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Segment ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "deleted",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "boolean"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/travel-knowledge/categories": {
+            "get": {
+                "description": "Returns all available document categories that can be used as filters",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "travel-knowledge"
+                ],
+                "summary": "Get available document categories/types",
+                "responses": {
+                    "200": {
+                        "description": "Available categories",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/travel-knowledge/category/{type}": {
+            "get": {
+                "description": "Retrieves all travel documents of a specific type across all cities",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "travel-knowledge"
+                ],
+                "summary": "Get travel documents by type/category",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Document type (historical, logistics, food, activities, nearby_places)",
+                        "name": "type",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Documents of the specified type",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/travel-knowledge/cities": {
+            "get": {
+                "description": "Returns all cities with document counts",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "travel-knowledge"
+                ],
+                "summary": "List all cities in the knowledge base",
+                "responses": {
+                    "200": {
+                        "description": "List of cities with document counts",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/travel-knowledge/city": {
+            "get": {
+                "description": "Retrieves all travel documents for a specific city with tags as categories",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "travel-knowledge"
+                ],
+                "summary": "Get travel documents for a city",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "City name",
+                        "name": "city",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Document type filter (historical, logistics, food, activities, nearby_places)",
+                        "name": "type",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "City documents grouped by type",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "City not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/travel-knowledge/city/{city}/info": {
+            "get": {
+                "description": "Returns comprehensive travel information for a city grouped by categories",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "travel-knowledge"
+                ],
+                "summary": "Get aggregated city information",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "City name",
+                        "name": "city",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aggregated city information",
+                        "schema": {
+                            "$ref": "#/definitions/travelknowledge.CityTravelInfo"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "City not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/travel-knowledge/stats": {
+            "get": {
+                "description": "Returns statistics about the travel knowledge base",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "travel-knowledge"
+                ],
+                "summary": "Get knowledge base statistics",
+                "responses": {
+                    "200": {
+                        "description": "Knowledge base statistics",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     },
                     "500": {
@@ -3403,6 +4450,49 @@ const docTemplate = `{
                 }
             }
         },
+        "/trip/clone/{share_code}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Creates a copy of a public trip (structure only) owned by the authenticated user.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sharing"
+                ],
+                "summary": "Clone a public trip plan",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Share Code of the trip to clone",
+                        "name": "share_code",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Cloned trip plan",
+                        "schema": {
+                            "$ref": "#/definitions/trips.TripPlan"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found or not public",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/trip/generate": {
             "post": {
                 "description": "Uses AI (Gemini/Claude/GPT) to generate a complete trip plan with hops, days, and activities",
@@ -3568,6 +4658,198 @@ const docTemplate = `{
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/trip/{id}/checklist": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns all checklist items, optionally filtered by category or hop.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "checklist"
+                ],
+                "summary": "List checklist items for a trip",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Trip Plan ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by category",
+                        "name": "category",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Filter by completion status",
+                        "name": "completed",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "items",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "checklist"
+                ],
+                "summary": "Add a checklist item to a trip",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Trip Plan ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Checklist item",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/trips.ChecklistItemRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/trips.ChecklistItem"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/trip/{id}/contacts": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns all active contacts for a trip plan.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "contacts"
+                ],
+                "summary": "List contacts for a trip",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Trip Plan ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by role (hotel, guide, driver, embassy, insurance, emergency, other)",
+                        "name": "role",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "contacts",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "contacts"
+                ],
+                "summary": "Add a contact to a trip",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Trip Plan ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Contact details",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/trips.TripContactRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/trips.TripContact"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -3963,6 +5245,61 @@ const docTemplate = `{
                 }
             }
         },
+        "/trip/{id}/publish": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Makes the trip publicly accessible via a share code. Generates code on first publish.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sharing"
+                ],
+                "summary": "Publish a trip plan for public sharing",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Trip Plan ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "share_code and public_url",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/trip/{id}/settlements": {
             "get": {
                 "security": [
@@ -4077,6 +5414,405 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/trip/{id}/share/rotate": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Generates a new share code, invalidating any existing shared links.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sharing"
+                ],
+                "summary": "Rotate the share code for a trip",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Trip Plan ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "new share_code",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/trip/{id}/shift-dates": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Atomically shifts trip start/end, all hop dates, all day dates, and all activity times.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "lifecycle"
+                ],
+                "summary": "Shift all dates in a trip by a number of days",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Trip Plan ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Delta in days (positive or negative)",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/trips.ShiftDatesRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "days shifted",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "integer"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/trip/{id}/status": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Transitions the trip through its lifecycle. Validates allowed transitions.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "lifecycle"
+                ],
+                "summary": "Update the status of a trip plan",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Trip Plan ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "New status",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/trips.StatusUpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated trip plan",
+                        "schema": {
+                            "$ref": "#/definitions/trips.TripPlan"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid transition",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/trip/{id}/today": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns the current day view including current hop/stay, activities, upcoming transport, and emergency contacts.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "lifecycle"
+                ],
+                "summary": "Get today's itinerary for an ongoing trip",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Trip Plan ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Today's view",
+                        "schema": {
+                            "$ref": "#/definitions/trips.TodayView"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found or trip not active",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/trip/{id}/transport": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns all non-deleted transport segments for a trip plan, ordered by departure time.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "transport"
+                ],
+                "summary": "List transport segments for a trip",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Trip Plan ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "segments",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Creates a new flight, train, bus, or other transport leg.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "transport"
+                ],
+                "summary": "Add a transport segment to a trip",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Trip Plan ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Segment details",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/trips.TransportSegmentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/trips.TransportSegment"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Trip not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/trip/{id}/unpublish": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Removes public access. The share code is preserved so re-publishing keeps the same URL.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sharing"
+                ],
+                "summary": "Unpublish a trip plan",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Trip Plan ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "unpublished",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "boolean"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -4206,6 +5942,54 @@ const docTemplate = `{
                 }
             }
         },
+        "accounts.PasswordResetConfirmInput": {
+            "type": "object",
+            "required": [
+                "new_password",
+                "token"
+            ],
+            "properties": {
+                "new_password": {
+                    "type": "string",
+                    "minLength": 8
+                },
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "accounts.PasswordResetRequestInput": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                }
+            }
+        },
+        "accounts.ResendVerificationInput": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                }
+            }
+        },
+        "core.Date": {
+            "description": "Date in YYYY-MM-DD format",
+            "type": "object",
+            "properties": {
+                "time.Time": {
+                    "type": "string"
+                }
+            }
+        },
         "documents.Document": {
             "type": "object",
             "properties": {
@@ -4221,7 +6005,7 @@ const docTemplate = `{
                     "type": "string",
                     "example": "application/pdf"
                 },
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
                 "description": {
@@ -4284,7 +6068,7 @@ const docTemplate = `{
                         "business-class"
                     ]
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
                 },
                 "uploaded_at": {
@@ -4306,9 +6090,26 @@ const docTemplate = `{
                 "hotel_bookings",
                 "insurance",
                 "visas",
+                "permits",
                 "receipts",
                 "itineraries",
                 "other"
+            ],
+            "x-enum-comments": {
+                "CategoryPermits": "ILP, forest permits, park entry"
+            },
+            "x-enum-descriptions": [
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "ILP, forest permits, park entry",
+                "",
+                "",
+                ""
             ],
             "x-enum-varnames": [
                 "CategoryTickets",
@@ -4318,6 +6119,7 @@ const docTemplate = `{
                 "CategoryHotelBookings",
                 "CategoryInsurance",
                 "CategoryVisas",
+                "CategoryPermits",
                 "CategoryReceipts",
                 "CategoryItineraries",
                 "CategoryOther"
@@ -4372,13 +6174,28 @@ const docTemplate = `{
                 "digitalocean",
                 "s3",
                 "gcs",
+                "azure",
                 "local",
                 "cloudflare"
+            ],
+            "x-enum-comments": {
+                "StorageProviderAzure": "Azure Blob Storage",
+                "StorageProviderGCS": "Google Cloud Storage",
+                "StorageProviderS3": "AWS S3"
+            },
+            "x-enum-descriptions": [
+                "",
+                "AWS S3",
+                "Google Cloud Storage",
+                "Azure Blob Storage",
+                "",
+                ""
             ],
             "x-enum-varnames": [
                 "StorageProviderDigitalOcean",
                 "StorageProviderS3",
                 "StorageProviderGCS",
+                "StorageProviderAzure",
                 "StorageProviderLocal",
                 "StorageProviderCloudflare"
             ]
@@ -4402,7 +6219,7 @@ const docTemplate = `{
                     ],
                     "example": "food"
                 },
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
                 "created_by": {
@@ -4498,7 +6315,7 @@ const docTemplate = `{
                     "type": "string",
                     "example": "123e4567-e89b-12d3-a456-426614174000"
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
                 },
                 "vendor": {
@@ -4653,7 +6470,7 @@ const docTemplate = `{
                     "type": "number",
                     "example": 150.5
                 },
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
                 "currency": {
@@ -4690,7 +6507,7 @@ const docTemplate = `{
                     "type": "string",
                     "example": "123e4567-e89b-12d3-a456-426614174000"
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
                 }
             }
@@ -4731,7 +6548,7 @@ const docTemplate = `{
                     "type": "number",
                     "example": 125.38
                 },
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
                 "expense": {
@@ -4763,7 +6580,7 @@ const docTemplate = `{
                     "type": "string",
                     "example": "123e4567-e89b-12d3-a456-426614174000"
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
                 }
             }
@@ -5016,6 +6833,109 @@ const docTemplate = `{
                 }
             }
         },
+        "flights.FlightOffer": {
+            "type": "object",
+            "properties": {
+                "cabin": {
+                    "type": "string"
+                },
+                "currency": {
+                    "type": "string"
+                },
+                "deep_link": {
+                    "type": "string"
+                },
+                "offer_id": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "provider": {
+                    "type": "string"
+                },
+                "segments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/flights.FlightSegment"
+                    }
+                }
+            }
+        },
+        "flights.FlightSegment": {
+            "type": "object",
+            "properties": {
+                "arrive": {
+                    "description": "RFC3339",
+                    "type": "string"
+                },
+                "carrier": {
+                    "type": "string"
+                },
+                "depart": {
+                    "description": "RFC3339",
+                    "type": "string"
+                },
+                "duration_min": {
+                    "type": "integer"
+                },
+                "flight_number": {
+                    "type": "string"
+                },
+                "from": {
+                    "description": "IATA",
+                    "type": "string"
+                },
+                "to": {
+                    "description": "IATA",
+                    "type": "string"
+                }
+            }
+        },
+        "hotels.HotelOffer": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "check_in_date": {
+                    "type": "string"
+                },
+                "check_out_date": {
+                    "type": "string"
+                },
+                "cost_per_night": {
+                    "type": "number"
+                },
+                "currency": {
+                    "type": "string"
+                },
+                "deep_link": {
+                    "type": "string"
+                },
+                "lat": {
+                    "type": "number"
+                },
+                "lng": {
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "offer_id": {
+                    "type": "string"
+                },
+                "provider": {
+                    "type": "string"
+                },
+                "rating": {
+                    "type": "number"
+                },
+                "total_cost": {
+                    "type": "number"
+                }
+            }
+        },
         "notifications.BatchSendRequest": {
             "type": "object",
             "required": [
@@ -5091,7 +7011,7 @@ const docTemplate = `{
                 "content_html": {
                     "type": "string"
                 },
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
                 "delivered_at": {
@@ -5211,7 +7131,7 @@ const docTemplate = `{
                         }
                     ]
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
                 }
             }
@@ -5227,7 +7147,7 @@ const docTemplate = `{
                     "description": "\"system\", \"user\", \"api\"",
                     "type": "string"
                 },
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
                 "details": {
@@ -5297,7 +7217,7 @@ const docTemplate = `{
                     "description": "Timing",
                     "type": "string"
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
                 }
             }
@@ -5316,7 +7236,7 @@ const docTemplate = `{
                 "completed_at": {
                     "type": "string"
                 },
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
                 "created_by": {
@@ -5373,7 +7293,7 @@ const docTemplate = `{
                 "type": {
                     "$ref": "#/definitions/notifications.NotificationType"
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
                 }
             }
@@ -5403,7 +7323,7 @@ const docTemplate = `{
                 "channel": {
                     "$ref": "#/definitions/notifications.NotificationChannel"
                 },
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
                 "id": {
@@ -5447,7 +7367,7 @@ const docTemplate = `{
                 "type": {
                     "$ref": "#/definitions/notifications.NotificationType"
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
                 },
                 "user_id": {
@@ -5509,7 +7429,7 @@ const docTemplate = `{
                 "content_html": {
                     "type": "string"
                 },
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
                 "created_by": {
@@ -5557,7 +7477,7 @@ const docTemplate = `{
                 "type": {
                     "$ref": "#/definitions/notifications.NotificationType"
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
                 },
                 "updated_by": {
@@ -5771,6 +7691,118 @@ const docTemplate = `{
                 }
             }
         },
+        "routes.Route": {
+            "type": "object",
+            "properties": {
+                "distance_km": {
+                    "type": "number"
+                },
+                "duration_min": {
+                    "type": "integer"
+                },
+                "polyline_geojson": {
+                    "type": "object"
+                },
+                "provider": {
+                    "type": "string"
+                },
+                "steps": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/routes.RouteStep"
+                    }
+                }
+            }
+        },
+        "routes.RouteStep": {
+            "type": "object",
+            "properties": {
+                "distance_km": {
+                    "type": "number"
+                },
+                "duration_min": {
+                    "type": "integer"
+                },
+                "instruction": {
+                    "type": "string"
+                }
+            }
+        },
+        "travelknowledge.CityTravelInfo": {
+            "type": "object",
+            "properties": {
+                "city_country": {
+                    "type": "string"
+                },
+                "city_name": {
+                    "type": "string"
+                },
+                "documents": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/travelknowledge.TravelDocument"
+                        }
+                    }
+                },
+                "last_updated": {
+                    "type": "string"
+                },
+                "total_docs": {
+                    "type": "integer"
+                }
+            }
+        },
+        "travelknowledge.DocumentType": {
+            "type": "string",
+            "enum": [
+                "historical",
+                "logistics",
+                "food",
+                "activities",
+                "nearby_places"
+            ],
+            "x-enum-varnames": [
+                "DocumentTypeHistorical",
+                "DocumentTypeLogistics",
+                "DocumentTypeFood",
+                "DocumentTypeActivities",
+                "DocumentTypeNearbyPlaces"
+            ]
+        },
+        "travelknowledge.TravelDocument": {
+            "type": "object",
+            "properties": {
+                "city_country": {
+                    "type": "string"
+                },
+                "city_name": {
+                    "type": "string"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "document_type": {
+                    "$ref": "#/definitions/travelknowledge.DocumentType"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "metadata": {
+                    "type": "object"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
         "trips.Activity": {
             "type": "object",
             "properties": {
@@ -5794,7 +7826,7 @@ const docTemplate = `{
                     "type": "string",
                     "example": "+33 1 44 11 23 23"
                 },
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
                 "description": {
@@ -5866,7 +7898,7 @@ const docTemplate = `{
                     "type": "string",
                     "example": "123e4567-e89b-12d3-a456-426614174000"
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
                 }
             }
@@ -5920,6 +7952,134 @@ const docTemplate = `{
                 "ActivityTypeBusiness",
                 "ActivityTypePersonal",
                 "ActivityTypeOther"
+            ]
+        },
+        "trips.ChecklistCategory": {
+            "type": "string",
+            "enum": [
+                "booking",
+                "documents",
+                "packing",
+                "money",
+                "health",
+                "other"
+            ],
+            "x-enum-varnames": [
+                "ChecklistCategoryBooking",
+                "ChecklistCategoryDocuments",
+                "ChecklistCategoryPacking",
+                "ChecklistCategoryMoney",
+                "ChecklistCategoryHealth",
+                "ChecklistCategoryOther"
+            ]
+        },
+        "trips.ChecklistItem": {
+            "type": "object",
+            "properties": {
+                "assignee_id": {
+                    "type": "string"
+                },
+                "category": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/trips.ChecklistCategory"
+                        }
+                    ],
+                    "example": "documents"
+                },
+                "completed_at": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "due_date": {
+                    "type": "string"
+                },
+                "hop_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_completed": {
+                    "type": "boolean"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "sort_order": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string",
+                    "example": "Apply for French visa"
+                },
+                "trip_plan": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "trips.ChecklistItemRequest": {
+            "type": "object",
+            "required": [
+                "title"
+            ],
+            "properties": {
+                "assignee_id": {
+                    "type": "string"
+                },
+                "category": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/trips.ChecklistCategory"
+                        }
+                    ],
+                    "example": "documents"
+                },
+                "due_date": {
+                    "type": "string"
+                },
+                "hop_id": {
+                    "type": "string"
+                },
+                "is_completed": {
+                    "type": "boolean"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "sort_order": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string",
+                    "example": "Apply for French visa"
+                }
+            }
+        },
+        "trips.ContactRole": {
+            "type": "string",
+            "enum": [
+                "hotel",
+                "guide",
+                "driver",
+                "embassy",
+                "insurance",
+                "emergency",
+                "other"
+            ],
+            "x-enum-varnames": [
+                "ContactRoleHotel",
+                "ContactRoleGuide",
+                "ContactRoleDriver",
+                "ContactRoleEmbassy",
+                "ContactRoleInsurance",
+                "ContactRoleEmergency",
+                "ContactRoleOther"
             ]
         },
         "trips.CreateTripRequest": {
@@ -6150,9 +8310,24 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "route_to_next": {
+                    "$ref": "#/definitions/trips.RouteSummary"
+                },
                 "start_date": {
                     "description": "ISO format",
                     "type": "string"
+                },
+                "suggested_flights": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/flights.FlightOffer"
+                    }
+                },
+                "suggested_hotels": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/hotels.HotelOffer"
+                    }
                 },
                 "transportation": {
                     "type": "string"
@@ -6196,10 +8371,221 @@ const docTemplate = `{
                 }
             }
         },
+        "trips.PublicActivity": {
+            "type": "object",
+            "properties": {
+                "activity_type": {
+                    "$ref": "#/definitions/trips.ActivityType"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "duration": {
+                    "type": "integer"
+                },
+                "end_time": {
+                    "type": "string"
+                },
+                "estimated_cost": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "location": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "start_time": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "trips.PublicTripDay": {
+            "type": "object",
+            "properties": {
+                "activities": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/trips.PublicActivity"
+                    }
+                },
+                "date": {
+                    "$ref": "#/definitions/core.Date"
+                },
+                "day_number": {
+                    "type": "integer"
+                },
+                "day_type": {
+                    "$ref": "#/definitions/trips.TripDayType"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "trips.PublicTripHop": {
+            "type": "object",
+            "properties": {
+                "city": {
+                    "type": "string"
+                },
+                "country": {
+                    "type": "string"
+                },
+                "days": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/trips.PublicTripDay"
+                    }
+                },
+                "end_date": {
+                    "type": "string"
+                },
+                "hop_order": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pois": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "start_date": {
+                    "type": "string"
+                },
+                "transportation": {
+                    "type": "string"
+                }
+            }
+        },
+        "trips.PublicTripPlan": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "end_date": {
+                    "type": "string"
+                },
+                "hops": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/trips.PublicTripHop"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "share_code": {
+                    "type": "string"
+                },
+                "start_date": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "travel_modes": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "trip_type": {
+                    "type": "string"
+                }
+            }
+        },
+        "trips.RouteSummary": {
+            "type": "object",
+            "properties": {
+                "distance_km": {
+                    "type": "number"
+                },
+                "duration_min": {
+                    "type": "integer"
+                },
+                "mode": {
+                    "type": "string"
+                },
+                "polyline_geojson": {
+                    "type": "object"
+                },
+                "provider": {
+                    "type": "string"
+                }
+            }
+        },
+        "trips.ShiftDatesRequest": {
+            "type": "object",
+            "required": [
+                "delta_days"
+            ],
+            "properties": {
+                "delta_days": {
+                    "type": "integer",
+                    "example": 3
+                }
+            }
+        },
+        "trips.SourceCitation": {
+            "type": "object",
+            "properties": {
+                "title": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "trips.StatusUpdateRequest": {
+            "type": "object",
+            "required": [
+                "status"
+            ],
+            "properties": {
+                "status": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/trips.TripStatus"
+                        }
+                    ],
+                    "example": "confirmed"
+                }
+            }
+        },
         "trips.Stay": {
             "type": "object",
             "properties": {
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
                 "end_date": {
@@ -6241,7 +8627,225 @@ const docTemplate = `{
                     "type": "string",
                     "example": "123e4567-e89b-12d3-a456-426614174000"
                 },
-                "updatedAt": {
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "trips.TodayView": {
+            "type": "object",
+            "properties": {
+                "check_in_today": {
+                    "type": "boolean"
+                },
+                "check_out_today": {
+                    "type": "boolean"
+                },
+                "current_hop": {
+                    "$ref": "#/definitions/trips.TripHop"
+                },
+                "current_stay": {
+                    "$ref": "#/definitions/trips.Stay"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "day_number": {
+                    "type": "integer"
+                },
+                "emergency_contacts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/trips.TripContact"
+                    }
+                },
+                "emergency_number": {
+                    "type": "string"
+                },
+                "trip_day": {
+                    "$ref": "#/definitions/trips.TripDay"
+                },
+                "trip_id": {
+                    "type": "string"
+                },
+                "trip_name": {
+                    "type": "string"
+                },
+                "upcoming_transport": {
+                    "$ref": "#/definitions/trips.TransportSegment"
+                }
+            }
+        },
+        "trips.TransportMode": {
+            "type": "string",
+            "enum": [
+                "flight",
+                "train",
+                "bus",
+                "car_rental",
+                "ferry",
+                "taxi",
+                "other"
+            ],
+            "x-enum-varnames": [
+                "TransportModeFlight",
+                "TransportModeTrain",
+                "TransportModeBus",
+                "TransportModeCarRental",
+                "TransportModeFerry",
+                "TransportModeTaxi",
+                "TransportModeOther"
+            ]
+        },
+        "trips.TransportSegment": {
+            "type": "object",
+            "properties": {
+                "arrive_at": {
+                    "type": "string"
+                },
+                "arrive_to": {
+                    "type": "string",
+                    "example": "Mumbai CSMT"
+                },
+                "arrive_tz": {
+                    "type": "string",
+                    "example": "Asia/Kolkata"
+                },
+                "booking_ref": {
+                    "type": "string",
+                    "example": "PNR1234567"
+                },
+                "cost": {
+                    "type": "number",
+                    "example": 1500
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "currency": {
+                    "type": "string",
+                    "example": "INR"
+                },
+                "deep_link_url": {
+                    "type": "string",
+                    "example": "https://www.irctc.co.in/nget/train-search"
+                },
+                "depart_at": {
+                    "type": "string"
+                },
+                "depart_from": {
+                    "type": "string",
+                    "example": "New Delhi Railway Station"
+                },
+                "depart_tz": {
+                    "type": "string",
+                    "example": "Asia/Kolkata"
+                },
+                "from_hop_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "mode": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/trips.TransportMode"
+                        }
+                    ],
+                    "example": "train"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "operator": {
+                    "type": "string",
+                    "example": "IRCTC"
+                },
+                "seats": {
+                    "type": "string",
+                    "example": "S4 42, S4 43"
+                },
+                "to_hop_id": {
+                    "type": "string"
+                },
+                "trip_plan": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "trips.TransportSegmentRequest": {
+            "type": "object",
+            "required": [
+                "mode"
+            ],
+            "properties": {
+                "arrive_at": {
+                    "type": "string",
+                    "example": "2026-09-01T22:00:00+05:30"
+                },
+                "arrive_to": {
+                    "type": "string",
+                    "example": "Mumbai CSMT"
+                },
+                "arrive_tz": {
+                    "type": "string",
+                    "example": "Asia/Kolkata"
+                },
+                "booking_ref": {
+                    "type": "string",
+                    "example": "PNR1234567"
+                },
+                "cost": {
+                    "type": "number",
+                    "example": 1500
+                },
+                "currency": {
+                    "type": "string",
+                    "example": "INR"
+                },
+                "deep_link_url": {
+                    "type": "string"
+                },
+                "depart_at": {
+                    "type": "string",
+                    "example": "2026-09-01T06:00:00+05:30"
+                },
+                "depart_from": {
+                    "type": "string",
+                    "example": "New Delhi Railway Station"
+                },
+                "depart_tz": {
+                    "type": "string",
+                    "example": "Asia/Kolkata"
+                },
+                "from_hop_id": {
+                    "type": "string"
+                },
+                "mode": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/trips.TransportMode"
+                        }
+                    ],
+                    "example": "train"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "operator": {
+                    "type": "string",
+                    "example": "IRCTC"
+                },
+                "seats": {
+                    "type": "string",
+                    "example": "S4 42, S4 43"
+                },
+                "to_hop_id": {
                     "type": "string"
                 }
             }
@@ -6249,7 +8853,7 @@ const docTemplate = `{
         "trips.Traveller": {
             "type": "object",
             "properties": {
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
                 "date_of_birth": {
@@ -6317,7 +8921,7 @@ const docTemplate = `{
                     "type": "string",
                     "example": "123e4567-e89b-12d3-a456-426614174000"
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
                 },
                 "user_id": {
@@ -6375,6 +8979,95 @@ const docTemplate = `{
                 }
             }
         },
+        "trips.TripContact": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "reservations@tajhotels.com"
+                },
+                "hop_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Taj Hotel Front Desk"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string",
+                    "example": "+91-22-66651234"
+                },
+                "role": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/trips.ContactRole"
+                        }
+                    ],
+                    "example": "hotel"
+                },
+                "trip_plan": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "trips.TripContactRequest": {
+            "type": "object",
+            "required": [
+                "name",
+                "role"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "hop_id": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Taj Hotel Front Desk"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string",
+                    "example": "+91-22-66651234"
+                },
+                "role": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/trips.ContactRole"
+                        }
+                    ],
+                    "example": "hotel"
+                }
+            }
+        },
         "trips.TripDay": {
             "type": "object",
             "properties": {
@@ -6388,7 +9081,7 @@ const docTemplate = `{
                     "type": "number",
                     "example": 175.25
                 },
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
                 "date": {
@@ -6443,7 +9136,7 @@ const docTemplate = `{
                     "type": "string",
                     "example": "123e4567-e89b-12d3-a456-426614174000"
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
                 },
                 "weather": {
@@ -6560,6 +9253,12 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "considerations_sources": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/trips.SourceCitation"
+                    }
+                },
                 "daily_itinerary": {
                     "type": "array",
                     "items": {
@@ -6621,7 +9320,7 @@ const docTemplate = `{
                     "type": "string",
                     "example": "France"
                 },
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
                 "description": {
@@ -6699,6 +9398,15 @@ const docTemplate = `{
                         "L'As du Fallafel"
                     ]
                 },
+                "route_to_next": {
+                    "type": "object"
+                },
+                "selected_flight": {
+                    "type": "object"
+                },
+                "selected_hotel": {
+                    "type": "object"
+                },
                 "start_date": {
                     "type": "string",
                     "example": "2024-06-01T00:00:00Z"
@@ -6723,7 +9431,7 @@ const docTemplate = `{
                     "type": "string",
                     "example": "123e4567-e89b-12d3-a456-426614174000"
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
                 }
             }
@@ -6739,7 +9447,7 @@ const docTemplate = `{
                     "type": "number",
                     "example": 5000
                 },
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
                 "currency": {
@@ -6810,7 +9518,11 @@ const docTemplate = `{
                     "example": "2024-06-01T00:00:00Z"
                 },
                 "status": {
-                    "type": "string",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/trips.TripStatus"
+                        }
+                    ],
                     "example": "planning"
                 },
                 "tags": {
@@ -6822,6 +9534,10 @@ const docTemplate = `{
                         "romantic",
                         "europe"
                     ]
+                },
+                "timezone": {
+                    "type": "string",
+                    "example": "Asia/Kolkata"
                 },
                 "travel_modes": {
                     "type": "array",
@@ -6855,14 +9571,34 @@ const docTemplate = `{
                     "type": "string",
                     "example": "leisure"
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
                 },
                 "user_id": {
                     "type": "string",
                     "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "user_set_status": {
+                    "type": "boolean"
                 }
             }
+        },
+        "trips.TripStatus": {
+            "type": "string",
+            "enum": [
+                "planning",
+                "confirmed",
+                "ongoing",
+                "completed",
+                "cancelled"
+            ],
+            "x-enum-varnames": [
+                "TripStatusPlanning",
+                "TripStatusConfirmed",
+                "TripStatusOngoing",
+                "TripStatusCompleted",
+                "TripStatusCancelled"
+            ]
         }
     },
     "securityDefinitions": {

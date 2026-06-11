@@ -350,7 +350,7 @@ func TestActivity_InItineraryContext(t *testing.T) {
 	status := "planned"
 
 	activity := Activity{
-		BaseModel:     core.BaseModel{ID: uuid.New()},
+		SoftDeleteModel: core.SoftDeleteModel{BaseModel: core.BaseModel{ID: uuid.New()}},
 		Name:          "Visit Eiffel Tower",
 		ActivityType:  ActivityTypeSightseeing,
 		StartTime:     &startTime,

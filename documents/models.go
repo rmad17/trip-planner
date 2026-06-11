@@ -18,6 +18,7 @@ const (
 	CategoryHotelBookings  DocumentCategory = "hotel_bookings"
 	CategoryInsurance      DocumentCategory = "insurance"
 	CategoryVisas          DocumentCategory = "visas"
+	CategoryPermits        DocumentCategory = "permits" // ILP, forest permits, park entry
 	CategoryReceipts       DocumentCategory = "receipts"
 	CategoryItineraries    DocumentCategory = "itineraries"
 	CategoryOther          DocumentCategory = "other"
@@ -48,7 +49,7 @@ const (
 
 // Document represents a document uploaded by users
 type Document struct {
-	core.BaseModel
+	core.SoftDeleteModel
 	Name            string           `json:"name" gorm:"not null" example:"Flight Ticket" description:"Display name of the document"`
 	OriginalName    string           `json:"original_name" gorm:"not null" example:"ticket_flight_123.pdf" description:"Original filename"`
 	StorageProvider StorageProvider  `json:"storage_provider" gorm:"type:varchar(50);not null" example:"digitalocean" description:"Storage provider used (digitalocean, s3, etc.)"`
@@ -96,6 +97,7 @@ func GetValidCategories() []DocumentCategory {
 		CategoryHotelBookings,
 		CategoryInsurance,
 		CategoryVisas,
+		CategoryPermits,
 		CategoryReceipts,
 		CategoryItineraries,
 		CategoryOther,

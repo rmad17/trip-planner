@@ -284,13 +284,13 @@ func TestCreateActivity_CompleteFlow_MockDB(t *testing.T) {
 
 	// Mock data
 	mockTripPlan := TripPlan{
-		BaseModel: core.BaseModel{ID: tripPlanID},
+		SoftDeleteModel: core.SoftDeleteModel{BaseModel: core.BaseModel{ID: tripPlanID}},
 		UserID:    userID,
 		Name:      stringPtr("Test Trip"),
 	}
 
 	mockTripDay := TripDay{
-		BaseModel: core.BaseModel{ID: tripDayID},
+		SoftDeleteModel: core.SoftDeleteModel{BaseModel: core.BaseModel{ID: tripDayID}},
 		Date:      core.Date{Time: time.Date(2024, 6, 1, 0, 0, 0, 0, time.UTC)},
 		DayNumber: 1,
 		DayType:   TripDayTypeExplore,
@@ -389,13 +389,13 @@ func TestCreateActivity_WrongTripDay_MockDB(t *testing.T) {
 	}
 
 	mockTripPlan2 := TripPlan{
-		BaseModel: core.BaseModel{ID: tripPlan2ID},
+		SoftDeleteModel: core.SoftDeleteModel{BaseModel: core.BaseModel{ID: tripPlan2ID}},
 		UserID:    userID,
 		Name:      stringPtr("Test Trip 2"),
 	}
 
 	mockTripDay1 := TripDay{
-		BaseModel: core.BaseModel{ID: tripDay1ID},
+		SoftDeleteModel: core.SoftDeleteModel{BaseModel: core.BaseModel{ID: tripDay1ID}},
 		TripPlan:  tripPlan1ID, // Belongs to different trip plan!
 	}
 

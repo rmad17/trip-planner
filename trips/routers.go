@@ -80,3 +80,61 @@ func RouterGroupStays(router *gin.RouterGroup) {
 	router.PUT("/:id", UpdateStay)    // PUT /stays/:id
 	router.DELETE("/:id", DeleteStay) // DELETE /stays/:id
 }
+
+// RouterGroupSharing sets up authenticated trip sharing routes
+func RouterGroupSharing(router *gin.RouterGroup) {
+	router.POST("/:id/publish", PublishTrip)          // POST /trip/:id/publish
+	router.POST("/:id/unpublish", UnpublishTrip)      // POST /trip/:id/unpublish
+	router.POST("/:id/share/rotate", RotateShareCode) // POST /trip/:id/share/rotate
+	router.POST("/clone/:share_code", ClonePublicTrip) // POST /trip/clone/:share_code
+}
+
+// RouterGroupPublicTrips sets up unauthenticated public trip routes
+func RouterGroupPublicTrips(router *gin.RouterGroup) {
+	router.GET("/:share_code", GetPublicTrip) // GET /public/trip/:share_code
+}
+
+// RouterGroupTripLifecycle sets up status and organizer endpoints
+func RouterGroupTripLifecycle(router *gin.RouterGroup) {
+	router.PATCH("/:id/status", UpdateTripStatus)     // PATCH /trip/:id/status
+	router.POST("/:id/shift-dates", ShiftTripDates)   // POST /trip/:id/shift-dates
+	router.GET("/:id/today", GetTodayView)            // GET /trip/:id/today
+}
+
+// RouterGroupTransportSegments sets up transport segments nested under trips
+func RouterGroupTransportSegments(router *gin.RouterGroup) {
+	router.GET("/:id/transport", ListTransportSegments)    // GET /trip/:id/transport
+	router.POST("/:id/transport", CreateTransportSegment)  // POST /trip/:id/transport
+}
+
+// RouterGroupTransportSegmentItems sets up individual transport segment CRUD
+func RouterGroupTransportSegmentItems(router *gin.RouterGroup) {
+	router.GET("/:id", GetTransportSegment)       // GET /transport/:id
+	router.PUT("/:id", UpdateTransportSegment)    // PUT /transport/:id
+	router.DELETE("/:id", DeleteTransportSegment) // DELETE /transport/:id
+}
+
+// RouterGroupContacts sets up trip contacts nested under trips
+func RouterGroupContacts(router *gin.RouterGroup) {
+	router.GET("/:id/contacts", ListContacts)   // GET /trip/:id/contacts
+	router.POST("/:id/contacts", CreateContact) // POST /trip/:id/contacts
+}
+
+// RouterGroupContactItems sets up individual contact CRUD
+func RouterGroupContactItems(router *gin.RouterGroup) {
+	router.PUT("/:id", UpdateContact)    // PUT /contacts/:id
+	router.DELETE("/:id", DeleteContact) // DELETE /contacts/:id
+}
+
+// RouterGroupChecklist sets up checklist items nested under trips
+func RouterGroupChecklist(router *gin.RouterGroup) {
+	router.GET("/:id/checklist", ListChecklist)    // GET /trip/:id/checklist
+	router.POST("/:id/checklist", CreateChecklistItem) // POST /trip/:id/checklist
+}
+
+// RouterGroupChecklistItems sets up individual checklist item CRUD
+func RouterGroupChecklistItems(router *gin.RouterGroup) {
+	router.PUT("/:id", UpdateChecklistItem)         // PUT /checklist/:id
+	router.DELETE("/:id", DeleteChecklistItem)      // DELETE /checklist/:id
+	router.PATCH("/:id/toggle", ToggleChecklistItem) // PATCH /checklist/:id/toggle
+}

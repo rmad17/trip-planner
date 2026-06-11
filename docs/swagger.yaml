@@ -10,6 +10,38 @@ definitions:
     - password
     - username
     type: object
+  accounts.PasswordResetConfirmInput:
+    properties:
+      new_password:
+        minLength: 8
+        type: string
+      token:
+        type: string
+    required:
+    - new_password
+    - token
+    type: object
+  accounts.PasswordResetRequestInput:
+    properties:
+      email:
+        example: user@example.com
+        type: string
+    required:
+    - email
+    type: object
+  accounts.ResendVerificationInput:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
+  core.Date:
+    description: Date in YYYY-MM-DD format
+    properties:
+      time.Time:
+        type: string
+    type: object
   documents.Document:
     properties:
       category:
@@ -19,7 +51,7 @@ definitions:
       content_type:
         example: application/pdf
         type: string
-      createdAt:
+      created_at:
         type: string
       description:
         example: Return flight ticket from NYC to Paris
@@ -63,7 +95,7 @@ definitions:
         items:
           type: string
         type: array
-      updatedAt:
+      updated_at:
         type: string
       uploaded_at:
         type: string
@@ -80,10 +112,25 @@ definitions:
     - hotel_bookings
     - insurance
     - visas
+    - permits
     - receipts
     - itineraries
     - other
     type: string
+    x-enum-comments:
+      CategoryPermits: ILP, forest permits, park entry
+    x-enum-descriptions:
+    - ""
+    - ""
+    - ""
+    - ""
+    - ""
+    - ""
+    - ""
+    - ILP, forest permits, park entry
+    - ""
+    - ""
+    - ""
     x-enum-varnames:
     - CategoryTickets
     - CategoryInvoices
@@ -92,6 +139,7 @@ definitions:
     - CategoryHotelBookings
     - CategoryInsurance
     - CategoryVisas
+    - CategoryPermits
     - CategoryReceipts
     - CategoryItineraries
     - CategoryOther
@@ -129,13 +177,26 @@ definitions:
     - digitalocean
     - s3
     - gcs
+    - azure
     - local
     - cloudflare
     type: string
+    x-enum-comments:
+      StorageProviderAzure: Azure Blob Storage
+      StorageProviderGCS: Google Cloud Storage
+      StorageProviderS3: AWS S3
+    x-enum-descriptions:
+    - ""
+    - AWS S3
+    - Google Cloud Storage
+    - Azure Blob Storage
+    - ""
+    - ""
     x-enum-varnames:
     - StorageProviderDigitalOcean
     - StorageProviderS3
     - StorageProviderGCS
+    - StorageProviderAzure
     - StorageProviderLocal
     - StorageProviderCloudflare
   expenses.Expense:
@@ -150,10 +211,10 @@ definitions:
         allOf:
         - $ref: '#/definitions/expenses.ExpenseCategory'
         example: food
+      created_at:
+        type: string
       created_by:
         example: 123e4567-e89b-12d3-a456-426614174000
-        type: string
-      createdAt:
         type: string
       currency:
         example: EUR
@@ -218,7 +279,7 @@ definitions:
           day
         example: 123e4567-e89b-12d3-a456-426614174000
         type: string
-      updatedAt:
+      updated_at:
         type: string
       vendor:
         example: Le Jules Verne Restaurant
@@ -340,7 +401,7 @@ definitions:
       amount:
         example: 150.5
         type: number
-      createdAt:
+      created_at:
         type: string
       currency:
         example: USD
@@ -367,7 +428,7 @@ definitions:
       trip_plan:
         example: 123e4567-e89b-12d3-a456-426614174000
         type: string
-      updatedAt:
+      updated_at:
         type: string
     type: object
   expenses.ExpenseSettlementRequest:
@@ -395,7 +456,7 @@ definitions:
       amount:
         example: 125.38
         type: number
-      createdAt:
+      created_at:
         type: string
       expense:
         example: 123e4567-e89b-12d3-a456-426614174000
@@ -418,7 +479,7 @@ definitions:
       traveller:
         example: 123e4567-e89b-12d3-a456-426614174000
         type: string
-      updatedAt:
+      updated_at:
         type: string
     type: object
   expenses.ExpenseSplitRequest:
@@ -597,6 +658,75 @@ definitions:
       traveller_name:
         type: string
     type: object
+  flights.FlightOffer:
+    properties:
+      cabin:
+        type: string
+      currency:
+        type: string
+      deep_link:
+        type: string
+      offer_id:
+        type: string
+      price:
+        type: number
+      provider:
+        type: string
+      segments:
+        items:
+          $ref: '#/definitions/flights.FlightSegment'
+        type: array
+    type: object
+  flights.FlightSegment:
+    properties:
+      arrive:
+        description: RFC3339
+        type: string
+      carrier:
+        type: string
+      depart:
+        description: RFC3339
+        type: string
+      duration_min:
+        type: integer
+      flight_number:
+        type: string
+      from:
+        description: IATA
+        type: string
+      to:
+        description: IATA
+        type: string
+    type: object
+  hotels.HotelOffer:
+    properties:
+      address:
+        type: string
+      check_in_date:
+        type: string
+      check_out_date:
+        type: string
+      cost_per_night:
+        type: number
+      currency:
+        type: string
+      deep_link:
+        type: string
+      lat:
+        type: number
+      lng:
+        type: number
+      name:
+        type: string
+      offer_id:
+        type: string
+      provider:
+        type: string
+      rating:
+        type: number
+      total_cost:
+        type: number
+    type: object
   notifications.BatchSendRequest:
     properties:
       channel:
@@ -649,7 +779,7 @@ definitions:
         type: string
       content_html:
         type: string
-      createdAt:
+      created_at:
         type: string
       delivered_at:
         type: string
@@ -728,7 +858,7 @@ definitions:
         allOf:
         - $ref: '#/definitions/notifications.NotificationType'
         description: Core fields
-      updatedAt:
+      updated_at:
         type: string
     type: object
   notifications.NotificationAudit:
@@ -739,7 +869,7 @@ definitions:
       actor_type:
         description: '"system", "user", "api"'
         type: string
-      createdAt:
+      created_at:
         type: string
       details:
         $ref: '#/definitions/notifications.JSONB'
@@ -783,7 +913,7 @@ definitions:
       timestamp:
         description: Timing
         type: string
-      updatedAt:
+      updated_at:
         type: string
     type: object
   notifications.NotificationBatch:
@@ -794,10 +924,10 @@ definitions:
         description: Batch properties
       completed_at:
         type: string
+      created_at:
+        type: string
       created_by:
         description: Creator
-        type: string
-      createdAt:
         type: string
       delivered_count:
         type: integer
@@ -832,7 +962,7 @@ definitions:
         type: integer
       type:
         $ref: '#/definitions/notifications.NotificationType'
-      updatedAt:
+      updated_at:
         type: string
     type: object
   notifications.NotificationChannel:
@@ -855,7 +985,7 @@ definitions:
     properties:
       channel:
         $ref: '#/definitions/notifications.NotificationChannel'
-      createdAt:
+      created_at:
         type: string
       id:
         type: string
@@ -884,7 +1014,7 @@ definitions:
         type: string
       type:
         $ref: '#/definitions/notifications.NotificationType'
-      updatedAt:
+      updated_at:
         type: string
       user_id:
         type: string
@@ -933,9 +1063,9 @@ definitions:
         type: string
       content_html:
         type: string
-      created_by:
+      created_at:
         type: string
-      createdAt:
+      created_by:
         type: string
       default_metadata:
         $ref: '#/definitions/notifications.JSONB'
@@ -965,9 +1095,9 @@ definitions:
         type: string
       type:
         $ref: '#/definitions/notifications.NotificationType'
-      updated_by:
+      updated_at:
         type: string
-      updatedAt:
+      updated_by:
         type: string
       variables:
         allOf:
@@ -1113,6 +1243,82 @@ definitions:
     - template_data
     - template_name
     type: object
+  routes.Route:
+    properties:
+      distance_km:
+        type: number
+      duration_min:
+        type: integer
+      polyline_geojson:
+        type: object
+      provider:
+        type: string
+      steps:
+        items:
+          $ref: '#/definitions/routes.RouteStep'
+        type: array
+    type: object
+  routes.RouteStep:
+    properties:
+      distance_km:
+        type: number
+      duration_min:
+        type: integer
+      instruction:
+        type: string
+    type: object
+  travelknowledge.CityTravelInfo:
+    properties:
+      city_country:
+        type: string
+      city_name:
+        type: string
+      documents:
+        additionalProperties:
+          items:
+            $ref: '#/definitions/travelknowledge.TravelDocument'
+          type: array
+        type: object
+      last_updated:
+        type: string
+      total_docs:
+        type: integer
+    type: object
+  travelknowledge.DocumentType:
+    enum:
+    - historical
+    - logistics
+    - food
+    - activities
+    - nearby_places
+    type: string
+    x-enum-varnames:
+    - DocumentTypeHistorical
+    - DocumentTypeLogistics
+    - DocumentTypeFood
+    - DocumentTypeActivities
+    - DocumentTypeNearbyPlaces
+  travelknowledge.TravelDocument:
+    properties:
+      city_country:
+        type: string
+      city_name:
+        type: string
+      content:
+        type: string
+      created_at:
+        type: string
+      document_type:
+        $ref: '#/definitions/travelknowledge.DocumentType'
+      id:
+        type: string
+      metadata:
+        type: object
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
   trips.Activity:
     properties:
       activity_type:
@@ -1128,7 +1334,7 @@ definitions:
       contact_info:
         example: +33 1 44 11 23 23
         type: string
-      createdAt:
+      created_at:
         type: string
       description:
         example: Take elevator to the top, enjoy views
@@ -1181,7 +1387,7 @@ definitions:
       trip_hop:
         example: 123e4567-e89b-12d3-a456-426614174000
         type: string
-      updatedAt:
+      updated_at:
         type: string
     type: object
   trips.ActivityType:
@@ -1230,6 +1436,96 @@ definitions:
     - ActivityTypeBusiness
     - ActivityTypePersonal
     - ActivityTypeOther
+  trips.ChecklistCategory:
+    enum:
+    - booking
+    - documents
+    - packing
+    - money
+    - health
+    - other
+    type: string
+    x-enum-varnames:
+    - ChecklistCategoryBooking
+    - ChecklistCategoryDocuments
+    - ChecklistCategoryPacking
+    - ChecklistCategoryMoney
+    - ChecklistCategoryHealth
+    - ChecklistCategoryOther
+  trips.ChecklistItem:
+    properties:
+      assignee_id:
+        type: string
+      category:
+        allOf:
+        - $ref: '#/definitions/trips.ChecklistCategory'
+        example: documents
+      completed_at:
+        type: string
+      created_at:
+        type: string
+      due_date:
+        type: string
+      hop_id:
+        type: string
+      id:
+        type: string
+      is_completed:
+        type: boolean
+      notes:
+        type: string
+      sort_order:
+        type: integer
+      title:
+        example: Apply for French visa
+        type: string
+      trip_plan:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  trips.ChecklistItemRequest:
+    properties:
+      assignee_id:
+        type: string
+      category:
+        allOf:
+        - $ref: '#/definitions/trips.ChecklistCategory'
+        example: documents
+      due_date:
+        type: string
+      hop_id:
+        type: string
+      is_completed:
+        type: boolean
+      notes:
+        type: string
+      sort_order:
+        type: integer
+      title:
+        example: Apply for French visa
+        type: string
+    required:
+    - title
+    type: object
+  trips.ContactRole:
+    enum:
+    - hotel
+    - guide
+    - driver
+    - embassy
+    - insurance
+    - emergency
+    - other
+    type: string
+    x-enum-varnames:
+    - ContactRoleHotel
+    - ContactRoleGuide
+    - ContactRoleDriver
+    - ContactRoleEmbassy
+    - ContactRoleInsurance
+    - ContactRoleEmergency
+    - ContactRoleOther
   trips.CreateTripRequest:
     properties:
       end_date:
@@ -1396,9 +1692,19 @@ definitions:
         items:
           type: string
         type: array
+      route_to_next:
+        $ref: '#/definitions/trips.RouteSummary'
       start_date:
         description: ISO format
         type: string
+      suggested_flights:
+        items:
+          $ref: '#/definitions/flights.FlightOffer'
+        type: array
+      suggested_hotels:
+        items:
+          $ref: '#/definitions/hotels.HotelOffer'
+        type: array
       transportation:
         type: string
     type: object
@@ -1426,9 +1732,146 @@ definitions:
     required:
     - feedback
     type: object
+  trips.PublicActivity:
+    properties:
+      activity_type:
+        $ref: '#/definitions/trips.ActivityType'
+      description:
+        type: string
+      duration:
+        type: integer
+      end_time:
+        type: string
+      estimated_cost:
+        type: number
+      id:
+        type: string
+      location:
+        type: string
+      name:
+        type: string
+      start_time:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+    type: object
+  trips.PublicTripDay:
+    properties:
+      activities:
+        items:
+          $ref: '#/definitions/trips.PublicActivity'
+        type: array
+      date:
+        $ref: '#/definitions/core.Date'
+      day_number:
+        type: integer
+      day_type:
+        $ref: '#/definitions/trips.TripDayType'
+      id:
+        type: string
+      notes:
+        type: string
+      title:
+        type: string
+    type: object
+  trips.PublicTripHop:
+    properties:
+      city:
+        type: string
+      country:
+        type: string
+      days:
+        items:
+          $ref: '#/definitions/trips.PublicTripDay'
+        type: array
+      end_date:
+        type: string
+      hop_order:
+        type: integer
+      id:
+        type: string
+      name:
+        type: string
+      pois:
+        items:
+          type: string
+        type: array
+      start_date:
+        type: string
+      transportation:
+        type: string
+    type: object
+  trips.PublicTripPlan:
+    properties:
+      description:
+        type: string
+      end_date:
+        type: string
+      hops:
+        items:
+          $ref: '#/definitions/trips.PublicTripHop'
+        type: array
+      id:
+        type: string
+      name:
+        type: string
+      share_code:
+        type: string
+      start_date:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      travel_modes:
+        items:
+          type: string
+        type: array
+      trip_type:
+        type: string
+    type: object
+  trips.RouteSummary:
+    properties:
+      distance_km:
+        type: number
+      duration_min:
+        type: integer
+      mode:
+        type: string
+      polyline_geojson:
+        type: object
+      provider:
+        type: string
+    type: object
+  trips.ShiftDatesRequest:
+    properties:
+      delta_days:
+        example: 3
+        type: integer
+    required:
+    - delta_days
+    type: object
+  trips.SourceCitation:
+    properties:
+      title:
+        type: string
+      url:
+        type: string
+    type: object
+  trips.StatusUpdateRequest:
+    properties:
+      status:
+        allOf:
+        - $ref: '#/definitions/trips.TripStatus'
+        example: confirmed
+    required:
+    - status
+    type: object
   trips.Stay:
     properties:
-      createdAt:
+      created_at:
         type: string
       end_date:
         example: "2024-06-03T00:00:00Z"
@@ -1459,12 +1902,165 @@ definitions:
       trip_hop:
         example: 123e4567-e89b-12d3-a456-426614174000
         type: string
-      updatedAt:
+      updated_at:
         type: string
+    type: object
+  trips.TodayView:
+    properties:
+      check_in_today:
+        type: boolean
+      check_out_today:
+        type: boolean
+      current_hop:
+        $ref: '#/definitions/trips.TripHop'
+      current_stay:
+        $ref: '#/definitions/trips.Stay'
+      date:
+        type: string
+      day_number:
+        type: integer
+      emergency_contacts:
+        items:
+          $ref: '#/definitions/trips.TripContact'
+        type: array
+      emergency_number:
+        type: string
+      trip_day:
+        $ref: '#/definitions/trips.TripDay'
+      trip_id:
+        type: string
+      trip_name:
+        type: string
+      upcoming_transport:
+        $ref: '#/definitions/trips.TransportSegment'
+    type: object
+  trips.TransportMode:
+    enum:
+    - flight
+    - train
+    - bus
+    - car_rental
+    - ferry
+    - taxi
+    - other
+    type: string
+    x-enum-varnames:
+    - TransportModeFlight
+    - TransportModeTrain
+    - TransportModeBus
+    - TransportModeCarRental
+    - TransportModeFerry
+    - TransportModeTaxi
+    - TransportModeOther
+  trips.TransportSegment:
+    properties:
+      arrive_at:
+        type: string
+      arrive_to:
+        example: Mumbai CSMT
+        type: string
+      arrive_tz:
+        example: Asia/Kolkata
+        type: string
+      booking_ref:
+        example: PNR1234567
+        type: string
+      cost:
+        example: 1500
+        type: number
+      created_at:
+        type: string
+      currency:
+        example: INR
+        type: string
+      deep_link_url:
+        example: https://www.irctc.co.in/nget/train-search
+        type: string
+      depart_at:
+        type: string
+      depart_from:
+        example: New Delhi Railway Station
+        type: string
+      depart_tz:
+        example: Asia/Kolkata
+        type: string
+      from_hop_id:
+        type: string
+      id:
+        type: string
+      mode:
+        allOf:
+        - $ref: '#/definitions/trips.TransportMode'
+        example: train
+      notes:
+        type: string
+      operator:
+        example: IRCTC
+        type: string
+      seats:
+        example: S4 42, S4 43
+        type: string
+      to_hop_id:
+        type: string
+      trip_plan:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      updated_at:
+        type: string
+    type: object
+  trips.TransportSegmentRequest:
+    properties:
+      arrive_at:
+        example: "2026-09-01T22:00:00+05:30"
+        type: string
+      arrive_to:
+        example: Mumbai CSMT
+        type: string
+      arrive_tz:
+        example: Asia/Kolkata
+        type: string
+      booking_ref:
+        example: PNR1234567
+        type: string
+      cost:
+        example: 1500
+        type: number
+      currency:
+        example: INR
+        type: string
+      deep_link_url:
+        type: string
+      depart_at:
+        example: "2026-09-01T06:00:00+05:30"
+        type: string
+      depart_from:
+        example: New Delhi Railway Station
+        type: string
+      depart_tz:
+        example: Asia/Kolkata
+        type: string
+      from_hop_id:
+        type: string
+      mode:
+        allOf:
+        - $ref: '#/definitions/trips.TransportMode'
+        example: train
+      notes:
+        type: string
+      operator:
+        example: IRCTC
+        type: string
+      seats:
+        example: S4 42, S4 43
+        type: string
+      to_hop_id:
+        type: string
+    required:
+    - mode
     type: object
   trips.Traveller:
     properties:
-      createdAt:
+      created_at:
         type: string
       date_of_birth:
         example: "1990-01-15T00:00:00Z"
@@ -1514,7 +2110,7 @@ definitions:
       trip_plan:
         example: 123e4567-e89b-12d3-a456-426614174000
         type: string
-      updatedAt:
+      updated_at:
         type: string
       user_id:
         example: 123e4567-e89b-12d3-a456-426614174000
@@ -1553,6 +2149,64 @@ definitions:
       transportation:
         type: number
     type: object
+  trips.TripContact:
+    properties:
+      address:
+        type: string
+      created_at:
+        type: string
+      email:
+        example: reservations@tajhotels.com
+        type: string
+      hop_id:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        example: Taj Hotel Front Desk
+        type: string
+      notes:
+        type: string
+      phone:
+        example: +91-22-66651234
+        type: string
+      role:
+        allOf:
+        - $ref: '#/definitions/trips.ContactRole'
+        example: hotel
+      trip_plan:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  trips.TripContactRequest:
+    properties:
+      address:
+        type: string
+      email:
+        type: string
+      hop_id:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        example: Taj Hotel Front Desk
+        type: string
+      notes:
+        type: string
+      phone:
+        example: +91-22-66651234
+        type: string
+      role:
+        allOf:
+        - $ref: '#/definitions/trips.ContactRole'
+        example: hotel
+    required:
+    - name
+    - role
+    type: object
   trips.TripDay:
     properties:
       activities:
@@ -1562,7 +2216,7 @@ definitions:
       actual_budget:
         example: 175.25
         type: number
-      createdAt:
+      created_at:
         type: string
       date:
         example: "2024-06-01"
@@ -1601,7 +2255,7 @@ definitions:
       trip_plan:
         example: 123e4567-e89b-12d3-a456-426614174000
         type: string
-      updatedAt:
+      updated_at:
         type: string
       weather:
         example: Sunny, 22°C
@@ -1688,6 +2342,10 @@ definitions:
         items:
           type: string
         type: array
+      considerations_sources:
+        items:
+          $ref: '#/definitions/trips.SourceCitation'
+        type: array
       daily_itinerary:
         items:
           $ref: '#/definitions/trips.GeneratedDay'
@@ -1730,7 +2388,7 @@ definitions:
       country:
         example: France
         type: string
-      createdAt:
+      created_at:
         type: string
       description:
         example: 3 days exploring the City of Light
@@ -1787,6 +2445,12 @@ definitions:
         items:
           type: string
         type: array
+      route_to_next:
+        type: object
+      selected_flight:
+        type: object
+      selected_hotel:
+        type: object
       start_date:
         example: "2024-06-01T00:00:00Z"
         type: string
@@ -1804,7 +2468,7 @@ definitions:
       trip_plan:
         example: 123e4567-e89b-12d3-a456-426614174000
         type: string
-      updatedAt:
+      updated_at:
         type: string
     type: object
   trips.TripPlan:
@@ -1815,7 +2479,7 @@ definitions:
       budget:
         example: 5000
         type: number
-      createdAt:
+      created_at:
         type: string
       currency:
         allOf:
@@ -1865,8 +2529,9 @@ definitions:
         example: "2024-06-01T00:00:00Z"
         type: string
       status:
+        allOf:
+        - $ref: '#/definitions/trips.TripStatus'
         example: planning
-        type: string
       tags:
         example:
         - romantic
@@ -1874,6 +2539,9 @@ definitions:
         items:
           type: string
         type: array
+      timezone:
+        example: Asia/Kolkata
+        type: string
       travel_modes:
         example:
         - flight
@@ -1896,12 +2564,28 @@ definitions:
       trip_type:
         example: leisure
         type: string
-      updatedAt:
+      updated_at:
         type: string
       user_id:
         example: 123e4567-e89b-12d3-a456-426614174000
         type: string
+      user_set_status:
+        type: boolean
     type: object
+  trips.TripStatus:
+    enum:
+    - planning
+    - confirmed
+    - ongoing
+    - completed
+    - cancelled
+    type: string
+    x-enum-varnames:
+    - TripStatusPlanning
+    - TripStatusConfirmed
+    - TripStatusOngoing
+    - TripStatusCompleted
+    - TripStatusCancelled
 host: localhost:8080
 info:
   contact: {}
@@ -2054,6 +2738,26 @@ paths:
       summary: Begin Google OAuth flow
       tags:
       - authentication
+  /auth/google/callback:
+    get:
+      description: Handle Google OAuth callback and create/login user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: JWT token and user data
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Authentication error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Google OAuth callback
+      tags:
+      - authentication
   /auth/login:
     post:
       consumes:
@@ -2084,6 +2788,61 @@ paths:
       summary: User login
       tags:
       - authentication
+  /auth/password-reset/confirm:
+    post:
+      consumes:
+      - application/json
+      description: Validates the reset token and updates the password.
+      parameters:
+      - description: Token and new password
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/accounts.PasswordResetConfirmInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid or expired token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Reset a user's password
+      tags:
+      - auth
+  /auth/password-reset/request:
+    post:
+      consumes:
+      - application/json
+      description: Sends a password reset link to the given email. Always returns
+        200 to prevent email enumeration.
+      parameters:
+      - description: Email address
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/accounts.PasswordResetRequestInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Request a password reset email
+      tags:
+      - auth
   /auth/signup:
     post:
       consumes:
@@ -2113,6 +2872,177 @@ paths:
       summary: Register a new user
       tags:
       - authentication
+  /auth/verify-email:
+    get:
+      description: Marks the user's email as verified using the token sent at signup.
+      parameters:
+      - description: Verification token
+        in: query
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Verify email address
+      tags:
+      - auth
+  /auth/verify-email/resend:
+    post:
+      consumes:
+      - application/json
+      description: Regenerates and resends the email verification link.
+      parameters:
+      - description: Email address
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/accounts.ResendVerificationInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Resend email verification
+      tags:
+      - auth
+  /checklist/{id}:
+    delete:
+      parameters:
+      - description: Checklist Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: deleted
+          schema:
+            additionalProperties:
+              type: boolean
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a checklist item
+      tags:
+      - checklist
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Checklist Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated item
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/trips.ChecklistItemRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/trips.ChecklistItem'
+      security:
+      - BearerAuth: []
+      summary: Update a checklist item
+      tags:
+      - checklist
+  /checklist/{id}/toggle:
+    patch:
+      description: Flips is_completed; sets completed_at when marking done, clears
+        when undoing.
+      parameters:
+      - description: Checklist Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/trips.ChecklistItem'
+      security:
+      - BearerAuth: []
+      summary: Toggle completion of a checklist item
+      tags:
+      - checklist
+  /contacts/{id}:
+    delete:
+      parameters:
+      - description: Contact ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: deleted
+          schema:
+            additionalProperties:
+              type: boolean
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Soft-delete a trip contact
+      tags:
+      - contacts
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Contact ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated contact
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/trips.TripContactRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/trips.TripContact'
+      security:
+      - BearerAuth: []
+      summary: Update a trip contact
+      tags:
+      - contacts
   /documents/{id}:
     delete:
       description: Delete a document and its associated file
@@ -3013,6 +3943,181 @@ paths:
       summary: Retrieve detailed place information using Mapbox ID
       tags:
       - places
+  /public/trip/{share_code}:
+    get:
+      description: Returns a sanitized read-only view of a trip plan by share code.
+        No authentication required.
+      parameters:
+      - description: Share Code
+        in: path
+        name: share_code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Sanitized trip plan
+          schema:
+            $ref: '#/definitions/trips.PublicTripPlan'
+        "404":
+          description: Not found or not public
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a publicly shared trip plan
+      tags:
+      - sharing
+  /routes:
+    get:
+      description: Returns distance, duration, and a GeoJSON polyline for a route.
+      parameters:
+      - description: Semicolon-separated lng,lat pairs (e.g. 2.35,48.85;4.83,45.76)
+        in: query
+        name: stops
+        required: true
+        type: string
+      - description: 'Travel mode: drive (default) | walk | transit | cycle'
+        in: query
+        name: mode
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/routes.Route'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Compute a multi-stop route
+      tags:
+      - routes
+  /search/flights:
+    get:
+      description: Returns flight offers from the configured provider.
+      parameters:
+      - description: Origin IATA code (or city name)
+        in: query
+        name: from
+        required: true
+        type: string
+      - description: Destination IATA code (or city name)
+        in: query
+        name: to
+        required: true
+        type: string
+      - description: Departure date YYYY-MM-DD
+        in: query
+        name: depart
+        required: true
+        type: string
+      - description: Return date YYYY-MM-DD (omit for one-way)
+        in: query
+        name: return
+        type: string
+      - description: Number of passengers (default 1)
+        in: query
+        name: pax
+        type: integer
+      - description: 'Cabin: economy | premium_economy | business | first'
+        in: query
+        name: cabin
+        type: string
+      - description: Currency code (e.g. EUR)
+        in: query
+        name: currency
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/flights.FlightOffer'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Search flights
+      tags:
+      - flights
+  /search/hotels:
+    get:
+      description: Returns hotel offers from the configured provider.
+      parameters:
+      - description: City name or IATA city code
+        in: query
+        name: city
+        required: true
+        type: string
+      - description: Check-in date YYYY-MM-DD
+        in: query
+        name: check_in
+        required: true
+        type: string
+      - description: Check-out date YYYY-MM-DD
+        in: query
+        name: check_out
+        required: true
+        type: string
+      - description: Number of guests (default 2)
+        in: query
+        name: guests
+        type: integer
+      - description: Currency code (e.g. EUR)
+        in: query
+        name: currency
+        type: string
+      - description: Max price per night
+        in: query
+        name: max_price
+        type: number
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/hotels.HotelOffer'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Search hotels
+      tags:
+      - hotels
   /stays/{id}:
     delete:
       description: Delete a stay
@@ -3120,6 +4225,272 @@ paths:
       summary: Update a stay
       tags:
       - stays
+  /transport/{id}:
+    delete:
+      parameters:
+      - description: Segment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: deleted
+          schema:
+            additionalProperties:
+              type: boolean
+            type: object
+        "404":
+          description: Not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Soft-delete a transport segment
+      tags:
+      - transport
+    get:
+      parameters:
+      - description: Segment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/trips.TransportSegment'
+        "404":
+          description: Not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get a transport segment by ID
+      tags:
+      - transport
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Segment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated fields
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/trips.TransportSegmentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/trips.TransportSegment'
+        "404":
+          description: Not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update a transport segment
+      tags:
+      - transport
+  /travel-knowledge/categories:
+    get:
+      consumes:
+      - application/json
+      description: Returns all available document categories that can be used as filters
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Available categories
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get available document categories/types
+      tags:
+      - travel-knowledge
+  /travel-knowledge/category/{type}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all travel documents of a specific type across all cities
+      parameters:
+      - description: Document type (historical, logistics, food, activities, nearby_places)
+        in: path
+        name: type
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Documents of the specified type
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get travel documents by type/category
+      tags:
+      - travel-knowledge
+  /travel-knowledge/cities:
+    get:
+      consumes:
+      - application/json
+      description: Returns all cities with document counts
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of cities with document counts
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List all cities in the knowledge base
+      tags:
+      - travel-knowledge
+  /travel-knowledge/city:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all travel documents for a specific city with tags as
+        categories
+      parameters:
+      - description: City name
+        in: query
+        name: city
+        required: true
+        type: string
+      - description: Document type filter (historical, logistics, food, activities,
+          nearby_places)
+        in: query
+        name: type
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: City documents grouped by type
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: City not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get travel documents for a city
+      tags:
+      - travel-knowledge
+  /travel-knowledge/city/{city}/info:
+    get:
+      consumes:
+      - application/json
+      description: Returns comprehensive travel information for a city grouped by
+        categories
+      parameters:
+      - description: City name
+        in: path
+        name: city
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Aggregated city information
+          schema:
+            $ref: '#/definitions/travelknowledge.CityTravelInfo'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: City not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get aggregated city information
+      tags:
+      - travel-knowledge
+  /travel-knowledge/stats:
+    get:
+      consumes:
+      - application/json
+      description: Returns statistics about the travel knowledge base
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Knowledge base statistics
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get knowledge base statistics
+      tags:
+      - travel-knowledge
   /travellers/{id}:
     delete:
       description: Remove a traveller from a trip plan (soft delete by setting is_active=false)
@@ -4119,6 +5490,130 @@ paths:
       summary: Invite a traveller via email
       tags:
       - travellers
+  /trip/{id}/checklist:
+    get:
+      description: Returns all checklist items, optionally filtered by category or
+        hop.
+      parameters:
+      - description: Trip Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Filter by category
+        in: query
+        name: category
+        type: string
+      - description: Filter by completion status
+        in: query
+        name: completed
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: items
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List checklist items for a trip
+      tags:
+      - checklist
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Trip Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Checklist item
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/trips.ChecklistItemRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/trips.ChecklistItem'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Add a checklist item to a trip
+      tags:
+      - checklist
+  /trip/{id}/contacts:
+    get:
+      description: Returns all active contacts for a trip plan.
+      parameters:
+      - description: Trip Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Filter by role (hotel, guide, driver, embassy, insurance, emergency,
+          other)
+        in: query
+        name: role
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: contacts
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List contacts for a trip
+      tags:
+      - contacts
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Trip Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Contact details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/trips.TripContactRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/trips.TripContact'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Add a contact to a trip
+      tags:
+      - contacts
   /trip/{id}/documents:
     get:
       description: Retrieve all documents for a specific trip plan with optional filtering
@@ -4374,6 +5869,42 @@ paths:
       summary: Create a new expense
       tags:
       - expenses
+  /trip/{id}/publish:
+    post:
+      description: Makes the trip publicly accessible via a share code. Generates
+        code on first publish.
+      parameters:
+      - description: Trip Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: share_code and public_url
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Publish a trip plan for public sharing
+      tags:
+      - sharing
   /trip/{id}/settlements:
     get:
       description: Retrieve all settlements for a specific trip plan
@@ -4454,6 +5985,293 @@ paths:
       summary: Create a settlement between travellers
       tags:
       - settlements
+  /trip/{id}/share/rotate:
+    post:
+      description: Generates a new share code, invalidating any existing shared links.
+      parameters:
+      - description: Trip Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: new share_code
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Rotate the share code for a trip
+      tags:
+      - sharing
+  /trip/{id}/shift-dates:
+    post:
+      consumes:
+      - application/json
+      description: Atomically shifts trip start/end, all hop dates, all day dates,
+        and all activity times.
+      parameters:
+      - description: Trip Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Delta in days (positive or negative)
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/trips.ShiftDatesRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: days shifted
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Shift all dates in a trip by a number of days
+      tags:
+      - lifecycle
+  /trip/{id}/status:
+    patch:
+      consumes:
+      - application/json
+      description: Transitions the trip through its lifecycle. Validates allowed transitions.
+      parameters:
+      - description: Trip Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: New status
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/trips.StatusUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated trip plan
+          schema:
+            $ref: '#/definitions/trips.TripPlan'
+        "400":
+          description: Invalid transition
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update the status of a trip plan
+      tags:
+      - lifecycle
+  /trip/{id}/today:
+    get:
+      description: Returns the current day view including current hop/stay, activities,
+        upcoming transport, and emergency contacts.
+      parameters:
+      - description: Trip Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Today's view
+          schema:
+            $ref: '#/definitions/trips.TodayView'
+        "404":
+          description: Not found or trip not active
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get today's itinerary for an ongoing trip
+      tags:
+      - lifecycle
+  /trip/{id}/transport:
+    get:
+      description: Returns all non-deleted transport segments for a trip plan, ordered
+        by departure time.
+      parameters:
+      - description: Trip Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: segments
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List transport segments for a trip
+      tags:
+      - transport
+    post:
+      consumes:
+      - application/json
+      description: Creates a new flight, train, bus, or other transport leg.
+      parameters:
+      - description: Trip Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Segment details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/trips.TransportSegmentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/trips.TransportSegment'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Trip not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Add a transport segment to a trip
+      tags:
+      - transport
+  /trip/{id}/unpublish:
+    post:
+      description: Removes public access. The share code is preserved so re-publishing
+        keeps the same URL.
+      parameters:
+      - description: Trip Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: unpublished
+          schema:
+            additionalProperties:
+              type: boolean
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Unpublish a trip plan
+      tags:
+      - sharing
+  /trip/clone/{share_code}:
+    post:
+      description: Creates a copy of a public trip (structure only) owned by the authenticated
+        user.
+      parameters:
+      - description: Share Code of the trip to clone
+        in: path
+        name: share_code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Cloned trip plan
+          schema:
+            $ref: '#/definitions/trips.TripPlan'
+        "404":
+          description: Not found or not public
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Clone a public trip plan
+      tags:
+      - sharing
   /trip/generate:
     post:
       consumes:

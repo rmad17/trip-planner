@@ -12,8 +12,8 @@ import (
 
 type BaseModel struct {
 	ID        uuid.UUID `gorm:"type:uuid;primaryKey" json:"id"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 // BeforeCreate hook to generate UUID for new records
@@ -22,6 +22,14 @@ func (b *BaseModel) BeforeCreate(tx *gorm.DB) error {
 		b.ID = uuid.New()
 	}
 	return nil
+}
+
+// SoftDeleteModel extends BaseModel with soft-delete capability.
+// Embed this in any model where accidental deletion would be catastrophic
+// (trip content, documents, expenses). Do not add to auth/preference tables.
+type SoftDeleteModel struct {
+	BaseModel
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
 // Date is a custom type that handles date-only values in JSON

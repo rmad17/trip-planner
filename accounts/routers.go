@@ -17,6 +17,14 @@ func RouterGroupUserProfile(router *gin.RouterGroup) {
 	router.GET("/profile", GetUserProfile)
 }
 
+// RouterGroupPasswordReset sets up password reset and email verification routes (no auth required)
+func RouterGroupPasswordReset(router *gin.RouterGroup) {
+	router.POST("/password-reset/request", RequestPasswordReset)   // POST /auth/password-reset/request
+	router.POST("/password-reset/confirm", ResetPassword)          // POST /auth/password-reset/confirm
+	router.GET("/verify-email", VerifyEmail)                       // GET /auth/verify-email?token=...
+	router.POST("/verify-email/resend", ResendVerificationEmail)   // POST /auth/verify-email/resend
+}
+
 func RouterGroupGoogleOAuth(router *gin.RouterGroup) {
 	google_client_id := os.Getenv("GOOGLE_OAUTH_CLIENT_ID")
 	google_client_secret := os.Getenv("GOOGLE_OAUTH_CLIENT_SECRET")

@@ -73,6 +73,12 @@ func main() {
 	v1 := router.Group("/api/v1")
 	accounts.RouterGroupUserAuth(v1.Group("/auth"))
 	accounts.RouterGroupGoogleOAuth(v1.Group("/auth"))
+	// Password reset & email verification — no auth required
+	accounts.RouterGroupPasswordReset(v1.Group("/auth"))
+
+	// Public trip share — no auth required
+	publicV1 := router.Group("/api/v1/public")
+	trips.RouterGroupPublicTrips(publicV1.Group("/trip"))
 
 	v1.Use(accounts.CheckAuth)
 	places.RouterGroupPlacesAPI(v1.Group("/places"))
@@ -95,6 +101,18 @@ func main() {
 	// Document Management Routes
 	documents.RouterGroupDocuments(v1.Group("/trip"))          // Documents nested under trip plans
 	documents.RouterGroupDocumentItems(v1.Group("/documents")) // Individual document operations
+
+	// Phase 2 — Trip sharing
+	trips.RouterGroupSharing(v1.Group("/trip"))
+
+	// Phase 3 — Trip lifecycle, transport, contacts, checklist
+	trips.RouterGroupTripLifecycle(v1.Group("/trip"))
+	trips.RouterGroupTransportSegments(v1.Group("/trip"))
+	trips.RouterGroupTransportSegmentItems(v1.Group("/transport"))
+	trips.RouterGroupContacts(v1.Group("/trip"))
+	trips.RouterGroupContactItems(v1.Group("/contacts"))
+	trips.RouterGroupChecklist(v1.Group("/trip"))
+	trips.RouterGroupChecklistItems(v1.Group("/checklist"))
 
 	// AI provider search endpoints (real hotel/flight offers, map routes)
 	hotels.RouterGroupHotels(v1.Group("/search/hotels"))

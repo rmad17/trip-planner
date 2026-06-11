@@ -146,20 +146,21 @@ func CreateTripFromAIGeneration(c *gin.Context) {
 		travelModes = pq.StringArray{travelMode}
 	}
 
+	tripStatus := TripStatus(status)
 	trip := TripPlan{
-		BaseModel:   core.BaseModel{ID: uuid.New()},
-		Name:        &tripName,
-		Description: &tripDesc,
-		StartDate:   startDate,
-		EndDate:     endDate,
-		MinDays:     &totalDays,
-		MaxDays:     &totalDays,
-		TravelModes: travelModes,
-		TripType:    &tripType,
-		Budget:      &budget,
-		Currency:    CurrencyUSD, // Default, should get from request
-		Status:      &status,
-		UserID:      userID,
+		SoftDeleteModel: core.SoftDeleteModel{BaseModel: core.BaseModel{ID: uuid.New()}},
+		Name:            &tripName,
+		Description:     &tripDesc,
+		StartDate:       startDate,
+		EndDate:         endDate,
+		MinDays:         &totalDays,
+		MaxDays:         &totalDays,
+		TravelModes:     travelModes,
+		TripType:        &tripType,
+		Budget:          &budget,
+		Currency:        CurrencyUSD,
+		Status:          &tripStatus,
+		UserID:          userID,
 	}
 
 	if err := tx.Create(&trip).Error; err != nil {
@@ -193,7 +194,7 @@ func CreateTripFromAIGeneration(c *gin.Context) {
 		}
 
 		hop := TripHop{
-			BaseModel:       core.BaseModel{ID: hopID},
+			SoftDeleteModel: core.SoftDeleteModel{BaseModel: core.BaseModel{ID: hopID}},
 			Name:            &hopName,
 			Description:     &hopDesc,
 			City:            &city,
@@ -290,7 +291,7 @@ func CreateTripFromAIGeneration(c *gin.Context) {
 		}
 
 		day := TripDay{
-			BaseModel:       core.BaseModel{ID: dayID},
+			SoftDeleteModel: core.SoftDeleteModel{BaseModel: core.BaseModel{ID: dayID}},
 			Date:            core.Date{Time: dayDate},
 			DayNumber:       generatedDay.DayNumber,
 			Title:           &dayTitle,
@@ -345,7 +346,7 @@ func CreateTripFromAIGeneration(c *gin.Context) {
 			}
 
 			activity := Activity{
-				BaseModel:     core.BaseModel{ID: uuid.New()},
+				SoftDeleteModel: core.SoftDeleteModel{BaseModel: core.BaseModel{ID: uuid.New()}},
 				Name:          activityName,
 				Description:   &activityDesc,
 				ActivityType:  activityType,

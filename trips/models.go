@@ -9,6 +9,56 @@ import (
 	"github.com/lib/pq"
 )
 
+// TripStatus represents the lifecycle state of a trip.
+// Transitions are validated server-side; see validTransitions in lifecycle.go.
+type TripStatus string
+
+const (
+	TripStatusPlanning  TripStatus = "planning"
+	TripStatusConfirmed TripStatus = "confirmed"
+	TripStatusOngoing   TripStatus = "ongoing"
+	TripStatusCompleted TripStatus = "completed"
+	TripStatusCancelled TripStatus = "cancelled"
+)
+
+// TransportMode represents the mode of transport for a segment.
+type TransportMode string
+
+const (
+	TransportModeFlight    TransportMode = "flight"
+	TransportModeTrain     TransportMode = "train"
+	TransportModeBus       TransportMode = "bus"
+	TransportModeCarRental TransportMode = "car_rental"
+	TransportModeFerry     TransportMode = "ferry"
+	TransportModeTaxi      TransportMode = "taxi"
+	TransportModeOther     TransportMode = "other"
+)
+
+// ContactRole represents the role of an emergency/trip contact.
+type ContactRole string
+
+const (
+	ContactRoleHotel     ContactRole = "hotel"
+	ContactRoleGuide     ContactRole = "guide"
+	ContactRoleDriver    ContactRole = "driver"
+	ContactRoleEmbassy   ContactRole = "embassy"
+	ContactRoleInsurance ContactRole = "insurance"
+	ContactRoleEmergency ContactRole = "emergency"
+	ContactRoleOther     ContactRole = "other"
+)
+
+// ChecklistCategory represents the category of a checklist item.
+type ChecklistCategory string
+
+const (
+	ChecklistCategoryBooking   ChecklistCategory = "booking"
+	ChecklistCategoryDocuments ChecklistCategory = "documents"
+	ChecklistCategoryPacking   ChecklistCategory = "packing"
+	ChecklistCategoryMoney     ChecklistCategory = "money"
+	ChecklistCategoryHealth    ChecklistCategory = "health"
+	ChecklistCategoryOther     ChecklistCategory = "other"
+)
+
 // TripDayType represents the type of trip day
 type TripDayType string
 
@@ -53,34 +103,36 @@ const (
 
 // TripPlan represents a trip plan in the system
 type TripPlan struct {
-	core.BaseModel
-	Name         *string        `json:"name" example:"Trip to Paris" description:"Name of the trip"`
-	Description  *string        `json:"description" example:"A romantic 10-day getaway to France" description:"Detailed description of the trip"`
-	StartDate    *time.Time     `json:"start_date" example:"2024-06-01T00:00:00Z" description:"Start date of the trip"`
-	EndDate      *time.Time     `json:"end_date" example:"2024-06-10T00:00:00Z" description:"End date of the trip"`
-	MinDays      *int8          `json:"min_days" example:"7" description:"Minimum number of days for the trip"`
-	MaxDays      *int8          `json:"max_days" example:"14" description:"Maximum number of days for the trip"`
-	TravelModes  pq.StringArray `json:"travel_modes,omitempty" gorm:"type:text[]" swaggertype:"array,string" example:"flight,train" description:"Modes of travel (flight, car, train, bus, etc.)"`
-	TripType     *string        `json:"trip_type" example:"leisure" description:"Type of trip (leisure, business, adventure, family, etc.)"`
-	Budget       *float64       `json:"budget" example:"5000.00" description:"Total planned budget for the trip"`
-	ActualSpent  *float64       `json:"actual_spent" example:"4750.25" description:"Total amount actually spent"`
-	Currency     Currency       `json:"currency" gorm:"type:varchar(10);default:'USD'" example:"EUR" description:"Currency for budget and expenses"`
-	Status       *string        `json:"status" example:"planning" description:"Status (planning, confirmed, in_progress, completed, cancelled)"`
-	IsPublic     *bool          `json:"is_public" example:"false" description:"Whether the trip plan is publicly visible"`
-	ShareCode    *string        `json:"share_code" example:"PARIS2024ABC" description:"Shareable code for the trip"`
-	Notes        *string        `json:"notes" example:"Romantic getaway" description:"Additional notes"`
-	Hotels       pq.StringArray `json:"hotels,omitempty" gorm:"type:text[]" swaggertype:"array,string" example:"Hotel de Paris,Le Bristol" description:"List of preferred hotels (optional)"`
-	Tags         pq.StringArray `json:"tags" gorm:"type:text[]" swaggertype:"array,string" example:"romantic,europe" description:"Trip tags"`
-	Participants pq.StringArray `json:"participants" gorm:"type:text[]" swaggertype:"array,string" example:"john@example.com,jane@example.com" description:"Email addresses of trip participants"`
-	UserID       uuid.UUID      `json:"user_id" gorm:"type:uuid;not null" example:"123e4567-e89b-12d3-a456-426614174000" description:"ID of the user who created the trip"`
-	TripHops     []TripHop      `json:"trip_hops,omitempty" gorm:"foreignKey:TripPlan" description:"Trip hops in this plan"`
-	TripDays     []TripDay      `json:"trip_days,omitempty" gorm:"foreignKey:TripPlan" description:"Trip days in this plan"`
-	Travellers   []Traveller    `json:"travellers,omitempty" gorm:"foreignKey:TripPlan" description:"Travellers in this trip"`
+	core.SoftDeleteModel
+	Name          *string        `json:"name" example:"Trip to Paris" description:"Name of the trip"`
+	Description   *string        `json:"description" example:"A romantic 10-day getaway to France" description:"Detailed description of the trip"`
+	StartDate     *time.Time     `json:"start_date" example:"2024-06-01T00:00:00Z" description:"Start date of the trip"`
+	EndDate       *time.Time     `json:"end_date" example:"2024-06-10T00:00:00Z" description:"End date of the trip"`
+	MinDays       *int8          `json:"min_days" example:"7" description:"Minimum number of days for the trip"`
+	MaxDays       *int8          `json:"max_days" example:"14" description:"Maximum number of days for the trip"`
+	TravelModes   pq.StringArray `json:"travel_modes,omitempty" gorm:"type:text[]" swaggertype:"array,string" example:"flight,train" description:"Modes of travel (flight, car, train, bus, etc.)"`
+	TripType      *string        `json:"trip_type" example:"leisure" description:"Type of trip (leisure, business, adventure, family, etc.)"`
+	Budget        *float64       `json:"budget" example:"5000.00" description:"Total planned budget for the trip"`
+	ActualSpent   *float64       `json:"actual_spent" example:"4750.25" description:"Total amount actually spent"`
+	Currency      Currency       `json:"currency" gorm:"type:varchar(10);default:'USD'" example:"EUR" description:"Currency for budget and expenses"`
+	Status        *TripStatus    `json:"status" gorm:"type:varchar(20)" example:"planning" description:"Status: planning, confirmed, ongoing, completed, cancelled"`
+	UserSetStatus bool           `json:"user_set_status" gorm:"default:false" description:"True when status was set manually, preventing auto-transition"`
+	Timezone      *string        `json:"timezone" gorm:"default:'Asia/Kolkata'" example:"Asia/Kolkata" description:"IANA timezone of the primary destination"`
+	IsPublic      *bool          `json:"is_public" example:"false" description:"Whether the trip plan is publicly visible"`
+	ShareCode     *string        `json:"share_code" example:"PARIS2024ABC" description:"Shareable code for the trip"`
+	Notes         *string        `json:"notes" example:"Romantic getaway" description:"Additional notes"`
+	Hotels        pq.StringArray `json:"hotels,omitempty" gorm:"type:text[]" swaggertype:"array,string" example:"Hotel de Paris,Le Bristol" description:"List of preferred hotels (optional)"`
+	Tags          pq.StringArray `json:"tags" gorm:"type:text[]" swaggertype:"array,string" example:"romantic,europe" description:"Trip tags"`
+	Participants  pq.StringArray `json:"participants" gorm:"type:text[]" swaggertype:"array,string" example:"john@example.com,jane@example.com" description:"Email addresses of trip participants"`
+	UserID        uuid.UUID      `json:"user_id" gorm:"type:uuid;not null" example:"123e4567-e89b-12d3-a456-426614174000" description:"ID of the user who created the trip"`
+	TripHops      []TripHop      `json:"trip_hops,omitempty" gorm:"foreignKey:TripPlan" description:"Trip hops in this plan"`
+	TripDays      []TripDay      `json:"trip_days,omitempty" gorm:"foreignKey:TripPlan" description:"Trip days in this plan"`
+	Travellers    []Traveller    `json:"travellers,omitempty" gorm:"foreignKey:TripPlan" description:"Travellers in this trip"`
 }
 
 // TripHop represents a hop/leg in a trip itinerary
 type TripHop struct {
-	core.BaseModel
+	core.SoftDeleteModel
 	Name            *string        `json:"name" example:"Paris Visit" description:"Name of the hop"`
 	Description     *string        `json:"description" example:"3 days exploring the City of Light" description:"Detailed description of the hop"`
 	City            *string        `json:"city" example:"Paris" description:"City name"`
@@ -112,7 +164,7 @@ type TripHop struct {
 
 // Stay represents accommodation details for a trip hop
 type Stay struct {
-	core.BaseModel
+	core.SoftDeleteModel
 	GoogleLocation *string    `json:"google_location" example:"ChIJD7fiBh9u5kcRYJSMaMOCCwQ" description:"Google Maps location identifier"`
 	MapboxLocation *string    `json:"mapbox_location" example:"paris.hotel.123" description:"Mapbox location identifier"`
 	StayType       *string    `json:"stay_type" example:"hotel" description:"Type of accommodation (hotel, airbnb, hostel, etc.)"`
@@ -126,7 +178,7 @@ type Stay struct {
 
 // TripDay represents a specific day within a trip, can span across trip hops
 type TripDay struct {
-	core.BaseModel
+	core.SoftDeleteModel
 	Date            core.Date   `json:"date" gorm:"not null" swaggertype:"string" format:"date" example:"2024-06-01" description:"The specific date of this day"`
 	DayNumber       int         `json:"day_number" gorm:"not null" example:"1" description:"Sequential day number in the trip (1-based)"`
 	Title           *string     `json:"title" example:"Exploring Paris" description:"Title/theme for the day"`
@@ -145,7 +197,7 @@ type TripDay struct {
 
 // Activity represents a specific activity/event planned for a day
 type Activity struct {
-	core.BaseModel
+	core.SoftDeleteModel
 	Name          string         `json:"name" gorm:"not null" example:"Visit Eiffel Tower" description:"Name of the activity"`
 	Description   *string        `json:"description" example:"Take elevator to the top, enjoy views" description:"Detailed description"`
 	ActivityType  ActivityType   `json:"activity_type" gorm:"type:varchar(20);not null" example:"sightseeing" description:"Type of activity"`
@@ -169,7 +221,7 @@ type Activity struct {
 
 // Traveller represents a person participating in a trip
 type Traveller struct {
-	core.BaseModel
+	core.SoftDeleteModel
 	FirstName           string     `json:"first_name" gorm:"not null" example:"John" description:"First name of the traveller"`
 	LastName            string     `json:"last_name" gorm:"not null" example:"Doe" description:"Last name of the traveller"`
 	Email               *string    `json:"email" example:"john.doe@example.com" description:"Email address"`
@@ -261,6 +313,58 @@ func IsValidCurrency(currency string) bool {
 	return false
 }
 
+// TransportSegment represents a single transport leg (flight, train, bus, etc.)
+// for a trip plan. Stores provider-agnostic data; booking happens off-app.
+type TransportSegment struct {
+	core.SoftDeleteModel
+	TripPlan    uuid.UUID     `json:"trip_plan" gorm:"type:uuid;not null" example:"123e4567-e89b-12d3-a456-426614174000"`
+	FromHopID   *uuid.UUID    `json:"from_hop_id" gorm:"type:uuid"`
+	ToHopID     *uuid.UUID    `json:"to_hop_id" gorm:"type:uuid"`
+	Mode        TransportMode `json:"mode" gorm:"type:varchar(20);not null" example:"train"`
+	Operator    *string       `json:"operator" example:"IRCTC"`
+	BookingRef  *string       `json:"booking_ref" example:"PNR1234567"`
+	DepartAt    *time.Time    `json:"depart_at"`
+	ArriveAt    *time.Time    `json:"arrive_at"`
+	DepartFrom  *string       `json:"depart_from" example:"New Delhi Railway Station"`
+	ArriveTo    *string       `json:"arrive_to" example:"Mumbai CSMT"`
+	DepartTZ    *string       `json:"depart_tz" example:"Asia/Kolkata"`
+	ArriveTZ    *string       `json:"arrive_tz" example:"Asia/Kolkata"`
+	Cost        *float64      `json:"cost" example:"1500.00"`
+	Currency    *string       `json:"currency" gorm:"type:varchar(3)" example:"INR"`
+	Seats       *string       `json:"seats" example:"S4 42, S4 43"`
+	DeepLinkURL *string       `json:"deep_link_url" example:"https://www.irctc.co.in/nget/train-search"`
+	Notes       *string       `json:"notes"`
+}
+
+// TripContact stores emergency and operational contacts for a trip.
+type TripContact struct {
+	core.SoftDeleteModel
+	TripPlan uuid.UUID   `json:"trip_plan" gorm:"type:uuid;not null"`
+	HopID    *uuid.UUID  `json:"hop_id" gorm:"type:uuid"`
+	Name     string      `json:"name" gorm:"not null" example:"Taj Hotel Front Desk"`
+	Role     ContactRole `json:"role" gorm:"type:varchar(20);not null" example:"hotel"`
+	Phone    *string     `json:"phone" example:"+91-22-66651234"`
+	Email    *string     `json:"email" example:"reservations@tajhotels.com"`
+	Address  *string     `json:"address"`
+	Notes    *string     `json:"notes"`
+	IsActive bool        `json:"is_active" gorm:"default:true"`
+}
+
+// ChecklistItem is a pre-trip task (book visa, pack medicine, recharge FASTag, etc.)
+type ChecklistItem struct {
+	core.BaseModel
+	TripPlan    uuid.UUID         `json:"trip_plan" gorm:"type:uuid;not null"`
+	HopID       *uuid.UUID        `json:"hop_id" gorm:"type:uuid"`
+	Title       string            `json:"title" gorm:"not null" example:"Apply for French visa"`
+	Category    ChecklistCategory `json:"category" gorm:"type:varchar(20);not null;default:'other'" example:"documents"`
+	DueDate     *time.Time        `json:"due_date"`
+	AssigneeID  *uuid.UUID        `json:"assignee_id" gorm:"type:uuid"`
+	IsCompleted bool              `json:"is_completed" gorm:"default:false"`
+	CompletedAt *time.Time        `json:"completed_at"`
+	Notes       *string           `json:"notes"`
+	SortOrder   int               `json:"sort_order" gorm:"default:0"`
+}
+
 // Add method to get models for Atlas
 func GetModels() []interface{} {
 	return []interface{}{
@@ -270,5 +374,8 @@ func GetModels() []interface{} {
 		&TripDay{},
 		&Activity{},
 		&Traveller{},
+		&TransportSegment{},
+		&TripContact{},
+		&ChecklistItem{},
 	}
 }

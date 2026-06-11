@@ -111,7 +111,7 @@ type RouteSummary struct {
 	DistanceKm      float64         `json:"distance_km"`
 	DurationMin     int             `json:"duration_min"`
 	Mode            string          `json:"mode"`
-	PolylineGeoJSON json.RawMessage `json:"polyline_geojson"`
+	PolylineGeoJSON json.RawMessage `json:"polyline_geojson" swaggertype:"object"`
 	Provider        string          `json:"provider"`
 }
 
