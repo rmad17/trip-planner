@@ -25,13 +25,14 @@ const (
 type TransportMode string
 
 const (
-	TransportModeFlight    TransportMode = "flight"
-	TransportModeTrain     TransportMode = "train"
-	TransportModeBus       TransportMode = "bus"
-	TransportModeCarRental TransportMode = "car_rental"
-	TransportModeFerry     TransportMode = "ferry"
-	TransportModeTaxi      TransportMode = "taxi"
-	TransportModeOther     TransportMode = "other"
+	TransportModeFlight          TransportMode = "flight"
+	TransportModeTrain           TransportMode = "train"
+	TransportModeBus             TransportMode = "bus"
+	TransportModeCarRental       TransportMode = "car_rental"
+	TransportModeFerry           TransportMode = "ferry"
+	TransportModeTaxi            TransportMode = "taxi"
+	TransportModePersonalVehicle TransportMode = "personal_vehicle"
+	TransportModeOther           TransportMode = "other"
 )
 
 // ContactRole represents the role of an emergency/trip contact.
@@ -165,12 +166,17 @@ type TripHop struct {
 // Stay represents accommodation details for a trip hop
 type Stay struct {
 	core.SoftDeleteModel
+	Name           *string    `json:"name" example:"Hotel de Paris" description:"Name of the accommodation"`
+	Address        *string    `json:"address" example:"Place du Casino, 98000 Monaco" description:"Address of the accommodation"`
 	GoogleLocation *string    `json:"google_location" example:"ChIJD7fiBh9u5kcRYJSMaMOCCwQ" description:"Google Maps location identifier"`
 	MapboxLocation *string    `json:"mapbox_location" example:"paris.hotel.123" description:"Mapbox location identifier"`
+	LocationURL    *string    `json:"location_url" example:"https://maps.google.com/?q=Hotel+de+Paris" description:"Direct link to the location on a map or booking site"`
 	StayType       *string    `json:"stay_type" example:"hotel" description:"Type of accommodation (hotel, airbnb, hostel, etc.)"`
 	StayNotes      *string    `json:"stay_notes" example:"Near Eiffel Tower" description:"Notes about the accommodation"`
 	StartDate      *time.Time `json:"start_date" example:"2024-06-01T00:00:00Z" description:"Check-in date"`
 	EndDate        *time.Time `json:"end_date" example:"2024-06-03T00:00:00Z" description:"Check-out date"`
+	Cost           *float64   `json:"cost" example:"500.00" description:"Total cost of the stay"`
+	CostPerNight   *float64   `json:"cost_per_night" example:"250.00" description:"Cost per night"`
 	IsPrepaid      *bool      `json:"is_prepaid" example:"true" description:"Whether the stay is prepaid"`
 	PaymentMode    *string    `json:"payment_mode" example:"credit_card" description:"Payment method used"`
 	TripHop        uuid.UUID  `json:"trip_hop" gorm:"type:uuid;not null" example:"123e4567-e89b-12d3-a456-426614174000" description:"ID of the associated trip hop"`
@@ -179,7 +185,7 @@ type Stay struct {
 // TripDay represents a specific day within a trip, can span across trip hops
 type TripDay struct {
 	core.SoftDeleteModel
-	Date            core.Date   `json:"date" gorm:"not null" swaggertype:"string" format:"date" example:"2024-06-01" description:"The specific date of this day"`
+	Date            *core.Date  `json:"date" gorm:"default:null" swaggertype:"string" format:"date" example:"2024-06-01" description:"The specific date of this day (optional)"`
 	DayNumber       int         `json:"day_number" gorm:"not null" example:"1" description:"Sequential day number in the trip (1-based)"`
 	Title           *string     `json:"title" example:"Exploring Paris" description:"Title/theme for the day"`
 	DayType         TripDayType `json:"day_type" gorm:"type:varchar(20);not null" example:"explore" description:"Type of day (travel, explore, relax, etc.)"`
@@ -210,11 +216,12 @@ type Activity struct {
 	EstimatedCost *float64       `json:"estimated_cost" example:"25.50" description:"Estimated cost"`
 	ActualCost    *float64       `json:"actual_cost" example:"30.00" description:"Actual cost incurred"`
 	Priority      *int8          `json:"priority" example:"1" description:"Priority level (1=highest, 5=lowest)"`
-	Status        *string        `json:"status" example:"planned" description:"Status (planned, confirmed, completed, cancelled)"`
+	Status        *string        `json:"status" example:"planned" description:"Status: planned, confirmed, completed, done, skipped, cancelled"`
 	BookingRef    *string        `json:"booking_ref" example:"EIF123456" description:"Booking reference if applicable"`
 	ContactInfo   *string        `json:"contact_info" example:"+33 1 44 11 23 23" description:"Contact information"`
 	Notes         *string        `json:"notes" example:"Book tickets in advance to avoid queue" description:"Additional notes"`
 	Tags          pq.StringArray `json:"tags" gorm:"type:text[]" swaggertype:"array,string" example:"must-see,photo-op" description:"Activity tags"`
+	SortOrder     int            `json:"sort_order" gorm:"not null;default:0" description:"Manual sort order within a day"`
 	TripDay       uuid.UUID      `json:"trip_day" gorm:"type:uuid;not null" example:"123e4567-e89b-12d3-a456-426614174000" description:"ID of the parent trip day"`
 	TripHop       *uuid.UUID     `json:"trip_hop" gorm:"type:uuid" example:"123e4567-e89b-12d3-a456-426614174000" description:"Associated trip hop if applicable"`
 }

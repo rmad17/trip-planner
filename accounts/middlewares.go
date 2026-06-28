@@ -80,3 +80,16 @@ func CheckAuth(c *gin.Context) {
 	c.Next()
 
 }
+
+func AdminRequired(c *gin.Context) {
+	currentUser, exists := c.Get("currentUser")
+	if !exists {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+	if !currentUser.(User).IsAdmin {
+		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "admin access required"})
+		return
+	}
+	c.Next()
+}

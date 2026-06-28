@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log in | Trip Planner Administration</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: "Roboto","Lucida Grande","DejaVu Sans","Bitstream Vera Sans",Verdana,Arial,sans-serif;
+            font-size: 14px;
+            color: #333;
+            background: #f8f8f8;
+        }
+        #header {
+            background: #417690;
+            padding: 12px 40px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+        }
+        #header h1 { font-size: 18px; font-weight: 300; }
+        #header h1 a { color: #fff; text-decoration: none; }
+        #login-wrapper {
+            max-width: 400px;
+            margin: 80px auto 0;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 30px 36px;
+        }
+        #login-wrapper h1 {
+            font-size: 20px;
+            font-weight: 400;
+            margin-bottom: 22px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e8e8e8;
+        }
+        .errornote {
+            background: #ba2121;
+            color: #fff;
+            padding: 10px 14px;
+            border-radius: 3px;
+            margin-bottom: 16px;
+            font-size: 13px;
+        }
+        .form-row { margin-bottom: 16px; }
+        .form-row label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 13px;
+        }
+        .form-row input[type=email],
+        .form-row input[type=password] {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 14px;
+            transition: border-color .15s;
+        }
+        .form-row input[type=email]:focus,
+        .form-row input[type=password]:focus {
+            border-color: #417690;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(65,118,144,.2);
+        }
+        .submit-row { margin-top: 22px; }
+        .submit-row input[type=submit] {
+            background: #417690;
+            color: #fff;
+            border: none;
+            padding: 10px 22px;
+            font-size: 14px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background .15s;
+        }
+        .submit-row input[type=submit]:hover { background: #205067; }
+        #footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+<div id="header">
+    <h1><a href="/admin/">Trip Planner Administration</a></h1>
+</div>
+<div id="login-wrapper">
+    <h1>Log in</h1>
+    {{if .Error}}
+    <p class="errornote">{{.Error}}</p>
+    {{end}}
+    <form method="post" action="/admin/login">
+        <input type="hidden" name="next" value="{{.Next}}">
+        <div class="form-row">
+            <label for="id_email">Email address:</label>
+            <input type="email" name="email" id="id_email" autofocus required>
+        </div>
+        <div class="form-row">
+            <label for="id_password">Password:</label>
+            <input type="password" name="password" id="id_password" required>
+        </div>
+        <div class="submit-row">
+            <input type="submit" value="Log in">
+        </div>
+    </form>
+</div>
+<p id="footer">Trip Planner Administration</p>
+</body>
+</html>

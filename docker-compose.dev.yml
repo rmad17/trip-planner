@@ -1,0 +1,56 @@
+version: '3.8'
+
+# Development compose — connects to the system postgres on the host.
+# On Linux, host.docker.internal is mapped via extra_hosts below.
+# Usage: docker compose -f docker-compose.dev.yml up --build
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: trip-planner-api-dev
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8080}:8080"
+    env_file:
+      - .env
+    environment:
+      - PORT=8080
+      - DB_URL=postgres://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@host.docker.internal:${DB_PORT:-5432}/${DB_NAME:-trip}?sslmode=disable
+      - DB_HOST=host.docker.internal
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - DB_NAME=${DB_NAME:-trip}
+      - APP_ENV=${APP_ENV:-development}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./uploads:/app/uploads
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    develop:
+      watch:
+        - action: rebuild
+          path: .
+          ignore:
+            - migrations/
+            - templates/
+            - uploads/
+            - logs/
+            - .env
+            - .envrc
+            - "*.md"
+            - docker-compose.dev.yml
+        - action: sync+restart
+          path: ./migrations
+          target: /app/migrations
+        - action: sync
+          path: ./templates
+          target: /app/templates

@@ -49,6 +49,7 @@ type User struct {
 	// Password reset (token stored as hex-encoded SHA-256 of the raw token)
 	PasswordResetToken  *string    `json:"-" gorm:"index"`
 	PasswordResetExpiry *time.Time `json:"-"`
+	IsAdmin             bool       `json:"is_admin" gorm:"default:false"`
 	Preferences         *UserPreferences `json:"preferences" gorm:"foreignKey:UserID"`
 }
 

@@ -24,7 +24,7 @@ import (
 // @Security BearerAuth
 // @Router /trip-plans/{trip_plan_id}/travellers [get]
 func GetTravellers(c *gin.Context) {
-	tripPlanID := c.Param("trip_plan_id")
+	tripPlanID := c.Param("id")
 	currentUser, exists := c.Get("currentUser")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
@@ -98,7 +98,7 @@ func GetTraveller(c *gin.Context) {
 // @Security BearerAuth
 // @Router /trip-plans/{trip_plan_id}/travellers [post]
 func CreateTraveller(c *gin.Context) {
-	tripPlanID := c.Param("trip_plan_id")
+	tripPlanID := c.Param("id")
 	currentUser, exists := c.Get("currentUser")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
@@ -241,7 +241,7 @@ func DeleteTraveller(c *gin.Context) {
 // @Security BearerAuth
 // @Router /trip-plans/{trip_plan_id}/travellers/invite [post]
 func InviteTraveller(c *gin.Context) {
-	tripPlanID := c.Param("trip_plan_id")
+	tripPlanID := c.Param("id")
 	currentUser, exists := c.Get("currentUser")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})

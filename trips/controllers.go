@@ -1,16 +1,19 @@
 package trips
 
 import (
+	"fmt"
 	"net/http"
+	"time"
 	"triplanner/accounts"
 	"triplanner/core"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // CreateTrip godoc
 // @Summary Create a new trip
-// @Description Create a new trip plan with automatic creation of default hop and stay
+// @Description Create a new trip plan with automatic creation of default hop, stay, and daily plans
 // @Tags trips
 // @Accept json
 // @Produce json
@@ -29,93 +32,81 @@ func CreateTrip(c *gin.Context) {
 		return
 	}
 
-	// Get current user from middleware
 	currentUser, exists := c.Get("currentUser")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
 		return
 	}
-
 	user := currentUser.(accounts.User)
 
-	// Create trip plan
 	tripPlan := TripPlan{
 		Name:        newTrip.Name,
 		StartDate:   newTrip.StartDate,
 		EndDate:     newTrip.EndDate,
-		TravelModes: newTrip.TravelModes,
+		TravelModes: newTrip.ParsedTravelModes(),
 		Notes:       newTrip.Notes,
 		Hotels:      newTrip.Hotels,
 		Tags:        newTrip.Tags,
 		UserID:      user.ID,
 	}
 
-	// Handle MinDays conversion if provided
 	if newTrip.MinDays != nil {
-		minDays := int8(*newTrip.MinDays) // Convert int16 to int8
+		minDays := int8(*newTrip.MinDays)
 		tripPlan.MinDays = &minDays
 	}
 
-	// Save to database
-	result := core.DB.Create(&tripPlan)
-	if result.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+	if err := core.DB.Create(&tripPlan).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Create default hop for the trip
+	// Default hop
 	defaultHop := TripHop{
-		Name:     newTrip.Name, // Use the same name as the trip
+		Name:     newTrip.Name,
 		TripPlan: tripPlan.ID,
 	}
-
-	result = core.DB.Create(&defaultHop)
-	if result.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+	if err := core.DB.Create(&defaultHop).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Create default stay for the hop
-	defaultStay := Stay{
-		TripHop: defaultHop.ID,
+	// Default stay for the hop
+	if err := core.DB.Create(&Stay{TripHop: defaultHop.ID}).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 
-	result = core.DB.Create(&defaultStay)
-	if result.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
-		return
+	// Auto-create one TripDay per travel date so the frontend has days to work with immediately.
+	// The frontend also attempts this after creation; the backend ensures it happens even if
+	// the frontend call fails, and skips dates that already exist.
+	if newTrip.StartDate != nil && newTrip.EndDate != nil {
+		createDefaultTripDays(tripPlan.ID, *newTrip.StartDate, *newTrip.EndDate)
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"trip": tripPlan})
 }
 
-// GetTripsWithUser godoc
-// @Summary Get all trips with user information
-// @Description Retrieve all trips along with associated user data
-// @Tags trips
-// @Produce json
-// @Success 200 {object} map[string]interface{} "List of trips with user information"
-// @Failure 500 {object} map[string]string "Internal server error"
-// @Security BearerAuth
-// @Router /trips [get]
-// func GetTripsWithUser(c *gin.Context) {
-// 	var trips []TripPlan
-// 	var tripsWithUsers []map[string]interface{}
-//
-// 	// Get all trips
-// 	core.DB.Find(&trips)
-//
-// 	// Load user data for each trip
-// 	for _, trip := range trips {
-// 		var user accounts.User
-// 		core.DB.First(&user, trip.UserID)
-//
-// 		tripWithUser := map[string]interface{}{
-// 			"trip": trip,
-// 			"user": user,
-// 		}
-// 		tripsWithUsers = append(tripsWithUsers, tripWithUser)
-// 	}
-//
-// 	c.JSON(http.StatusOK, gin.H{"trips": tripsWithUsers})
-// }
+// createDefaultTripDays inserts one TripDay per calendar date in [startDate, endDate].
+// Existing days for the trip are left untouched (insert is skipped on conflict).
+func createDefaultTripDays(tripPlanID uuid.UUID, startDate, endDate time.Time) {
+	start := startDate.UTC().Truncate(24 * time.Hour)
+	end := endDate.UTC().Truncate(24 * time.Hour)
+
+	dayNumber := 1
+	for d := start; !d.After(end); d = d.AddDate(0, 0, 1) {
+		dt := d
+		title := fmt.Sprintf("Day %d", dayNumber)
+		day := TripDay{
+			SoftDeleteModel: core.SoftDeleteModel{BaseModel: core.BaseModel{ID: uuid.New()}},
+			Date:            &core.Date{Time: dt},
+			DayNumber:       dayNumber,
+			Title:           &title,
+			DayType:         TripDayTypeExplore,
+			TripPlan:        tripPlanID,
+		}
+		// Use OnConflict to skip if a day with the same trip_plan+day_number already exists
+		core.DB.Where(TripDay{TripPlan: tripPlanID, DayNumber: dayNumber}).
+			FirstOrCreate(&day)
+		dayNumber++
+	}
+}

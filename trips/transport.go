@@ -11,13 +11,14 @@ import (
 
 // validTransportModes is the set of accepted TransportMode values.
 var validTransportModes = map[TransportMode]struct{}{
-	TransportModeFlight:    {},
-	TransportModeTrain:     {},
-	TransportModeBus:       {},
-	TransportModeCarRental: {},
-	TransportModeFerry:     {},
-	TransportModeTaxi:      {},
-	TransportModeOther:     {},
+	TransportModeFlight:          {},
+	TransportModeTrain:           {},
+	TransportModeBus:             {},
+	TransportModeCarRental:       {},
+	TransportModeFerry:           {},
+	TransportModeTaxi:            {},
+	TransportModePersonalVehicle: {},
+	TransportModeOther:           {},
 }
 
 func isValidTransportMode(m TransportMode) bool {

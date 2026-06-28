@@ -204,8 +204,19 @@ func CreateExpense(c *gin.Context) {
 	if result.Error == nil {
 		createdByTraveller = currentTraveller.ID
 	} else {
-		// If not a traveller, use the paid_by traveller
 		createdByTraveller = expenseReq.PaidBy
+	}
+
+	// Default split method
+	splitMethod := expenseReq.SplitMethod
+	if splitMethod == "" {
+		splitMethod = SplitMethodEqual
+	}
+
+	// Default paid_by to the current user's traveller if not provided
+	paidBy := expenseReq.PaidBy
+	if paidBy == uuid.Nil {
+		paidBy = createdByTraveller
 	}
 
 	// Create expense
@@ -220,17 +231,17 @@ func CreateExpense(c *gin.Context) {
 		Location:      expenseReq.Location,
 		Vendor:        expenseReq.Vendor,
 		PaymentMethod: expenseReq.PaymentMethod,
-		SplitMethod:   expenseReq.SplitMethod,
+		SplitMethod:   splitMethod,
 		ReceiptURL:    expenseReq.ReceiptURL,
 		Notes:         expenseReq.Notes,
 		Tags:          expenseReq.Tags,
 		IsRecurring:   expenseReq.IsRecurring,
-		// TripPlan:      (*uuid.UUID)(&uuid.MustParse(tripPlanID)),
-		TripHop:   expenseReq.TripHop,
-		TripDay:   expenseReq.TripDay,
-		Activity:  expenseReq.Activity,
-		PaidBy:    expenseReq.PaidBy,
-		CreatedBy: createdByTraveller,
+		TripPlan:      &tripPlanID,
+		TripHop:       expenseReq.TripHop,
+		TripDay:       expenseReq.TripDay,
+		Activity:      expenseReq.Activity,
+		PaidBy:        paidBy,
+		CreatedBy:     createdByTraveller,
 	}
 
 	// Start transaction
@@ -264,11 +275,18 @@ func CreateExpense(c *gin.Context) {
 		}
 	} else {
 		// Auto-create equal splits for all active travellers if no splits provided
-		if expenseReq.SplitMethod == SplitMethodEqual {
+		if splitMethod == SplitMethodEqual {
 			var travellers []struct {
 				ID uuid.UUID
 			}
 			tx.Table("travellers").Select("id").Where("trip_plan = ? AND is_active = ?", tripPlanID, true).Find(&travellers)
+
+			if len(travellers) == 0 {
+				tx.Commit()
+				core.DB.Preload("ExpenseSplits").First(&expense, expense.ID)
+				c.JSON(http.StatusCreated, gin.H{"expense": expense})
+				return
+			}
 
 			amountPerPerson := expense.Amount / float64(len(travellers))
 			for _, traveller := range travellers {

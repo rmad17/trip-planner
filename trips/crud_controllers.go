@@ -3,6 +3,7 @@ package trips
 import (
 	"net/http"
 	"strconv"
+	"time"
 	"triplanner/accounts"
 	"triplanner/core"
 
@@ -197,17 +198,71 @@ func UpdateTripPlan(c *gin.Context) {
 		return
 	}
 
-	var updateData TripPlan
-	if err := c.BindJSON(&updateData); err != nil {
+	var req UpdateTripRequest
+	if err := c.BindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Update fields
-	result = core.DB.Model(&tripPlan).Updates(updateData)
-	if result.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+	// Build explicit update map so zero-value fields (empty arrays, blank strings)
+	// are applied correctly rather than being skipped by GORM's Updates heuristic.
+	updates := map[string]interface{}{}
+	if req.Name != nil {
+		updates["name"] = req.Name
+	}
+	if req.Description != nil {
+		updates["description"] = req.Description
+	}
+	if req.StartDate != nil {
+		updates["start_date"] = req.StartDate
+	}
+	if req.EndDate != nil {
+		updates["end_date"] = req.EndDate
+	}
+	if modes := req.ParsedTravelModes(); modes != nil {
+		updates["travel_modes"] = modes
+	}
+	if req.Notes != nil {
+		updates["notes"] = req.Notes
+	}
+	if req.Budget != nil {
+		updates["budget"] = req.Budget
+	}
+	if req.Currency != "" {
+		updates["currency"] = req.Currency
+	}
+	if req.Status != "" {
+		updates["status"] = req.Status
+	}
+	if req.TripType != nil {
+		updates["trip_type"] = req.TripType
+	}
+	if req.Tags != nil {
+		updates["tags"] = req.Tags
+	}
+	if req.IsPublic != nil {
+		updates["is_public"] = req.IsPublic
+	}
+	if req.Timezone != nil {
+		updates["timezone"] = req.Timezone
+	}
+
+	if len(updates) == 0 {
+		c.JSON(http.StatusOK, gin.H{"trip_plan": tripPlan})
 		return
+	}
+
+	if err := core.DB.Model(&tripPlan).Updates(updates).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// If dates changed, create any missing daily plans for the new range.
+	if (req.StartDate != nil || req.EndDate != nil) && tripPlan.StartDate != nil && tripPlan.EndDate != nil {
+		core.DB.First(&tripPlan, "id = ?", id) // reload updated record
+		if tripPlan.StartDate != nil && tripPlan.EndDate != nil {
+			createDefaultTripDays(tripPlan.ID, *tripPlan.StartDate, *tripPlan.EndDate)
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{"trip_plan": tripPlan})
@@ -486,7 +541,7 @@ func GetActivities(c *gin.Context) {
 	var activities []Activity
 	result := core.DB.Joins("JOIN trip_days ON activities.trip_day = trip_days.id").
 		Where("trip_days.trip_plan = ?", tripPlanID).
-		Order("trip_days.day_number ASC, activities.start_time ASC").
+		Order("trip_days.day_number ASC, activities.sort_order ASC, activities.start_time ASC").
 		Find(&activities)
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
@@ -546,6 +601,19 @@ func CreateActivity(c *gin.Context) {
 		return
 	}
 
+	// Normalize start/end times to the day's actual date.
+	// The frontend uses epoch (1970-01-01) as the date component and only the
+	// time portion is meaningful, so we overwrite the date with the trip day's date.
+	dayDate := tripDay.Date.Time
+	activity.StartTime = normalizeToDayDate(activity.StartTime, dayDate)
+	activity.EndTime = normalizeToDayDate(activity.EndTime, dayDate)
+
+	// Validate end time is after start time when both are provided.
+	if activity.StartTime != nil && activity.EndTime != nil && activity.EndTime.Before(*activity.StartTime) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "end_time must be after start_time"})
+		return
+	}
+
 	result := core.DB.Create(&activity)
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
@@ -595,6 +663,19 @@ func UpdateActivity(c *gin.Context) {
 		return
 	}
 
+	// Normalize times to the day's actual date.
+	var tripDay TripDay
+	if err := core.DB.Where("id = ?", activity.TripDay).First(&tripDay).Error; err == nil {
+		dayDate := tripDay.Date.Time
+		updateData.StartTime = normalizeToDayDate(updateData.StartTime, dayDate)
+		updateData.EndTime = normalizeToDayDate(updateData.EndTime, dayDate)
+	}
+
+	if updateData.StartTime != nil && updateData.EndTime != nil && updateData.EndTime.Before(*updateData.StartTime) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "end_time must be after start_time"})
+		return
+	}
+
 	result = core.DB.Model(&activity).Updates(updateData)
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
@@ -641,4 +722,18 @@ func DeleteActivity(c *gin.Context) {
 	}
 
 	c.Status(http.StatusNoContent)
+}
+
+// normalizeToDayDate sets the date component of t to dayDate while preserving the time.
+// The frontend sends activity times with epoch as the date (1970-01-01TH:M:SZ), so we
+// replace the date portion with the actual trip day date.
+func normalizeToDayDate(t *time.Time, dayDate time.Time) *time.Time {
+	if t == nil {
+		return nil
+	}
+	normalized := time.Date(
+		dayDate.Year(), dayDate.Month(), dayDate.Day(),
+		t.Hour(), t.Minute(), t.Second(), 0, time.UTC,
+	)
+	return &normalized
 }

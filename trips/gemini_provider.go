@@ -8,38 +8,70 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
 
 // GeminiProvider implements LLMProvider for Google's Gemini AI
 type GeminiProvider struct {
-	APIKey     string
-	BaseURL    string
-	Model      string
-	HTTPClient *http.Client
+	APIKey          string
+	BaseURL         string
+	Model           string
+	MaxOutputTokens int
+	ThinkingBudget  int
+	HTTPClient      *http.Client
 }
 
 // NewGeminiProvider creates a new Gemini provider instance.
 // The model is configurable via GEMINI_MODEL (default: gemini-2.5-flash).
+// The request timeout is configurable via GEMINI_TIMEOUT_SECONDS (default: 180s)
+// — gemini-2.5-flash is a thinking model and a full itinerary can take well
+// over a minute to return.
 func NewGeminiProvider(apiKey string) *GeminiProvider {
 	model := os.Getenv("GEMINI_MODEL")
 	if model == "" {
 		model = "gemini-2.5-flash"
 	}
+
+	timeout := 180 * time.Second
+	if v := os.Getenv("GEMINI_TIMEOUT_SECONDS"); v != "" {
+		if secs, err := strconv.Atoi(v); err == nil && secs > 0 {
+			timeout = time.Duration(secs) * time.Second
+		}
+	}
+
+	// gemini-2.5-flash supports up to 65536 output tokens. A full multi-city,
+	// day-by-day itinerary plus thinking tokens can exceed smaller caps, so
+	// default high and cap the thinking budget to leave room for the response.
+	maxOutputTokens := envInt("GEMINI_MAX_OUTPUT_TOKENS", 32768)
+	thinkingBudget := envInt("GEMINI_THINKING_BUDGET", 4096)
+
 	return &GeminiProvider{
-		APIKey:  apiKey,
-		BaseURL: "https://generativelanguage.googleapis.com/v1beta",
-		Model:   model,
+		APIKey:          apiKey,
+		BaseURL:         "https://generativelanguage.googleapis.com/v1beta",
+		Model:           model,
+		MaxOutputTokens: maxOutputTokens,
+		ThinkingBudget:  thinkingBudget,
 		HTTPClient: &http.Client{
-			Timeout: 60 * time.Second,
+			Timeout: timeout,
 		},
 	}
 }
 
+// envInt returns the integer value of an env var, or fallback when unset/invalid.
+func envInt(key string, fallback int) int {
+	if v := os.Getenv(key); v != "" {
+		if n, err := strconv.Atoi(v); err == nil && n > 0 {
+			return n
+		}
+	}
+	return fallback
+}
+
 // GeminiRequest represents the request structure for Gemini API
 type GeminiRequest struct {
-	Contents []GeminiContent `json:"contents"`
+	Contents         []GeminiContent        `json:"contents"`
 	GenerationConfig GeminiGenerationConfig `json:"generationConfig,omitempty"`
 }
 
@@ -56,10 +88,18 @@ type GeminiPart struct {
 
 // GeminiGenerationConfig represents generation configuration
 type GeminiGenerationConfig struct {
-	Temperature     float64 `json:"temperature,omitempty"`
-	MaxOutputTokens int     `json:"maxOutputTokens,omitempty"`
-	TopP            float64 `json:"topP,omitempty"`
-	TopK            int     `json:"topK,omitempty"`
+	Temperature     float64               `json:"temperature,omitempty"`
+	MaxOutputTokens int                   `json:"maxOutputTokens,omitempty"`
+	TopP            float64               `json:"topP,omitempty"`
+	TopK            int                   `json:"topK,omitempty"`
+	ThinkingConfig  *GeminiThinkingConfig `json:"thinkingConfig,omitempty"`
+}
+
+// GeminiThinkingConfig controls the thinking budget for gemini-2.5 models.
+// Capping it ensures thinking tokens don't exhaust maxOutputTokens before the
+// actual response is produced.
+type GeminiThinkingConfig struct {
+	ThinkingBudget int `json:"thinkingBudget"`
 }
 
 // GeminiResponse represents the response from Gemini API
@@ -71,8 +111,8 @@ type GeminiResponse struct {
 			} `json:"parts"`
 			Role string `json:"role"`
 		} `json:"content"`
-		FinishReason string `json:"finishReason"`
-		Index        int    `json:"index"`
+		FinishReason  string `json:"finishReason"`
+		Index         int    `json:"index"`
 		SafetyRatings []struct {
 			Category    string `json:"category"`
 			Probability string `json:"probability"`
@@ -109,10 +149,14 @@ func (gp *GeminiProvider) GenerateTrip(ctx context.Context, request TripGenerati
 			},
 		},
 		GenerationConfig: GeminiGenerationConfig{
-			Temperature:     0.7,
-			MaxOutputTokens: 4096,
+			Temperature: 0.7,
+			// gemini-2.5-flash is a thinking model: thinking tokens count against
+			// maxOutputTokens. Cap the thinking budget so it can't exhaust the
+			// allowance before the full JSON itinerary is emitted.
+			MaxOutputTokens: gp.MaxOutputTokens,
 			TopP:            0.95,
 			TopK:            40,
+			ThinkingConfig:  &GeminiThinkingConfig{ThinkingBudget: gp.ThinkingBudget},
 		},
 	}
 
@@ -155,8 +199,13 @@ func (gp *GeminiProvider) GenerateTrip(ctx context.Context, request TripGenerati
 		return nil, fmt.Errorf("empty response from Gemini")
 	}
 
+	candidate := geminiResp.Candidates[0]
+	if candidate.FinishReason == "MAX_TOKENS" {
+		return nil, fmt.Errorf("gemini response truncated (MAX_TOKENS): increase maxOutputTokens or shorten the prompt")
+	}
+
 	// Extract the text response
-	responseText := geminiResp.Candidates[0].Content.Parts[0].Text
+	responseText := candidate.Content.Parts[0].Text
 
 	// Clean up the response (remove markdown code blocks if present)
 	responseText = cleanJSONResponse(responseText)

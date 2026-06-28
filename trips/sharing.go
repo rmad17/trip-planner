@@ -46,7 +46,7 @@ type PublicActivity struct {
 // PublicTripDay is the PII-free projection of a TripDay for public sharing.
 type PublicTripDay struct {
 	ID          uuid.UUID      `json:"id"`
-	Date        core.Date      `json:"date"`
+	Date        *core.Date     `json:"date"`
 	DayNumber   int            `json:"day_number"`
 	Title       *string        `json:"title"`
 	DayType     TripDayType    `json:"day_type"`

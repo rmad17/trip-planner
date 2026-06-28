@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 	"time"
+	"triplanner/accounts"
 	"triplanner/core"
 
 	"github.com/gin-gonic/gin"
@@ -103,7 +104,8 @@ func CreateTripFromAIGeneration(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
 		return
 	}
-	userID := currentUser.(uuid.UUID)
+	user := currentUser.(accounts.User)
+	userID := user.BaseModel.ID
 
 	// Start a transaction
 	tx := core.DB.Begin()
@@ -292,7 +294,7 @@ func CreateTripFromAIGeneration(c *gin.Context) {
 
 		day := TripDay{
 			SoftDeleteModel: core.SoftDeleteModel{BaseModel: core.BaseModel{ID: dayID}},
-			Date:            core.Date{Time: dayDate},
+			Date:            &core.Date{Time: dayDate},
 			DayNumber:       generatedDay.DayNumber,
 			Title:           &dayTitle,
 			DayType:         dayType,

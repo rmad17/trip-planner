@@ -18,7 +18,7 @@ type ExpenseCreateRequest struct {
 	Location      *string         `json:"location"`
 	Vendor        *string         `json:"vendor"`
 	PaymentMethod PaymentMethod   `json:"payment_method" binding:"required"`
-	SplitMethod   SplitMethod     `json:"split_method" binding:"required"`
+	SplitMethod   SplitMethod     `json:"split_method"`
 	ReceiptURL    *string         `json:"receipt_url"`
 	Notes         *string         `json:"notes"`
 	Tags          []string        `json:"tags"`
@@ -30,7 +30,7 @@ type ExpenseCreateRequest struct {
 	Activity *uuid.UUID `json:"activity"`
 
 	// Who paid
-	PaidBy uuid.UUID `json:"paid_by" binding:"required"`
+	PaidBy uuid.UUID `json:"paid_by"`
 
 	// Splits (optional - if not provided, will auto-split based on split_method)
 	Splits []ExpenseSplitRequest `json:"splits"`

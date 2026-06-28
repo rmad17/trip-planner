@@ -17,21 +17,22 @@ COPY . .
 
 # Build the application
 # CGO_ENABLED=0 for static binary
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o main app.go
-
-# Build migration utility
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o migrate ./cmd/migrate
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -buildvcs=false -ldflags="-w -s" -o main app.go
 
 # Stage 2: Runtime
 FROM alpine:latest
 
-# Install runtime dependencies including postgresql-client for migrations
+# Install runtime dependencies
 RUN apk --no-cache add \
     ca-certificates \
     tzdata \
     wget \
     curl \
     postgresql-client
+
+# Download Atlas binary
+RUN curl -sSfL https://release.ariga.io/atlas/atlas-linux-amd64-latest -o /usr/local/bin/atlas && \
+    chmod +x /usr/local/bin/atlas
 
 # Create non-root user
 RUN addgroup -g 1000 appuser && \
@@ -41,19 +42,16 @@ WORKDIR /app
 
 # Copy binaries from builder
 COPY --from=builder /app/main .
-COPY --from=builder /app/migrate .
 
-# Copy migrations and scripts
+# Copy migrations, templates, and scripts
 COPY --from=builder /app/migrations ./migrations
-COPY --from=builder /app/scripts/run-migrations.sh ./scripts/run-migrations.sh
+COPY --from=builder /app/templates ./templates
+COPY --from=builder /app/scripts/entrypoint.sh ./scripts/entrypoint.sh
 
-# Make scripts executable
+# Make scripts executable, create directories, and set ownership
 USER root
-RUN chmod +x ./scripts/run-migrations.sh
-USER appuser
-
-# Create necessary directories
-RUN mkdir -p uploads logs && \
+RUN chmod +x ./scripts/entrypoint.sh && \
+    mkdir -p uploads logs && \
     chown -R appuser:appuser /app
 
 # Switch to non-root user
@@ -64,7 +62,7 @@ EXPOSE 8080
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1
+    CMD wget -q -O /dev/null http://localhost:8080/health || exit 1
 
-# Run the application
-CMD ["./main"]
+# Run migrations then start the application
+CMD ["./scripts/entrypoint.sh"]

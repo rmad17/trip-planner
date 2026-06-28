@@ -14,6 +14,7 @@ package main
 import (
 	"log"
 	"triplanner/accounts"
+	"triplanner/adminapi"
 	"triplanner/core"
 	_ "triplanner/docs" // This line is necessary for go-swagger to find your docs!
 	"triplanner/documents"
@@ -50,6 +51,9 @@ func main() {
 
 	router.LoadHTMLGlob("templates/*")
 
+	// Admin web UI — browser-based login/dashboard at /admin/
+	adminapi.RouterGroupAdminWeb(router.Group("/admin"))
+
 	// Initialize GoAdmin
 	// admin.SimpleSetupGoAdmin(router)
 
@@ -57,12 +61,15 @@ func main() {
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// Health check endpoint for Caddy and monitoring
-	router.GET("/health", func(c *gin.Context) {
+	// Handles both GET and HEAD (Gin doesn't auto-handle HEAD for GET routes)
+	healthHandler := func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"status":  "healthy",
 			"message": "Trip Planner API is running",
 		})
-	})
+	}
+	router.GET("/health", healthHandler)
+	router.HEAD("/health", healthHandler)
 
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
@@ -81,6 +88,12 @@ func main() {
 	trips.RouterGroupPublicTrips(publicV1.Group("/trip"))
 
 	v1.Use(accounts.CheckAuth)
+
+	// Admin API — requires CheckAuth + IsAdmin
+	adminGroup := v1.Group("/admin")
+	adminGroup.Use(accounts.AdminRequired)
+	adminapi.RouterGroupAdmin(adminGroup)
+
 	places.RouterGroupPlacesAPI(v1.Group("/places"))
 	accounts.RouterGroupUserProfile(v1.Group("/user"))
 

@@ -15,6 +15,7 @@ func RouterGroupUserAuth(router *gin.RouterGroup) {
 
 func RouterGroupUserProfile(router *gin.RouterGroup) {
 	router.GET("/profile", GetUserProfile)
+	router.PUT("/profile", UpdateUserProfile)
 }
 
 // RouterGroupPasswordReset sets up password reset and email verification routes (no auth required)
@@ -28,14 +29,13 @@ func RouterGroupPasswordReset(router *gin.RouterGroup) {
 func RouterGroupGoogleOAuth(router *gin.RouterGroup) {
 	google_client_id := os.Getenv("GOOGLE_OAUTH_CLIENT_ID")
 	google_client_secret := os.Getenv("GOOGLE_OAUTH_CLIENT_SECRET")
-	// Use environment variable for callback URL, fallback to localhost for development
 	callback_url := os.Getenv("GOOGLE_OAUTH_CALLBACK_URL")
 	if callback_url == "" {
-		callback_url = "http://localhost:8080/auth/google/callback"
+		callback_url = "http://localhost:8080/api/v1/auth/google/callback"
 	}
 	google_provider := google.New(google_client_id, google_client_secret, callback_url, "email", "profile")
 	goth.UseProviders(google_provider)
-	router.GET("/auth/google/login", GoogleOAuthLogin)
+	router.GET("/google/login", GoogleOAuthLogin)
 	router.GET("/:provider/begin", GoogleOAuthBegin)
-	router.GET("/auth/:provider/callback", GoogleOAuthCallback)
+	router.GET("/:provider/callback", GoogleOAuthCallback)
 }

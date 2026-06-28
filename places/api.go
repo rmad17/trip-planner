@@ -19,6 +19,7 @@ import (
 // @Tags places
 // @Produce json
 // @Param text query string true "Search text for autocomplete"
+// @Param session_token query string false "Client-generated session token; reuse the same value across autocomplete calls and the final retrieve so they bill as one Search Box session"
 // @Success 200 {object} map[string]interface{} "Autocomplete suggestions"
 // @Failure 400 {object} map[string]string "Bad request"
 // @Failure 500 {object} map[string]string "Internal server error"
@@ -41,7 +42,13 @@ func SearchAutocomplete(c *gin.Context) {
 	_, _ = pretty.Println("SearchText: ", SearchText)
 	_, _ = pretty.Println("MapboxAPIKey set: ", MapboxAPIKey != "")
 
-	SessionToken := uuid.Must(uuid.NewV4()).String()
+	// Reuse the client-provided session_token so all /suggest calls and the
+	// final /retrieve are billed as a single Mapbox Search Box session.
+	// Only mint one as a fallback when the client doesn't send it.
+	SessionToken := data.Get("session_token")
+	if SessionToken == "" {
+		SessionToken = uuid.Must(uuid.NewV4()).String()
+	}
 	response_data := make_http_request(MapboxApi{"GET", string(Autosuggest), SearchText, MapboxAPIKey, SessionToken, ""})
 
 	if response_data == nil {
@@ -68,6 +75,7 @@ func SearchAutocomplete(c *gin.Context) {
 // @Produce json
 // @Param id path string true "Mapbox Place ID"
 // @Param language query string false "ISO language code (default: en)"
+// @Param session_token query string false "Session token from the preceding autocomplete calls; pass the same value so this retrieve closes the same Search Box session"
 // @Param eta_type query string false "Enable ETA calculation (only 'navigation' allowed)"
 // @Param navigation_profile query string false "Navigation profile for ETA (driving, walking, cycling)"
 // @Param origin query string false "Origin coordinates for ETA calculation (longitude,latitude)"
@@ -99,7 +107,13 @@ func PlaceRetrieve(c *gin.Context) {
 	_, _ = pretty.Println("PlaceID: ", placeID)
 	_, _ = pretty.Println("Language: ", language)
 
-	SessionToken := uuid.Must(uuid.NewV4()).String()
+	// Must match the session_token used for the preceding /suggest calls so
+	// this retrieve closes out the same Search Box session rather than billing
+	// as a standalone (geocoding-style) request. Fall back only if absent.
+	SessionToken := data.Get("session_token")
+	if SessionToken == "" {
+		SessionToken = uuid.Must(uuid.NewV4()).String()
+	}
 
 	// Build the request - for retrieve endpoint, the ID goes in the URL path
 	response_data := make_http_request(MapboxApi{"GET", string(Retrieve), placeID, MapboxAPIKey, SessionToken, ""})
